@@ -99,6 +99,31 @@ const Community = () => {
   // Inline Carousel active indexes per item
   const [activeSlideIndices, setActiveSlideIndices] = useState<Record<string, number>>({});
 
+  // Swipe support state
+  const [touchStartCoords, setTouchStartCoords] = useState<{ [id: string]: number | null }>({});
+
+  const handleTouchStart = (e: React.TouchEvent, itemId: string) => {
+    setTouchStartCoords(prev => ({ ...prev, [itemId]: e.targetTouches[0].clientX }));
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent, itemId: string, photosLength: number, currentSlide: number) => {
+    const touchStart = touchStartCoords[itemId];
+    if (touchStart === null || touchStart === undefined) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        // swipe left -> next
+        setActiveSlideIndices(prev => ({ ...prev, [itemId]: currentSlide === photosLength - 1 ? 0 : currentSlide + 1 }));
+      } else {
+        // swipe right -> prev
+        setActiveSlideIndices(prev => ({ ...prev, [itemId]: currentSlide === 0 ? photosLength - 1 : currentSlide - 1 }));
+      }
+    }
+    setTouchStartCoords(prev => ({ ...prev, [itemId]: null }));
+  };
+
   // Inline expanded comments per item
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
   
@@ -1155,7 +1180,11 @@ const Community = () => {
               {isEvent ? (
                 // Event gallery slider carousel inline
                 hasPhotos ? (
-                  <div className="instagram-post-media inline-carousel">
+                  <div 
+                    className="instagram-post-media inline-carousel"
+                    onTouchStart={(e) => handleTouchStart(e, item.id)}
+                    onTouchEnd={(e) => handleTouchEnd(e, item.id, photos.length, currentSlide)}
+                  >
                     <img 
                       src={photos[currentSlide].image_url} 
                       alt="Gallery slide" 
