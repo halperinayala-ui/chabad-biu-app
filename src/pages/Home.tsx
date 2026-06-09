@@ -69,6 +69,7 @@ const Home = () => {
     if (activeCategory !== 'הכל' && event.category !== activeCategory) return false;
     const aud: string[] = (event.audience as any) || [];
     if (aud.length === 0) return true; // empty = everyone
+    if (profile?.is_admin) return true; // admins see all events
     if (!userStatus) return false; // guest sees only unrestricted events
     return aud.includes(userStatus);
   });
@@ -87,7 +88,7 @@ const Home = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          חב״ד<br/>בקמפוס בר אילן
+          חב״ד בקמפוס בר אילן
         </motion.h1>
         <motion.p 
           className="hero-subtitle"
