@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
+import OneSignal from 'react-onesignal';
 import { supabase } from '../lib/supabase';
 
 export interface UserProfile {
@@ -37,6 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
+        OneSignal.login(session.user.id).catch(console.error);
       } else {
         setLoading(false);
       }
@@ -47,9 +49,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
+        OneSignal.login(session.user.id).catch(console.error);
       } else {
         setProfile(null);
         setLoading(false);
+        OneSignal.logout().catch(console.error);
       }
     });
 
