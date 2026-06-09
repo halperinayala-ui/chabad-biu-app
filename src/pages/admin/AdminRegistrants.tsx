@@ -34,7 +34,7 @@ const AdminRegistrants = () => {
   const [activeWhatsappMenu, setActiveWhatsappMenu] = useState<string | null>(null);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [noteText, setNoteText] = useState('');
-  const [isPastEvent, setIsPastEvent] = useState(false);
+  
 
   useEffect(() => {
     fetchData();
@@ -54,8 +54,6 @@ const AdminRegistrants = () => {
         // isPastEvent: true if event date is today or earlier
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const evDate = new Date(eventData.event_date);
-        setIsPastEvent(evDate <= today);
       }
 
       const { data, error } = await supabase
@@ -105,9 +103,9 @@ const AdminRegistrants = () => {
 
   const getName = (reg: Registrant) => reg.profiles?.full_name || reg.guest_name || '—';
   const getPhone = (reg: Registrant) => reg.profiles?.phone || reg.guest_phone || '—';
-  const getGender = (reg: Registrant) => reg.profiles?.gender || 'm';
+  
 
-  const getWhatsappLink = (phone: string, template: string, name: string, gender: string) => {
+  const getWhatsappLink = (phone: string, template: string, name: string) => {
     let msg = '';
     if (template === 'approved') msg = `היי ${name}, איזה כיף שנרשמת! אנחנו מחכים לך.`;
     else if (template === 'verify') msg = `היי ${name}, ראיתי שנרשמת אלינו. האם את/ה סטודנט/ית בבר אילן?`;
@@ -289,9 +287,9 @@ const AdminRegistrants = () => {
                       {activeWhatsappMenu === reg.id && (
                         <div className="whatsapp-dropdown menu-active">
                           <div className="dropdown-title">תבניות הודעה:</div>
-                          <a href={getWhatsappLink(getPhone(reg), 'approved', getName(reg), getGender(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">✅ אישור השתתפות</a>
-                          <a href={getWhatsappLink(getPhone(reg), 'verify', getName(reg), getGender(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">❓ בירור סטודנט/ית</a>
-                          <a href={getWhatsappLink(getPhone(reg), 'rejected', getName(reg), getGender(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">❌ הרשמה נסגרה</a>
+                          <a href={getWhatsappLink(getPhone(reg), 'approved', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">✅ אישור השתתפות</a>
+                          <a href={getWhatsappLink(getPhone(reg), 'verify', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">❓ בירור סטודנט/ית</a>
+                          <a href={getWhatsappLink(getPhone(reg), 'rejected', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">❌ הרשמה נסגרה</a>
                         </div>
                       )}
                     </div>

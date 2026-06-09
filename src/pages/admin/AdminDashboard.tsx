@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Plus, Users, Settings, BarChart2, Archive, CalendarDays, ChevronLeft, Edit, Video } from 'lucide-react';
+import { Plus, Users, Settings, BarChart2, Archive, CalendarDays, ChevronLeft, Edit } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import './AdminDashboard.css';
 

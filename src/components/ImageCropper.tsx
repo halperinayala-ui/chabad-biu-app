@@ -33,8 +33,7 @@ const createImage = (url: string): Promise<HTMLImageElement> =>
 
 async function getCroppedImg(
   imageSrc: string,
-  pixelCrop: Area,
-  rotation = 0
+  pixelCrop: Area
 ): Promise<File | null> {
   const image = await createImage(imageSrc);
   const canvas = document.createElement('canvas');
@@ -85,7 +84,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropDone, onCan
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const onCropComplete = useCallback((croppedArea: Area, croppedAreaPixels: Area) => {
+  const onCropComplete = useCallback((_: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 

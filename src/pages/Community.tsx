@@ -824,8 +824,8 @@ const Community = () => {
       // Update local feed state to render immediately in carousel
       setFeed(prevFeed => prevFeed.map(item => {
         if (item.id === eventId) {
-          const posts = item.posts ? [newPost, ...item.posts] : [newPost];
-          return { ...item, posts };
+          const posts = item.posts ? [newPost as any, ...item.posts] : [newPost as any];
+          return { ...item, posts: posts as any };
         }
         return item;
       }));
