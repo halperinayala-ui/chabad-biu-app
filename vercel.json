@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/events/:id",
+      "destination": "/api/og-event?id=:id"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

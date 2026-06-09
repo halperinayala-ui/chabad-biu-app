@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { title, body, url } = req.body;
+    const { title, body, url, targetUserId } = req.body;
 
     if (!title) {
       return res.status(400).json({ error: 'Missing title' });
@@ -51,10 +51,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(403).json({ error: 'Forbidden: Admin access required' });
     }
 
-    // Get all push subscriptions from the database
-    const { data: subscriptions, error: dbError } = await supabase
-      .from('push_subscriptions')
-      .select('*');
+    // Get push subscriptions from the database
+    let query = supabase.from('push_subscriptions').select('*');
+    if (targetUserId) {
+      query = query.eq('user_id', targetUserId);
+    }
+    const { data: subscriptions, error: dbError } = await query;
 
     if (dbError) {
       console.error('Error fetching subscriptions:', dbError);

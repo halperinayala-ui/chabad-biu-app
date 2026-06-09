@@ -598,6 +598,28 @@ const Community = () => {
           if (error) throw error;
           toast.success('פוסט חדש פורסם בהצלחה!');
         }
+
+        // Trigger Push Notification for new post
+        try {
+          const session = await supabase.auth.getSession();
+          const token = session.data.session?.access_token;
+          if (token) {
+            fetch('/api/notify-event', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                title: 'פוסט חדש בקהילה! 🎉',
+                body: mediaOptionalTitle.trim() || mediaTitle.trim() || 'כנסו לראות מה חדש',
+                url: 'https://chabad-biu-app.vercel.app/community'
+              })
+            }).catch(e => console.error("Push notification trigger failed:", e));
+          }
+        } catch (pushErr) {
+          console.error("Could not trigger push notification", pushErr);
+        }
       }
 
       // Reset states and reload

@@ -37,6 +37,7 @@ function App() {
             <Route path="/auth" element={<Auth />} />
             <Route path="/community" element={<Community />} />
             <Route path="/events/:id" element={<EventDetails />} />
+            <Route path="/event/view/:id" element={<EventDetails />} />
             
             {/* Protected User Routes */}
             <Route path="/profile" element={

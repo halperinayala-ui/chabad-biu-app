@@ -8,6 +8,7 @@ import './AdminRegistrants.css';
 
 interface Registrant {
   id: string;
+  user_id: string;
   created_at: string;
   status: string;
   attended: boolean | null;
@@ -77,6 +78,33 @@ const AdminRegistrants = () => {
       if (error) throw error;
       setRegistrants(registrants.map(r => r.id === id ? { ...r, status } : r));
       toast.success(status === 'approved' ? 'הרשמה אושרה!' : 'הרשמה נדחתה');
+      
+      // Trigger Push Notification
+      const registration = registrants.find(r => r.id === id);
+      const targetUserId = registration?.user_id;
+      
+      if (targetUserId) {
+        const session = await supabase.auth.getSession();
+        const token = session.data.session?.access_token;
+        if (token) {
+          fetch('/api/notify-event', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              title: status === 'approved' ? 'אישור הרשמה!' : 'עדכון הרשמה',
+              body: status === 'approved' 
+                ? `הרשמתך לאירוע "${eventTitle}" אושרה בהצלחה! נשמח לראותך.`
+                : `לצערנו, ההרשמה לאירוע "${eventTitle}" לא אושרה הפעם. נשמח לראותך באירועים הבאים!`,
+              url: `https://chabad-biu-app.vercel.app/events/${eventId}`,
+              targetUserId: targetUserId
+            })
+          }).catch(e => console.error("Push notification trigger failed:", e));
+        }
+      }
+      
     } catch { toast.error('שגיאה בעדכון סטטוס'); }
   };
 
