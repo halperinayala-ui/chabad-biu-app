@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle, XCircle, Clock, MessageCircle, Download, UserCheck, Loader2, Check, X as XIcon, UserCircle, StickyNote, Eye, Edit, Image } from 'lucide-react';
+import { ArrowRight, CheckCircle, XCircle, Clock, MessageCircle, UserCheck, Loader2, Check, X as XIcon, UserCircle, StickyNote, Eye, Edit, Image } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';

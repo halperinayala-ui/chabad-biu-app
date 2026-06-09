@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarDays, Clock, MapPin, ArrowRight, Image as ImageIcon, Loader2, CheckCircle2, XCircle, Edit, Settings } from 'lucide-react';
+import { CalendarDays, Clock, MapPin, ArrowRight, Image as ImageIcon, Loader2, CheckCircle2, XCircle, Settings } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';

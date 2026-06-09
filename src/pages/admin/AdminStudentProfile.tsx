@@ -40,7 +40,6 @@ const AdminStudentProfile = () => {
 
   const attended = registrations.filter(r => r.attended === true).length;
   const absent = registrations.filter(r => r.attended === false).length;
-  const pending = registrations.filter(r => r.attended === null).length;
   const rate = registrations.length > 0 ? Math.round((attended / registrations.length) * 100) : null;
 
   const phone = (profile.phone || '').replace(/-/g, '').replace(/^0/, '972');

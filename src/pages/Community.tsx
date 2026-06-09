@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  CalendarDays, Image as ImageIcon, MessageCircle, Upload, 
-  Trash2, X, Cake, ChevronLeft, ChevronRight, Send, Loader2, Sparkles, Video, Play,
+  Image as ImageIcon, MessageCircle, Upload, 
+  Trash2, X, Cake, ChevronLeft, ChevronRight, Loader2, Sparkles, Video, 
   Heart, MoreVertical, Edit, Lock, Unlock, Plus, Save, Star
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -643,8 +643,8 @@ const Community = () => {
         is_cover: p.id === postId,
         caption: p.id === postId ? 'תמונה ראשית' : p.caption
       }));
-      setEditingGalleryPosts(updatedPosts);
-      setFeed(prevFeed => prevFeed.map(item => item.id === eventId ? { ...item, posts: updatedPosts } : item));
+      setEditingGalleryPosts(updatedPosts as any);
+      setFeed(prevFeed => prevFeed.map(item => item.id === eventId ? { ...item, posts: updatedPosts as any } : item));
     } catch (e) {
       toast.error('שגיאה בהגדרת תמונת הנושא');
     }
@@ -657,7 +657,7 @@ const Community = () => {
       toast.success('התמונה נמחקה');
       const updatedPosts = editingGalleryPosts.filter(p => p.id !== postId);
       setEditingGalleryPosts(updatedPosts);
-      setFeed(prevFeed => prevFeed.map(item => item.id === editingItem?.id ? { ...item, posts: updatedPosts } : item));
+      setFeed(prevFeed => prevFeed.map(item => item.id === editingItem?.id ? { ...item, posts: updatedPosts as any } : item));
     } catch (e) {
       toast.error('שגיאה במחיקת תמונה');
     }
@@ -684,13 +684,13 @@ const Community = () => {
           image_url: publicUrlData.publicUrl,
           caption: 'תמונה נוספה בעריכה'
         }]).select('id, image_url, caption, created_at, is_cover, profiles (full_name, gender, is_admin)').single();
-        if (newPost) newPosts.push(newPost);
+        if (newPost) newPosts.push(newPost as any);
       }
       toast.dismiss('upload-existing');
       toast.success('תמונות חדשות נוספו בהצלחה!');
       const updatedPosts = [...newPosts, ...editingGalleryPosts];
       setEditingGalleryPosts(updatedPosts);
-      setFeed(prevFeed => prevFeed.map(item => item.id === editingItem.id ? { ...item, posts: updatedPosts } : item));
+      setFeed(prevFeed => prevFeed.map(item => item.id === editingItem.id ? { ...item, posts: updatedPosts as any } : item));
     } catch (err: any) {
       toast.dismiss('upload-existing');
       toast.error('שגיאה בהעלאה: ' + err.message);
@@ -731,7 +731,7 @@ const Community = () => {
         // Update local Feed state
         setFeed(prevFeed => prevFeed.map(item => {
           if (item.id === itemId) {
-            return { ...item, comments: [...item.comments, newComment] };
+            return { ...item, comments: [...item.comments, newComment as any] };
           }
           return item;
         }));
@@ -756,7 +756,7 @@ const Community = () => {
         // Update local Feed state
         setFeed(prevFeed => prevFeed.map(item => {
           if (item.id === itemId) {
-            return { ...item, comments: [...item.comments, newMComment] };
+            return { ...item, comments: [...item.comments, newMComment as any] };
           }
           return item;
         }));

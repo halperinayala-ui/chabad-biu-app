@@ -1,4 +1,4 @@
-import { MapPin, Clock, CalendarDays, Edit, ChevronLeft, Settings } from 'lucide-react';
+import { MapPin, Clock, CalendarDays, ChevronLeft, Settings } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import './EventCard.css';
 

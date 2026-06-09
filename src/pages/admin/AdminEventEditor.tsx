@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Plus, Trash2, Image as ImageIcon, Save, Loader2, X, Copy, Tag } from 'lucide-react';
+import { ArrowRight, Plus, Trash2, Image as ImageIcon, Save, Loader2, X, Tag } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
