@@ -26,6 +26,13 @@
   gap: 1rem;
 }
 
+@media (max-width: 550px) {
+  .event-top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 .event-top-actions {
   display: flex;
   align-items: center;

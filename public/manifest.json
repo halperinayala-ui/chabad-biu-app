@@ -7,7 +7,7 @@
       "src": "LOGO.png",
       "type": "image/png",
       "sizes": "192x192 512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "start_url": ".",

@@ -499,7 +499,7 @@ const EventDetails = () => {
               )}
               <div 
                 className="meta-card share-card" 
-                style={{ cursor: 'pointer', background: 'rgba(73, 38, 145, 0.08)', border: '1px solid rgba(73, 38, 145, 0.2)' }}
+                style={{ cursor: 'pointer', background: 'rgba(230, 126, 34, 0.08)', border: '1px solid rgba(230, 126, 34, 0.2)' }}
                 onClick={() => {
                   if (navigator.share) {
                     navigator.share({
@@ -513,10 +513,10 @@ const EventDetails = () => {
                   }
                 }}
               >
-                <Share className="meta-icon" style={{ background: 'var(--primary)', color: 'white' }} />
+                <Share className="meta-icon" style={{ background: 'var(--secondary)', color: 'white' }} />
                 <div className="meta-text">
-                  <span className="meta-label" style={{ color: 'var(--primary)' }}>הזמינו חברים</span>
-                  <span className="meta-value" style={{ color: 'var(--primary)' }}>שתפו את האירוע</span>
+                  <span className="meta-label" style={{ color: 'var(--secondary)' }}>הזמינו חברים</span>
+                  <span className="meta-value" style={{ color: 'var(--secondary)' }}>שתפו את האירוע</span>
                 </div>
               </div>
             </div>

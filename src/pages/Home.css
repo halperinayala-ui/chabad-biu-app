@@ -74,7 +74,7 @@
 }
 
 .section-header h2 {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   font-weight: 900;
   color: var(--text-primary);
   position: relative;
@@ -98,6 +98,10 @@
     justify-content: space-between;
     align-items: flex-end;
   }
+  
+  .section-header h2 {
+    font-size: 2.5rem;
+  }
 }
 
 .filters {
@@ -106,6 +110,12 @@
   overflow-x: auto;
   padding-bottom: 0.5rem;
   padding-top: 0.5rem;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.filters::-webkit-scrollbar {
+  display: none;
 }
 
 .filter-btn {

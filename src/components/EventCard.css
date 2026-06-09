@@ -19,7 +19,7 @@
   border: 1px solid rgba(73, 38, 145, 0.08);
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
+  padding: 1.25rem;
   position: relative;
   cursor: pointer;
   height: 100%;
@@ -55,11 +55,11 @@
 
 /* ─── Title ─────────────────────────────────────────── */
 .event-title {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 800;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.5rem;
   color: var(--text-primary);
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 /* ─── Short description ─────────────────────────────── */
@@ -92,8 +92,8 @@
 .event-details {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
-  margin-bottom: 1.25rem;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
 }
 
 .detail-item {
@@ -130,7 +130,7 @@
 /* ─── Action Button ─────────────────────────────────── */
 .event-actions {
   margin-top: auto;
-  padding-top: 1.1rem;
+  padding-top: 0.8rem;
   border-top: 1px solid rgba(73, 38, 145, 0.07);
 }
 
