@@ -13,6 +13,7 @@ import AdminMediaManager from './pages/admin/AdminMediaManager';
 import Auth from './pages/Auth';
 import ProfileSettings from './pages/ProfileSettings';
 import Community from './pages/Community';
+import InstallBanner from './components/InstallBanner';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
@@ -23,6 +24,7 @@ function App() {
     <AuthProvider>
       <Toaster position="top-center" toastOptions={{ style: { fontFamily: 'Rubik, sans-serif' } }} />
       <div className="app-container">
+        <InstallBanner />
         {/* Global Animated Background */}
         <div className="global-bg">
           <div className="blob blob-1"></div>
