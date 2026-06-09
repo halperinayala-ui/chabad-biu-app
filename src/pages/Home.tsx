@@ -82,12 +82,12 @@ const Home = () => {
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <motion.h1 
-          className="hero-title"
+          className="hero-title animate-fade-in-up"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          חב"ד בקמפוס בר אילן
+          חב״ד<br/>בקמפוס בר אילן
         </motion.h1>
         <motion.p 
           className="hero-subtitle"
@@ -95,7 +95,7 @@ const Home = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          הבית שלכם בקמפוס. הצטרפו אלינו לאירועים, סעודות ושיעורים באווירה משפחתית וצעירה.
+          הבית שלכם בקמפוס.<br/>הצטרפו אלינו לאירועים, סעודות ושיעורים באווירה משפחתית וצעירה.
         </motion.p>
       </motion.header>
       
