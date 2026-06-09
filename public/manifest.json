@@ -1,12 +1,12 @@
 {
-  "short_name": "חב״ד בקמפוס",
+  "short_name": "חב״ד בקמפוס בר אילן",
   "name": "חב״ד בקמפוס בר אילן",
   "description": "האפליקציה הרשמית של חב״ד בקמפוס בר אילן - הרשמה לאירועים, עדכונים וקהילה.",
   "icons": [
     {
       "src": "LOGO.png",
       "type": "image/png",
-      "sizes": "512x512",
+      "sizes": "192x192 512x512",
       "purpose": "any maskable"
     }
   ],

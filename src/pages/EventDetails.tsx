@@ -427,25 +427,6 @@ const EventDetails = () => {
           <span>חזרה</span>
         </button>
         <div className="event-top-actions">
-          <button
-            className="btn btn-outline icon-btn"
-            title="שתף אירוע"
-            onClick={() => {
-              if (navigator.share) {
-                navigator.share({
-                  title: event.title,
-                  text: 'הצטרפו אליי לאירוע בחב״ד קמפוס בר אילן!',
-                  url: window.location.href,
-                }).catch(console.error);
-              } else {
-                navigator.clipboard.writeText(window.location.href);
-                toast.success('הקישור הועתק בהצלחה!');
-              }
-            }}
-          >
-            <Share size={18} />
-          </button>
-          
           {profile?.is_admin && (
             <button
               className="btn btn-outline"
@@ -516,6 +497,28 @@ const EventDetails = () => {
                   </div>
                 </div>
               )}
+              <div 
+                className="meta-card share-card" 
+                style={{ cursor: 'pointer', background: 'rgba(73, 38, 145, 0.08)', border: '1px solid rgba(73, 38, 145, 0.2)' }}
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({
+                      title: event.title,
+                      text: 'הצטרפו אליי לאירוע בחב״ד קמפוס בר אילן!',
+                      url: window.location.href,
+                    }).catch(console.error);
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success('הקישור הועתק בהצלחה!');
+                  }
+                }}
+              >
+                <Share className="meta-icon" style={{ background: 'var(--primary)', color: 'white' }} />
+                <div className="meta-text">
+                  <span className="meta-label" style={{ color: 'var(--primary)' }}>הזמינו חברים</span>
+                  <span className="meta-value" style={{ color: 'var(--primary)' }}>שתפו את האירוע</span>
+                </div>
+              </div>
             </div>
 
             <div className="event-description">

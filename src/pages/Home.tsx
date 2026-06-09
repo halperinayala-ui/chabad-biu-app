@@ -63,15 +63,10 @@ const Home = () => {
     }
   };
 
-  // Filter by category AND audience
-  const userStatus = (profile as any)?.user_status || null;
+  // Filter by category ONLY. Audience restriction is enforced on the event details page.
   const filteredEvents = events.filter(event => {
     if (activeCategory !== 'הכל' && event.category !== activeCategory) return false;
-    const aud: string[] = (event.audience as any) || [];
-    if (aud.length === 0) return true; // empty = everyone
-    if (profile?.is_admin) return true; // admins see all events
-    if (!userStatus) return false; // guest sees only unrestricted events
-    return aud.includes(userStatus);
+    return true;
   });
 
   return (
