@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarDays, Clock, MapPin, ArrowRight, Image as ImageIcon, Loader2, CheckCircle2, XCircle, Settings } from 'lucide-react';
+import { CalendarDays, Clock, MapPin, ArrowRight, Image as ImageIcon, Loader2, CheckCircle2, XCircle, Settings, Share, Edit } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -421,13 +421,41 @@ const EventDetails = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="event-top-bar">
         <button className="back-btn" onClick={() => navigate(-1)} style={{ marginBottom: 0 }}>
           <ArrowRight size={20} />
-          <span>חזרה ללוח האירועים</span>
+          <span>חזרה</span>
         </button>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-
+        <div className="event-top-actions">
+          <button
+            className="btn btn-outline icon-btn"
+            title="שתף אירוע"
+            onClick={() => {
+              if (navigator.share) {
+                navigator.share({
+                  title: event.title,
+                  text: 'הצטרפו אליי לאירוע בחב״ד קמפוס בר אילן!',
+                  url: window.location.href,
+                }).catch(console.error);
+              } else {
+                navigator.clipboard.writeText(window.location.href);
+                toast.success('הקישור הועתק בהצלחה!');
+              }
+            }}
+          >
+            <Share size={18} />
+          </button>
+          
+          {profile?.is_admin && (
+            <button
+              className="btn btn-outline"
+              onClick={() => navigate(`/admin/events/edit/${event.id}`)}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}
+            >
+              <Edit size={16} />
+              עריכה
+            </button>
+          )}
           {profile?.is_admin && (
             <button
               className="btn btn-outline"
@@ -489,26 +517,6 @@ const EventDetails = () => {
                 </div>
               )}
             </div>
-
-            <button
-              className="btn btn-outline"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', marginTop: '1.5rem', padding: '0.8rem', fontSize: '1rem', fontWeight: 'bold' }}
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: event.title,
-                    text: 'הצטרפו אליי לאירוע בחב״ד קמפוס בר אילן!',
-                    url: window.location.href,
-                  }).catch(console.error);
-                } else {
-                  navigator.clipboard.writeText(window.location.href);
-                  toast.success('הקישור הועתק בהצלחה!');
-                }
-              }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-              שתפו את האירוע עם חברים
-            </button>
 
             <div className="event-description">
               <h3>על האירוע</h3>
