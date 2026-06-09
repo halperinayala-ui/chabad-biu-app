@@ -1,0 +1,97 @@
+.cropper-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.2s ease;
+}
+
+.cropper-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  background: #111;
+}
+
+.cropper-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: #222;
+  color: white;
+}
+
+.cropper-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.cropper-header .icon-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.cropper-header .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.cropper-header .icon-btn.primary {
+  color: #2ecc71;
+}
+
+.cropper-body {
+  position: relative;
+  flex-grow: 1;
+  width: 100%;
+}
+
+.cropper-controls {
+  padding: 1.5rem;
+  background: #222;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: white;
+}
+
+.cropper-controls label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.zoom-slider {
+  width: 100%;
+  accent-color: var(--primary, #8e44ad);
+}
+
+.spinner-small {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

@@ -1,0 +1,93 @@
+.footer {
+  background: linear-gradient(135deg, var(--primary), #32166a);
+  color: white;
+  margin-top: 4rem;
+  padding-top: 3rem;
+  border-top: 4px solid var(--secondary);
+  position: relative;
+  z-index: 1;
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  padding-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+  .footer-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  margin-bottom: 1.25rem;
+  color: var(--secondary-light); 
+}
+
+.footer-icon {
+  color: var(--secondary);
+}
+
+.footer-text {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.75rem;
+  line-height: 1.7;
+}
+
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: white;
+  font-weight: 600;
+  transition: var(--transition);
+  margin-top: 0.5rem;
+}
+
+.footer-link:hover {
+  color: var(--secondary-light);
+  transform: translateX(-4px); /* RTL */
+}
+
+.whatsapp-link {
+  color: #4CAF50;
+}
+
+.whatsapp-link:hover {
+  color: #69F0AE;
+}
+
+.footer-action-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.instagram-btn {
+  border-color: rgba(255,255,255,0.3);
+  color: white;
+}
+
+.instagram-btn:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: white;
+  color: white;
+}
+
+.footer-bottom {
+  background-color: rgba(0, 0, 0, 0.2);
+  text-align: center;
+  padding: 1.5rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}

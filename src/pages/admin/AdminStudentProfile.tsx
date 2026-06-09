@@ -1,0 +1,129 @@
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowRight, Loader2, CheckCircle2, XCircle, Clock, MessageCircle } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { supabase } from '../../lib/supabase';
+import './AdminCRM.css';
+
+const AdminStudentProfile = () => {
+  const navigate = useNavigate();
+  const { studentId } = useParams();
+  const [profile, setProfile] = useState<any>(null);
+  const [registrations, setRegistrations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, [studentId]);
+
+  const fetchData = async () => {
+    try {
+      const { data: p } = await supabase.from('profiles').select('*').eq('id', studentId).single();
+      setProfile(p);
+
+      const { data: regs } = await supabase
+        .from('registrations')
+        .select('*, events(title, event_date, category)')
+        .eq('user_id', studentId)
+        .order('created_at', { ascending: false });
+
+      setRegistrations(regs || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '5rem' }}><Loader2 className="spinner" size={40} style={{ color: 'var(--primary)' }} /></div>;
+  if (!profile) return <div style={{ textAlign: 'center', padding: '5rem' }}>סטודנט לא נמצא</div>;
+
+  const attended = registrations.filter(r => r.attended === true).length;
+  const absent = registrations.filter(r => r.attended === false).length;
+  const pending = registrations.filter(r => r.attended === null).length;
+  const rate = registrations.length > 0 ? Math.round((attended / registrations.length) * 100) : null;
+
+  const phone = (profile.phone || '').replace(/-/g, '').replace(/^0/, '972');
+  const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(`היי ${profile.full_name}!`)}`;
+
+  return (
+    <motion.div className="admin-crm-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <div className="admin-header">
+        <button className="back-btn" onClick={() => navigate('/admin/crm')}>
+          <ArrowRight size={20} /> חזרה ל-CRM
+        </button>
+      </div>
+
+      <div className="crm-grid" style={{ gridTemplateColumns: '340px 1fr', gap: '2rem', alignItems: 'start' }}>
+        {/* Profile Card */}
+        <div className="student-card glass" style={{ cursor: 'default' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <div className="student-avatar" style={{ width: '80px', height: '80px', fontSize: '2rem', margin: '0 auto 1rem', background: profile.gender === 'f' ? 'linear-gradient(135deg, #e91e8c, #ff6b6b)' : 'linear-gradient(135deg, var(--primary), var(--secondary))' }}>
+              {(profile.full_name || '?').charAt(0)}
+            </div>
+            <h2 style={{ margin: 0 }}>{profile.full_name || 'לא צוין'}</h2>
+            <p style={{ margin: '0.3rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }} dir="ltr">{profile.phone || '—'}</p>
+            {profile.heb_birthday && (
+              <p style={{ margin: '0.5rem 0 0', color: 'var(--primary)', fontSize: '0.95rem', fontWeight: 600 }}>🎂 יום הולדת עברי: {profile.heb_birthday}</p>
+            )}
+          </div>
+
+          <div className="student-card-stats" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div className="mini-stat"><span className="mini-stat-value" style={{ color: 'var(--primary)' }}>{registrations.length}</span><span className="mini-stat-label">הרשמות</span></div>
+            <div className="mini-stat"><span className="mini-stat-value" style={{ color: '#2ecc71' }}>{attended}</span><span className="mini-stat-label">הגעות</span></div>
+            <div className="mini-stat"><span className="mini-stat-value" style={{ color: '#e74c3c' }}>{absent}</span><span className="mini-stat-label">לא הגיע/ה</span></div>
+            <div className="mini-stat"><span className="mini-stat-value">{rate !== null ? `${rate}%` : '—'}</span><span className="mini-stat-label">אחוז הגעה</span></div>
+          </div>
+
+          {rate !== null && (
+            <div style={{ height: '8px', background: '#eee', borderRadius: '10px', overflow: 'hidden', margin: '1rem 0' }}>
+              <div style={{ height: '100%', width: `${rate}%`, background: rate > 70 ? '#2ecc71' : rate > 40 ? '#f39c12' : '#e74c3c', borderRadius: '10px' }} />
+            </div>
+          )}
+
+          {profile.phone && (
+            <a href={waLink} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem', textDecoration: 'none' }}>
+              <MessageCircle size={18} /> שלח/י הודעה בוואטסאפ
+            </a>
+          )}
+        </div>
+
+        {/* Events History */}
+        <div>
+          <h2 style={{ marginBottom: '1rem' }}>היסטוריית השתתפות</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {registrations.map(reg => (
+              <div key={reg.id} className="glass" style={{ padding: '1rem 1.5rem', borderRadius: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRight: `4px solid ${reg.attended === true ? '#2ecc71' : reg.attended === false ? '#e74c3c' : '#ddd'}` }}>
+                <div>
+                  <strong>{reg.events?.title || '—'}</strong>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                    {reg.events?.event_date?.split('-').reverse().join('.')} · {reg.events?.category}
+                  </div>
+                  {reg.answers && Object.keys(reg.answers).length > 0 && (
+                    <div style={{ marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                      {Object.entries(reg.answers).map(([k, v]) => (
+                        <span key={k} style={{ fontSize: '0.75rem', background: 'rgba(73,38,145,0.08)', color: 'var(--primary)', padding: '0.15rem 0.5rem', borderRadius: '10px' }} title={k}>{String(v)}</span>
+                      ))}
+                    </div>
+                  )}
+                  {reg.admin_note && <div style={{ marginTop: '0.4rem', fontSize: '0.8rem', color: '#666', fontStyle: 'italic' }}>📝 {reg.admin_note}</div>}
+                </div>
+                <div style={{ textAlign: 'center', minWidth: '80px' }}>
+                  {reg.attended === true && <><CheckCircle2 size={28} style={{ color: '#2ecc71', display: 'block', margin: '0 auto 4px' }} /><span style={{ fontSize: '0.75rem', color: '#2ecc71', fontWeight: '700' }}>הגיע/ה</span></>}
+                  {reg.attended === false && <><XCircle size={28} style={{ color: '#e74c3c', display: 'block', margin: '0 auto 4px' }} /><span style={{ fontSize: '0.75rem', color: '#e74c3c', fontWeight: '700' }}>לא הגיע/ה</span></>}
+                  {reg.attended === null && <><Clock size={28} style={{ color: '#bbb', display: 'block', margin: '0 auto 4px' }} /><span style={{ fontSize: '0.75rem', color: '#bbb' }}>לא סומן</span></>}
+                  <div style={{ marginTop: '4px' }}>
+                    <span className={`status-badge status-${reg.status}`} style={{ fontSize: '0.7rem' }}>{reg.status}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {registrations.length === 0 && <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem' }}>אין היסטוריית השתתפות עדיין.</p>}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+export default AdminStudentProfile;
