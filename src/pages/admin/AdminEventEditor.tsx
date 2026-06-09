@@ -214,7 +214,8 @@ const AdminEventEditor = () => {
               body: JSON.stringify({
                 title: 'אירוע חדש במרכז!',
                 body: payload.title,
-                url: data ? `https://chabad-biu-app.vercel.app/events/${data.id}` : 'https://chabad-biu-app.vercel.app/'
+                url: data ? `https://chabad-biu-app.vercel.app/events/${data.id}` : 'https://chabad-biu-app.vercel.app/',
+                audience: payload.audience
               })
             }).catch(e => console.error("Push notification trigger failed:", e));
           }

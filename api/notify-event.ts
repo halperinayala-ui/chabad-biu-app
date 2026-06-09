@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { title, body, url, targetUserId } = req.body;
+    const { title, body, url, targetUserId, audience } = req.body;
 
     if (!title) {
       return res.status(400).json({ error: 'Missing title' });
@@ -52,16 +52,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Get push subscriptions from the database
-    let query = supabase.from('push_subscriptions').select('*');
+    let query = supabase.from('push_subscriptions').select('*, profiles(is_student)');
     if (targetUserId) {
       query = query.eq('user_id', targetUserId);
     }
-    const { data: subscriptions, error: dbError } = await query;
+    const { data: rawSubscriptions, error: dbError } = await query;
 
     if (dbError) {
       console.error('Error fetching subscriptions:', dbError);
       return res.status(500).json({ error: 'Failed to fetch subscriptions' });
     }
+
+    // Filter by audience if provided
+    let subscriptions = rawSubscriptions || [];
+    if (!targetUserId && audience && audience.length > 0) {
+      const isStudentTarget = audience.includes('student');
+      const isOtherTarget = audience.includes('graduate') || audience.includes('other');
+      
+      if (isStudentTarget && !isOtherTarget) {
+        // Only students
+        subscriptions = subscriptions.filter(sub => sub.profiles?.is_student === true);
+      } else if (!isStudentTarget && isOtherTarget) {
+        // Only non-students (graduates/others)
+        subscriptions = subscriptions.filter(sub => sub.profiles?.is_student === false);
+      }
+      // If both are true, it sends to everyone, so no filter needed.
+    }
+
+
 
     if (!subscriptions || subscriptions.length === 0) {
       return res.status(200).json({ success: true, message: 'No subscriptions found', sentCount: 0 });

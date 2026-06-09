@@ -7,6 +7,7 @@ import './Navbar.css';
 const Navbar = () => {
   const { user, profile, subscribeToPush } = useAuth();
   const [showBell, setShowBell] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     // Only show bell if user is logged in, and notifications are supported but not yet granted
@@ -69,11 +70,27 @@ const Navbar = () => {
             </Link>
           )}
           
-          <button className="mobile-menu-btn">
+          <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
             <Menu size={24} />
           </button>
         </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="mobile-menu-dropdown">
+          <Link to="/" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>עמוד הבית</Link>
+          <Link to="/community" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>קהילה 👥</Link>
+          {profile?.is_admin && (
+            <Link to="/admin" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>ניהול</Link>
+          )}
+          {user ? (
+            <Link to="/profile" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>האזור האישי</Link>
+          ) : (
+            <Link to="/auth" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>התחברות</Link>
+          )}
+        </div>
+      )}
     </nav>
   );
 };

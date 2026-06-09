@@ -6,9 +6,9 @@
 
 /* WOW Hero Section */
 .hero-section {
-  padding: 6rem 2rem;
+  padding: 3rem 1.5rem;
   border-radius: var(--radius-lg);
-  margin-top: 2rem;
+  margin-top: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: 0 10px 30px rgba(0,0,0,0.02);
   position: relative;
@@ -16,6 +16,13 @@
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+}
+
+@media (min-width: 768px) {
+  .hero-section {
+    padding: 6rem 2rem;
+    margin-top: 2rem;
+  }
 }
 
 .text-center {
