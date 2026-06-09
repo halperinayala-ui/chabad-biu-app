@@ -18,44 +18,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import './App.css'; 
-import { useEffect } from 'react';
-import OneSignal from 'react-onesignal';
-
 function App() {
-  useEffect(() => {
-    const initOneSignal = async () => {
-      try {
-        await OneSignal.init({
-          appId: "0d669e68-1fe9-4854-a7a6-348fd2e3e5e1",
-          allowLocalhostAsSecureOrigin: true,
-          notifyButton: {
-            enable: true,
-            prenotify: true,
-            position: 'bottom-right',
-            showCredit: false,
-            text: {
-              'tip.state.unsubscribed': 'הירשם לעדכונים',
-              'tip.state.subscribed': 'אתה רשום לעדכונים',
-              'tip.state.blocked': 'חסמת התראות',
-              'message.prenotify': 'לחץ להרשמה לעדכונים',
-              'message.action.subscribing': 'נרשם...',
-              'message.action.subscribed': 'תודה שנרשמת!',
-              'message.action.resubscribed': 'אתה רשום לעדכונים',
-              'message.action.unsubscribed': 'הסרת את ההרשמה לעדכונים',
-              'dialog.main.title': 'ניהול התראות',
-              'dialog.main.button.subscribe': 'הירשם',
-              'dialog.main.button.unsubscribe': 'הסר הרשמה',
-              'dialog.blocked.title': 'בטל חסימת התראות',
-              'dialog.blocked.message': 'עקוב אחרי ההוראות כדי לאפשר התראות.'
-            }
-          }
-        });
-      } catch (e) {
-        console.error("OneSignal Init Error", e);
-      }
-    };
-    initOneSignal();
-  }, []);
   return (
     <AuthProvider>
       <Toaster position="top-center" toastOptions={{ style: { fontFamily: 'Rubik, sans-serif' } }} />

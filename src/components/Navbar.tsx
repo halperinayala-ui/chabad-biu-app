@@ -1,10 +1,29 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, LayoutDashboard } from 'lucide-react';
+import { Menu, LayoutDashboard, Bell } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import './Navbar.css';
 
 const Navbar = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, subscribeToPush } = useAuth();
+  const [showBell, setShowBell] = useState(false);
+
+  useEffect(() => {
+    // Only show bell if user is logged in, and notifications are supported but not yet granted
+    if (user && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        setShowBell(true);
+      }
+    }
+  }, [user]);
+
+  const handleSubscribe = async () => {
+    const success = await subscribeToPush();
+    if (success) {
+      setShowBell(false);
+      alert('נרשמת בהצלחה לקבלת התראות!');
+    }
+  };
 
   return (
     <nav className="navbar glass">
@@ -27,6 +46,16 @@ const Navbar = () => {
         <div className="navbar-actions">
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              {showBell && (
+                <button 
+                  onClick={handleSubscribe}
+                  className="btn" 
+                  style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0.5rem' }}
+                  title="הירשם להתראות"
+                >
+                  <Bell size={20} className="bell-shake" />
+                </button>
+              )}
               <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }} className="desktop-only">
                 שלום {profile?.full_name ? profile.full_name.split(' ')[0] : 'אורח'}!
               </span>

@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import OneSignal from 'react-onesignal';
 import { supabase } from '../lib/supabase';
 
 export interface UserProfile {
@@ -18,6 +17,7 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  subscribeToPush: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -25,6 +25,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   loading: true,
   signOut: async () => {},
+  subscribeToPush: async () => false,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -38,7 +39,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
-        OneSignal.login(session.user.id).catch(console.error);
       } else {
         setLoading(false);
       }
@@ -49,16 +49,78 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
-        OneSignal.login(session.user.id).catch(console.error);
+        // Automatically try to subscribe if permission was already granted previously
+        if ('Notification' in window && Notification.permission === 'granted') {
+          subscribeToPush();
+        }
       } else {
         setProfile(null);
         setLoading(false);
-        OneSignal.logout().catch(console.error);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const urlBase64ToUint8Array = (base64String: string) => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+  
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+  
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  };
+
+  const subscribeToPush = async (): Promise<boolean> => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      return false;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return false;
+
+      const registration = await navigator.serviceWorker.ready;
+      
+      let subscription = await registration.pushManager.getSubscription();
+      if (!subscription) {
+        const publicVapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+        if (!publicVapidKey) {
+          console.error('VAPID public key not found');
+          return false;
+        }
+
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+        });
+      }
+
+      const currentUser = (await supabase.auth.getSession()).data.session?.user;
+      if (!currentUser) return false;
+
+      const subJSON = subscription.toJSON();
+      
+      // Save to Supabase
+      await supabase.from('push_subscriptions').upsert({
+        user_id: currentUser.id,
+        endpoint: subJSON.endpoint,
+        p256dh: subJSON.keys?.p256dh,
+        auth: subJSON.keys?.auth
+      }, { onConflict: 'user_id, endpoint' });
+
+      return true;
+    } catch (error) {
+      console.error('Failed to subscribe to push notifications:', error);
+      return false;
+    }
+  };
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -81,11 +143,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setProfile(null);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signOut }}>
+    <AuthContext.Provider value={{ user, profile, loading, signOut, subscribeToPush }}>
       {children}
     </AuthContext.Provider>
   );

@@ -196,9 +196,31 @@ const AdminEventEditor = () => {
         if (error) throw error;
         toast.success('האירוע עודכן בהצלחה!');
       } else {
-        const { error } = await supabase.from('events').insert(payload);
+        const { error, data } = await supabase.from('events').insert(payload).select().single();
         if (error) throw error;
         toast.success('האירוע נוצר בהצלחה!');
+        
+        // Trigger Push Notification
+        try {
+          const session = await supabase.auth.getSession();
+          const token = session.data.session?.access_token;
+          if (token) {
+            fetch('/api/notify-event', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                title: 'אירוע חדש במרכז!',
+                body: payload.title,
+                url: data ? `https://chabad-biu-app.vercel.app/events/${data.id}` : 'https://chabad-biu-app.vercel.app/'
+              })
+            }).catch(e => console.error("Push notification trigger failed:", e));
+          }
+        } catch (pushErr) {
+          console.error("Could not trigger push notification", pushErr);
+        }
       }
       
       navigate('/');
