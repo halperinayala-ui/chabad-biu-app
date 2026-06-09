@@ -10,15 +10,9 @@ const InstallBanner = () => {
 
   useEffect(() => {
     // Check if the app is already installed
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
     if (isStandalone) {
       return; // Already installed, don't show banner
-    }
-
-    // Check if we already dismissed the banner recently
-    const dismissed = localStorage.getItem('installBannerDismissed');
-    if (dismissed && Date.now() - parseInt(dismissed) < 1000 * 60 * 60 * 24 * 7) {
-      return; // Dismissed in the last 7 days
     }
 
     // Detect iOS
@@ -72,7 +66,6 @@ const InstallBanner = () => {
 
   const handleDismiss = () => {
     setShowBanner(false);
-    localStorage.setItem('installBannerDismissed', Date.now().toString());
   };
 
   if (!showBanner) return null;
@@ -90,7 +83,7 @@ const InstallBanner = () => {
         </button>
         <div className="install-content">
           <div className="install-icon">
-            <img src="/logo-purple.png" alt="Chabad BIU" />
+            <img src="/LOGO.png" alt="Chabad BIU" />
           </div>
           <div className="install-text">
             <h4>הוסף את האפליקציה!</h4>
