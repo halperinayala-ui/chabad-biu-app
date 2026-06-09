@@ -1185,11 +1185,18 @@ const Community = () => {
                     onTouchStart={(e) => handleTouchStart(e, item.id)}
                     onTouchEnd={(e) => handleTouchEnd(e, item.id, photos.length, currentSlide)}
                   >
-                    <img 
-                      src={photos[currentSlide].image_url} 
-                      alt="Gallery slide" 
-                      className="post-media-img" 
-                    />
+                    <AnimatePresence mode="wait">
+                      <motion.img 
+                        key={currentSlide}
+                        src={photos[currentSlide].image_url} 
+                        alt="Gallery slide" 
+                        className="post-media-img" 
+                        initial={{ opacity: 0.5 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0.5 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    </AnimatePresence>
                     
                     {/* Student uploader badge on the active photo */}
                     {photos[currentSlide]?.profiles && !photos[currentSlide].profiles.is_admin && (
