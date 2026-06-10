@@ -23,6 +23,22 @@
     <meta property="og:url" content="https://chabad-biu-app.vercel.app" />
     
     <title>חב״ד בקמפוס בר אילן</title>
+    <script>
+      if (window.location.search.includes('reset=1')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (let r of registrations) { r.unregister(); }
+            alert('מטמון ונתונים נוקו בהצלחה. כעת העמוד יתרענן.');
+            window.location.href = '/';
+          });
+        } else {
+          alert('מטמון ונתונים נוקו בהצלחה. כעת העמוד יתרענן.');
+          window.location.href = '/';
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
