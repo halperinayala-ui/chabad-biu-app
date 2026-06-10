@@ -55,12 +55,11 @@ const InstallBanner = () => {
     
     if (outcome === 'accepted') {
       console.log('User accepted the install prompt');
-      setShowBanner(false);
     } else {
       console.log('User dismissed the install prompt');
     }
     
-    // We've used the prompt, and can't use it again, throw it away
+    setShowBanner(false);
     setDeferredPrompt(null);
   };
 
@@ -83,7 +82,7 @@ const InstallBanner = () => {
         </button>
         <div className="install-content">
           <div className="install-icon">
-            <img src="/LOGO.png" alt="Chabad BIU" />
+            <img src="/logo-purple.png" alt="Chabad BIU" />
           </div>
           <div className="install-text">
             <h4>הוסף את האפליקציה!</h4>

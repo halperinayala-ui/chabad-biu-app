@@ -2,6 +2,15 @@
   padding-top: 1rem;
 }
 
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
 .stats-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
