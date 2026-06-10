@@ -142,6 +142,27 @@ const EventDetails = () => {
 
       setMyRegistration(data);
       toast.success(requiresManualApproval ? 'בקשתך נשלחה! נחזור אליך בקרוב.' : 'נרשמת בהצלחה! נתראה באירוע 🎉');
+      
+      // Trigger Admin Notification (if logged in)
+      if (user) {
+        try {
+          const session = await supabase.auth.getSession();
+          const token = session.data.session?.access_token;
+          if (token) {
+            const userName = profile?.full_name || 'משתמש';
+            fetch('/api/notify-event', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({
+                title: 'נרשם חדש לאירוע!',
+                body: `${userName} נרשם לאירוע: ${event.title}`,
+                url: `https://chabad-biu-app.vercel.app/admin/events/${event.id}/registrants`,
+                targetRole: 'admin'
+              })
+            }).catch(e => console.error(e));
+          }
+        } catch (e) { console.error(e); }
+      }
     } catch (err: any) {
       console.error('Error registering:', err);
       toast.error('שגיאה בהרשמה: ' + err.message);
@@ -168,6 +189,25 @@ const EventDetails = () => {
       if (error) throw error;
       setMyRegistration(data);
       toast.success(profile?.gender === 'female' ? 'אחלה! רשמנו אותך 🎉' : 'אחלה! רשמנו אותך 🎉');
+
+      // Trigger Admin Notification
+      try {
+        const session = await supabase.auth.getSession();
+        const token = session.data.session?.access_token;
+        if (token) {
+          const userName = profile?.full_name || 'משתמש';
+          fetch('/api/notify-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({
+              title: 'נרשם חדש לאירוע!',
+              body: `${userName} נרשם לאירוע: ${event.title}`,
+              url: `https://chabad-biu-app.vercel.app/admin/events/${event.id}/registrants`,
+              targetRole: 'admin'
+            })
+          }).catch(e => console.error(e));
+        }
+      } catch (e) { console.error(e); }
     } catch (err: any) {
       toast.error('שגיאה: ' + err.message);
     } finally {

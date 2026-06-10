@@ -40,19 +40,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ error: 'Invalid token' });
     }
 
-    // Verify user is an admin
+    // Check if the sender is asking to notify admins
+    const targetRole = req.body.targetRole; // 'admin' or undefined
+    const isSendingToAdmins = targetRole === 'admin';
+
+    // Verify user is an admin, UNLESS they are sending a notification explicitly to admins
     const { data: profile } = await supabase
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
       .single();
 
-    if (!profile?.is_admin) {
+    if (!profile?.is_admin && !isSendingToAdmins) {
       return res.status(403).json({ error: 'Forbidden: Admin access required' });
     }
 
     // Get push subscriptions from the database
-    let query = supabase.from('push_subscriptions').select('*, profiles(is_student)');
+    // Removed is_student as it's no longer reliable. Using user_status instead.
+    let query = supabase.from('push_subscriptions').select('*, profiles(user_status, is_admin)');
     if (targetUserId) {
       query = query.eq('user_id', targetUserId);
     }
@@ -63,18 +68,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: 'Failed to fetch subscriptions' });
     }
 
-    // Filter by audience if provided
+    // Filter by audience or role if provided
     let subscriptions = rawSubscriptions || [];
-    if (!targetUserId && audience && audience.length > 0) {
+    
+    if (isSendingToAdmins) {
+      // Send ONLY to admins
+      subscriptions = subscriptions.filter(sub => sub.profiles?.is_admin === true);
+    } else if (!targetUserId && audience && audience.length > 0) {
       const isStudentTarget = audience.includes('student');
       const isOtherTarget = audience.includes('graduate') || audience.includes('other');
       
       if (isStudentTarget && !isOtherTarget) {
         // Only students
-        subscriptions = subscriptions.filter(sub => sub.profiles?.is_student === true);
+        subscriptions = subscriptions.filter(sub => sub.profiles?.user_status === 'student');
       } else if (!isStudentTarget && isOtherTarget) {
         // Only non-students (graduates/others)
-        subscriptions = subscriptions.filter(sub => sub.profiles?.is_student === false);
+        subscriptions = subscriptions.filter(sub => sub.profiles?.user_status !== 'student');
       }
       // If both are true, it sends to everyone, so no filter needed.
     }

@@ -18,6 +18,8 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   subscribeToPush: () => Promise<boolean>;
+  unsubscribeFromPush: () => Promise<boolean>;
+  isPushEnabled: boolean;
   refreshProfile: () => Promise<void>;
 }
 
@@ -27,6 +29,8 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signOut: async () => {},
   subscribeToPush: async () => false,
+  unsubscribeFromPush: async () => false,
+  isPushEnabled: false,
   refreshProfile: async () => {},
 });
 
@@ -34,8 +38,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isPushEnabled, setIsPushEnabled] = useState(false);
+
+  const checkPushSubscription = async () => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      setIsPushEnabled(!!subscription);
+    } catch (e) {
+      console.error('Error checking push subscription:', e);
+    }
+  };
 
   useEffect(() => {
+    checkPushSubscription();
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -117,9 +134,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         auth: subJSON.keys?.auth
       }, { onConflict: 'user_id, endpoint' });
 
+      setIsPushEnabled(true);
       return true;
     } catch (error) {
       console.error('Failed to subscribe to push notifications:', error);
+      return false;
+    }
+  };
+
+  const unsubscribeFromPush = async () => {
+    try {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        return false;
+      }
+
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+
+      if (subscription) {
+        // Delete from Supabase
+        const currentUser = (await supabase.auth.getSession()).data.session?.user;
+        if (currentUser) {
+          await supabase.from('push_subscriptions')
+            .delete()
+            .eq('endpoint', subscription.endpoint)
+            .eq('user_id', currentUser.id);
+        }
+
+        // Unsubscribe from browser
+        await subscription.unsubscribe();
+        setIsPushEnabled(false);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to unsubscribe from push notifications:', error);
       return false;
     }
   };
@@ -155,7 +204,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signOut, subscribeToPush, refreshProfile: async () => { if (user) await fetchProfile(user.id); } }}>
+    <AuthContext.Provider value={{ user, profile, loading, signOut, subscribeToPush, unsubscribeFromPush, isPushEnabled, refreshProfile: async () => { if (user) await fetchProfile(user.id); } }}>
       {children}
     </AuthContext.Provider>
   );

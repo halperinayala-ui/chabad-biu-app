@@ -23,7 +23,7 @@ const HEBREW_MONTHS = [
 ];
 
 const ProfileSettings = () => {
-  const { user, profile, signOut, refreshProfile } = useAuth();
+  const { user, profile, signOut, refreshProfile, isPushEnabled, subscribeToPush, unsubscribeFromPush } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -290,8 +290,18 @@ const ProfileSettings = () => {
               <input type="checkbox" defaultChecked />
             </label>
             <label className="toggle-row">
-              <span>לקבלת התראות ועדכונים על אירועים והרשמות חדשות</span>
-              <input type="checkbox" defaultChecked />
+              <span>לקבלת התראות פוש על אירועים והרשמות</span>
+              <input 
+                type="checkbox" 
+                checked={isPushEnabled} 
+                onChange={async (e) => {
+                  if (e.target.checked) {
+                    await subscribeToPush();
+                  } else {
+                    await unsubscribeFromPush();
+                  }
+                }} 
+              />
             </label>
           </div>
 
