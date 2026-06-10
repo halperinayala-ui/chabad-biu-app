@@ -25,6 +25,7 @@ const Home = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState('הכל');
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchEventsAndSettings();
@@ -54,8 +55,10 @@ const Home = () => {
 
       if (error) throw error;
       setEvents(eventsData || []);
-    } catch (err) {
+      setFetchError(null);
+    } catch (err: any) {
       console.error('Error fetching data:', err);
+      setFetchError(err.message || 'Unknown error');
       setEvents([]);
     } finally {
       clearTimeout(timeoutId);
@@ -126,6 +129,11 @@ const Home = () => {
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
             <Loader2 className="spinner" size={40} style={{ color: 'var(--primary)' }} />
+          </div>
+        ) : fetchError ? (
+          <div style={{ textAlign: 'center', padding: '3rem', color: 'red' }}>
+            <h3>שגיאה בטעינת אירועים: {fetchError}</h3>
+            <p>אנא פני למפתח עם הודעה זו כדי לבדוק את הרשאות ה-Supabase.</p>
           </div>
         ) : filteredEvents.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
