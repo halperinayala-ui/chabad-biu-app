@@ -59,7 +59,8 @@ const Home = () => {
     } catch (err: any) {
       console.error('Error fetching data:', err);
       setFetchError(err.message || 'Unknown error');
-      setEvents([]);
+      // Do not clear events on transient errors so they don't suddenly disappear
+      // setEvents([]);
     } finally {
       clearTimeout(timeoutId);
       setLoading(false);
