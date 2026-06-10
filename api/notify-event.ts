@@ -57,7 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Get push subscriptions from the database
     // Removed is_student as it's no longer reliable. Using user_status instead.
-    let query = supabase.from('push_subscriptions').select('*, profiles(user_status, is_admin)');
+    let query = supabase.from('push_subscriptions').select('*');
     if (targetUserId) {
       query = query.eq('user_id', targetUserId);
     }
@@ -68,9 +68,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: 'Failed to fetch subscriptions' });
     }
 
-    // Filter by audience or role if provided
     let subscriptions = rawSubscriptions || [];
-    
+
+    // If we need to filter by role/audience, fetch profiles separately
+    if (subscriptions.length > 0 && (!targetUserId || isSendingToAdmins)) {
+      const userIds = [...new Set(subscriptions.map(s => s.user_id).filter(Boolean))];
+      
+      if (userIds.length > 0) {
+        const { data: profilesData, error: profileErr } = await supabase
+          .from('profiles')
+          .select('id, user_status, is_admin')
+          .in('id', userIds);
+          
+        if (!profileErr && profilesData) {
+          // Attach profiles to subscriptions
+          subscriptions = subscriptions.map(sub => {
+            const profile = profilesData.find(p => p.id === sub.user_id);
+            return { ...sub, profiles: profile || null };
+          });
+        }
+      }
+    }
+
+    // Filter by audience or role if provided
     if (isSendingToAdmins) {
       // Send ONLY to admins
       subscriptions = subscriptions.filter(sub => sub.profiles?.is_admin === true);
