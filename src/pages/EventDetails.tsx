@@ -51,6 +51,8 @@ const EventDetails = () => {
   const [submitting, setSubmitting] = useState(false);
   const [myRegistration, setMyRegistration] = useState<Registration | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [guestStatus, setGuestStatus] = useState('');
+  const [guestStatusDetails, setGuestStatusDetails] = useState('');
 
   useEffect(() => {
     fetchEvent();
@@ -116,8 +118,23 @@ const EventDetails = () => {
       if (user) {
         payload.user_id = user.id;
       } else {
+        // Guest validation
+        if (Array.isArray(event.audience) && event.audience.length > 0) {
+          if (!guestStatus || !event.audience.includes(guestStatus)) {
+            toast.error('האירוע אינו מיועד לקבוצת היעד שסימנת. לא ניתן להשלים הרשמה.');
+            setSubmitting(false);
+            return;
+          }
+        }
         payload.guest_name = formData.get('guest_name');
         payload.guest_phone = formData.get('guest_phone');
+        if (guestStatus) {
+          const labels: Record<string, string> = { student: 'סטודנט/ית', graduate: 'בוגר/ת', other: 'אחר' };
+          answers['סטטוס'] = labels[guestStatus] || guestStatus;
+          if (guestStatus === 'student' && guestStatusDetails) {
+            answers['פירוט לימודים'] = guestStatusDetails;
+          }
+        }
       }
 
       const { data, error } = await supabase.from('registrations').insert(payload).select('id, status').single();
@@ -195,7 +212,7 @@ const EventDetails = () => {
     if (aud.length > 0) {
       if (!user) {
         audienceBlocked = false;
-        audienceMsg = 'אירוע זה מיועד לקהל יעד מוגדר. מאחר ואינך מחובר/ת לאפליקציה, הרשמתך כ"אורח" תמתין לאישור מנהל ידני.';
+        audienceMsg = 'אירוע זה מיועד לקהל יעד מוגדר. אנא ציינו את הסטטוס שלכם בטופס.';
       } else if (!userStatus || !aud.includes(userStatus)) {
         audienceBlocked = true;
         const labels: Record<string, string> = { student: 'סטודנטים', graduate: 'בוגרים', other: 'אחרים' };
@@ -354,6 +371,35 @@ const EventDetails = () => {
               <label className="form-label">מספר טלפון <span className="required-star">*</span></label>
               <input type="tel" name="guest_phone" className="form-control" required />
             </div>
+            
+            <div className="form-group">
+              <label className="form-label">סטטוס מול חב״ד בקמפוס <span className="required-star">*</span></label>
+              <select 
+                className="form-control" 
+                required 
+                value={guestStatus}
+                onChange={(e) => setGuestStatus(e.target.value)}
+              >
+                <option value="">בחר/י סטטוס...</option>
+                <option value="student">סטודנט/ית בבר אילן</option>
+                <option value="graduate">בוגר/ת</option>
+                <option value="other">אחר</option>
+              </select>
+            </div>
+
+            {guestStatus === 'student' && (
+              <div className="form-group animate-fade-in-up">
+                <label className="form-label">מוסד לימודים, תואר ושנת לימוד <span className="required-star">*</span></label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  required 
+                  placeholder="לדוגמה: בר אילן, מדעי המחשב, שנה ב׳"
+                  value={guestStatusDetails}
+                  onChange={(e) => setGuestStatusDetails(e.target.value)}
+                />
+              </div>
+            )}
           </>
         )}
 
