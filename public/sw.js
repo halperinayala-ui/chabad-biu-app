@@ -6,9 +6,7 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(clients.claim());
 });
 
-self.addEventListener('fetch', (e) => {
-  e.respondWith(fetch(e.request));
-});
+// Fetch listener removed to prevent CORS/network interception issues on specific Android browsers
 
 self.addEventListener('push', (e) => {
   const data = e.data ? e.data.json() : {};
