@@ -82,7 +82,7 @@ const InstallBanner = () => {
         </button>
         <div className="install-content">
           <div className="install-icon">
-            <img src="/logo-purple.png" alt="Chabad BIU" />
+            <img src="/app-logo-white.png" alt="Chabad BIU" />
           </div>
           <div className="install-text">
             <h4>הוסף את האפליקציה!</h4>

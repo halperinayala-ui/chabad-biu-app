@@ -72,7 +72,7 @@
 }
 
 .install-button {
-  background-color: var(--primary-color);
+  background-color: var(--primary);
   color: white;
   border: none;
   border-radius: 20px;
@@ -84,7 +84,7 @@
 }
 
 .install-button:hover {
-  background-color: var(--primary-color-dark);
+  background-color: var(--secondary);
 }
 
 @media (min-width: 768px) {
