@@ -160,7 +160,17 @@ const Community = () => {
     try {
       const formatter = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { month: 'long' });
       const parts = formatter.formatToParts(new Date());
-      return parts.find(p => p.type === 'month')?.value || '';
+      let month = parts.find(p => p.type === 'month')?.value || '';
+      
+      // Normalize to match ProfileSettings.tsx MONTH_MAP
+      const normalization: Record<string, string> = {
+        'תשרי': 'תשרי', 'מרחשוון': 'חשוון', 'חשוון': 'חשוון', 'כסלו': 'כסלו',
+        'טבת': 'טבת', 'שבט': 'שבט', 'אדר': 'אדר', 'אדר א׳': 'אדר', 'אדר א': 'אדר',
+        'אדר ב׳': 'אדר ב', 'אדר ב': 'אדר ב', 'ניסן': 'ניסן', 'אייר': 'אייר',
+        'סיוון': 'סיון', 'סיון': 'סיון', 'תמוז': 'תמוז', 'אב': 'אב', 'אלול': 'אלול'
+      };
+      
+      return normalization[month] || month;
     } catch {
       return '';
     }
