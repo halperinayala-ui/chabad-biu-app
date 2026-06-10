@@ -23,7 +23,7 @@ const HEBREW_MONTHS = [
 ];
 
 const ProfileSettings = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -122,8 +122,10 @@ const ProfileSettings = () => {
         study_year: userStatus === 'student' && studyYear ? parseInt(studyYear) : null,
       }).eq('id', user.id);
       if (error) throw error;
+      await refreshProfile();
       setMessage('הפרטים נשמרו בהצלחה!');
-      setTimeout(() => { window.location.href = '/'; }, 1500);
+      // Update local profile state immediately so OnboardingGuard sees it
+      setTimeout(() => { navigate('/'); }, 1500);
     } catch (err: any) {
       console.error(err);
       setMessage('שגיאה בשמירת הנתונים: ' + err.message);
