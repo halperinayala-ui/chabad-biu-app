@@ -32,6 +32,7 @@ interface EventData {
   tags: string[];
   registration_mode: 'form' | 'rsvp' | 'none';
   registration_deadline: string | null;
+  registration_start: string | null;
   audience?: string;
 }
 
