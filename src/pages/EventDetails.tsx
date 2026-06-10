@@ -226,12 +226,33 @@ const EventDetails = () => {
       if (error) throw error;
       setMyRegistration(null);
       toast.success('ההרשמה בוטלה.');
+
+      // Notify admins about cancellation
+      try {
+        const session = await supabase.auth.getSession();
+        const token = session.data.session?.access_token;
+        if (token) {
+          const userName = profile?.full_name || 'משתמש';
+          fetch('/api/notify-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({
+              title: 'ביטול הרשמה לאירוע',
+              body: `${userName} ביטל/ה הרשמה לאירוע: ${event?.title}`,
+              url: `https://chabad-biu-app.vercel.app/admin/events/${event?.id}/registrants`,
+              targetRole: 'admin'
+            })
+          }).catch(e => console.error('Cancel notification failed:', e));
+        }
+      } catch (e) { console.error(e); }
+
     } catch (err: any) {
       toast.error('שגיאה בביטול: ' + err.message);
     } finally {
       setCancelling(false);
     }
   };
+
 
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', padding: '5rem' }}><Loader2 className="spinner" size={40} style={{ color: 'var(--primary)' }} /></div>;
