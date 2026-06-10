@@ -68,10 +68,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
-        // Automatically try to subscribe if permission was already granted previously
-        if ('Notification' in window && Notification.permission === 'granted') {
-          subscribeToPush();
-        }
+        // We no longer auto-subscribe here because it overrides the user's explicit unsubscribe choice.
+        // checkPushSubscription() already runs on mount to detect existing subscriptions.
       } else {
         setProfile(null);
         setLoading(false);
