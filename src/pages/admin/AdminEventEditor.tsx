@@ -216,7 +216,7 @@ const AdminEventEditor = () => {
                 'Authorization': `Bearer ${token}`
               },
               body: JSON.stringify({
-                title: 'אירוע חדש במרכז!',
+                title: 'אירוע חדש בחב"ד בקמפוס!',
                 body: payload.title,
                 url: data ? `https://chabad-biu-app.vercel.app/events/${data.id}` : 'https://chabad-biu-app.vercel.app/',
                 audience: payload.audience
