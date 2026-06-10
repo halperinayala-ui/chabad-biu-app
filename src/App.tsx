@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -15,15 +16,35 @@ import ProfileSettings from './pages/ProfileSettings';
 import Community from './pages/Community';
 import InstallBanner from './components/InstallBanner';
 import ProtectedRoute from './components/ProtectedRoute';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import './App.css'; 
+
+function OnboardingGuard({ children }: { children: React.ReactNode }) {
+  const { user, profile, loading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!loading && user && profile) {
+      const isProfileIncomplete = !profile.full_name || !profile.phone || !profile.gender || !(profile as any).user_status;
+      
+      if (isProfileIncomplete && location.pathname !== '/profile' && location.pathname !== '/auth') {
+        navigate('/profile', { replace: true, state: { requireOnboarding: true } });
+      }
+    }
+  }, [user, profile, loading, location.pathname, navigate]);
+
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <AuthProvider>
-      <Toaster position="top-center" toastOptions={{ style: { fontFamily: 'Rubik, sans-serif' } }} />
-      <div className="app-container">
-        <InstallBanner />
+      <OnboardingGuard>
+        <Toaster position="top-center" toastOptions={{ style: { fontFamily: 'Rubik, sans-serif' } }} />
+        <div className="app-container">
+          <InstallBanner />
         {/* Global Animated Background */}
         <div className="global-bg">
           <div className="blob blob-1"></div>
@@ -74,6 +95,7 @@ function App() {
         </main>
         <Footer />
       </div>
+      </OnboardingGuard>
     </AuthProvider>
   );
 }
