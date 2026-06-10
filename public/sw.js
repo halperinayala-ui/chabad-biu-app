@@ -7,8 +7,7 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Let the browser do its default thing for all requests
-  // This satisfies the PWA install requirement on Android
+  e.respondWith(fetch(e.request));
 });
 
 self.addEventListener('push', (e) => {
