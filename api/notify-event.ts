@@ -2,13 +2,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import webpush from 'web-push';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize web-push with VAPID keys
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT || 'mailto:admin@chabad-biu.com',
-  process.env.VITE_VAPID_PUBLIC_KEY || '',
-  process.env.VAPID_PRIVATE_KEY || ''
-);
-
 // Initialize Supabase with Service Role Key to bypass RLS and get all subscriptions
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
@@ -26,6 +19,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!title) {
       return res.status(400).json({ error: 'Missing title' });
     }
+
+    // Initialize web-push with VAPID keys (inside handler to avoid module-level crash)
+    const vapidPublicKey = process.env.VITE_VAPID_PUBLIC_KEY || '';
+    const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || '';
+    const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@chabad-biu.com';
+    
+    if (!vapidPublicKey || !vapidPrivateKey) {
+      console.error('VAPID keys are missing from environment variables');
+      return res.status(500).json({ error: 'Push notification configuration missing' });
+    }
+    
+    webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+
 
     // Verify authentication - check if the user sending this request is an admin
     const authHeader = req.headers.authorization;
