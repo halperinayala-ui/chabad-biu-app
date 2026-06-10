@@ -105,9 +105,11 @@ const EventDetails = () => {
         }
       });
 
+      const isRestrictedGuest = !user && Array.isArray(event.audience) && event.audience.length > 0;
+      const requiresManualApproval = event.requires_approval || isRestrictedGuest;
       const payload: any = {
         event_id: event.id,
-        status: event.requires_approval ? 'pending' : 'approved',
+        status: requiresManualApproval ? 'pending' : 'approved',
         answers,
       };
 
@@ -122,7 +124,7 @@ const EventDetails = () => {
       if (error) throw error;
 
       setMyRegistration(data);
-      toast.success(event.requires_approval ? 'בקשתך נשלחה! נחזור אליך בקרוב.' : 'נרשמת בהצלחה! נתראה באירוע 🎉');
+      toast.success(requiresManualApproval ? 'בקשתך נשלחה! נחזור אליך בקרוב.' : 'נרשמת בהצלחה! נתראה באירוע 🎉');
     } catch (err: any) {
       console.error('Error registering:', err);
       toast.error('שגיאה בהרשמה: ' + err.message);
@@ -192,8 +194,8 @@ const EventDetails = () => {
     let audienceMsg = '';
     if (aud.length > 0) {
       if (!user) {
-        audienceBlocked = true;
-        audienceMsg = 'אירוע זה מיועד לקהל מוגדר. התחברו כדי לבדוק אם תוכלו להירשם.';
+        audienceBlocked = false;
+        audienceMsg = 'אירוע זה מיועד לקהל יעד מוגדר. מאחר ואינך מחובר/ת לאפליקציה, הרשמתך כ"אורח" תמתין לאישור מנהל ידני.';
       } else if (!userStatus || !aud.includes(userStatus)) {
         audienceBlocked = true;
         const labels: Record<string, string> = { student: 'סטודנטים', graduate: 'בוגרים', other: 'אחרים' };
@@ -301,8 +303,8 @@ const EventDetails = () => {
       );
     }
 
-    // RSVP mode
-    if (event.registration_mode === 'rsvp') {
+    // RSVP mode - only for logged in users. Guests get the form.
+    if (event.registration_mode === 'rsvp' && user) {
       return (
         <div style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
@@ -326,9 +328,21 @@ const EventDetails = () => {
       );
     }
 
-    // Full form mode
+    // Full form mode (or RSVP for guests)
     return (
       <form ref={formRef} className="dynamic-form" onSubmit={handleFormSubmit}>
+        
+        {audienceMsg && !audienceBlocked && !user && (
+          <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(243, 156, 18, 0.1)', border: '1px solid rgba(243, 156, 18, 0.3)', borderRadius: '12px', color: '#d35400', fontSize: '0.95rem' }}>
+            <span style={{ fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>שימו לב: {audienceMsg}</span>
+            <div style={{ marginTop: '0.75rem' }}>
+              <button type="button" className="btn btn-outline" style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem', borderColor: '#d35400', color: '#d35400', background: 'transparent' }} onClick={() => navigate('/auth')}>
+                <span style={{ textDecoration: 'underline' }}>להתחברות לאפליקציה לחץ כאן</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Guest fields – shown only if not logged in */}
         {!user && (
           <>

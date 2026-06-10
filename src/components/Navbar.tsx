@@ -30,7 +30,7 @@ const Navbar = () => {
     <nav className="navbar glass">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
-          <img src="/logo-purple.png" alt="חב״ד בר אילן" style={{ height: '50px', width: 'auto' }} />
+          <img src="/app-icon.png" alt="חב״ד בר אילן" style={{ height: '50px', width: 'auto' }} />
         </Link>
         
         <div className="navbar-links desktop-only">
