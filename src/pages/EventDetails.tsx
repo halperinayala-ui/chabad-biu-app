@@ -261,6 +261,37 @@ const EventDetails = () => {
       }
     }
 
+    // Check if registration hasn't started yet
+    if (event.registration_start && new Date() < new Date(event.registration_start)) {
+      const startDate = new Date(event.registration_start);
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      let dateString = startDate.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
+      if (startDate.toDateString() === today.toDateString()) {
+        dateString = 'היום';
+      } else if (startDate.toDateString() === tomorrow.toDateString()) {
+        dateString = 'מחר';
+      }
+
+      const timeString = startDate.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+
+      return (
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(73, 38, 145, 0.05)', borderRadius: '16px' }}
+        >
+          <Clock size={48} style={{ color: 'var(--primary)', opacity: 0.7, margin: '0 auto 1rem', display: 'block' }} />
+          <h3 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>ההרשמה טרם נפתחה</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>
+            ההרשמה תיפתח <strong>{dateString} בשעה {timeString}</strong>
+          </p>
+        </motion.div>
+      );
+    }
+
     // Check if registration is closed
     if (event.registration_deadline && new Date() > new Date(event.registration_deadline)) {
       return (

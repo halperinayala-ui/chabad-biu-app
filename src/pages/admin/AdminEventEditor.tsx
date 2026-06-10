@@ -45,6 +45,7 @@ const AdminEventEditor = () => {
   const [existingHeaderUrl, setExistingHeaderUrl] = useState<string | null>(null);
   const [existingFlyerUrl, setExistingFlyerUrl] = useState<string | null>(null);
   const [registrationDeadline, setRegistrationDeadline] = useState('');
+  const [registrationStart, setRegistrationStart] = useState('');
   const [audience, setAudience] = useState<string[]>([]); // [] means everyone; e.g. ['student','graduate']
   const [isNewCategory, setIsNewCategory] = useState(false);
   const [otherDetails, setOtherDetails] = useState<string[]>([]); // unique 'other' status_detail values from profiles
@@ -121,7 +122,8 @@ const AdminEventEditor = () => {
         setRegistrationMode(data.registration_mode || 'form');
         setExistingHeaderUrl(data.header_image_url);
         setExistingFlyerUrl(data.flyer_image_url);
-        setRegistrationDeadline(data.registration_deadline || '');
+        setRegistrationDeadline(data.registration_deadline ? new Date(new Date(data.registration_deadline).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '');
+        setRegistrationStart(data.registration_start ? new Date(new Date(data.registration_start).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '');
         setAudience(data.audience || []);
         if (data.form_config && data.form_config.length > 0) {
           setFields(data.form_config);
@@ -173,22 +175,23 @@ const AdminEventEditor = () => {
         finalFlyerUrl = await uploadImage(flyerImage, 'flyers');
       }
 
-      const payload = {
+      const payload: any = {
         title,
-        category,
+        category: category,
         event_date: eventDate,
         event_time: eventTime,
         location,
         description,
         requires_approval: requiresApproval,
         max_registrants: maxRegistrants ? parseInt(maxRegistrants) : null,
+        registration_deadline: registrationDeadline ? new Date(registrationDeadline).toISOString() : null,
+        registration_start: registrationStart ? new Date(registrationStart).toISOString() : null,
         closed_message: closedMessage,
         tags,
-        registration_mode: registrationMode,
         header_image_url: finalHeaderUrl,
         flyer_image_url: finalFlyerUrl,
+        registration_mode: registrationMode,
         form_config: registrationMode === 'form' ? fields : [],
-        registration_deadline: registrationDeadline || null,
         audience: audience  // TEXT[] array, empty = everyone
       };
 
@@ -558,11 +561,18 @@ const AdminEventEditor = () => {
               </div>
               
               <div className="form-row" style={{ marginTop: '1rem' }}>
-                <div className="form-group" style={{ padding: '1rem', background: 'rgba(73, 38, 145, 0.05)', borderRadius: '8px', border: '1px solid rgba(73, 38, 145, 0.1)' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>תאריך ושעת סגירת הרשמה (אופציונלי)</label>
-                  <input type="datetime-local" className="form-control" style={{ width: '100%', maxWidth: '250px' }} value={registrationDeadline} onChange={(e) => setRegistrationDeadline(e.target.value)} />
+                <div className="form-group" style={{ padding: '1rem', background: 'rgba(73, 38, 145, 0.05)', borderRadius: '8px', border: '1px solid rgba(73, 38, 145, 0.1)', flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>תאריך ושעת פתיחת הרשמה (אופציונלי)</label>
+                  <input type="datetime-local" className="form-control" style={{ width: '100%' }} value={registrationStart} onChange={(e) => setRegistrationStart(e.target.value)} />
                   <small style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', display: 'block' }}>
-                    השאירו ריק אם תרצו שההרשמה תישאר פתוחה תמיד (או עד שתסגרו ידנית או שמכסת המשתתפים תתמלא).
+                    השאירו ריק אם תרצו שההרשמה תהיה פתוחה מרגע פרסום האירוע.
+                  </small>
+                </div>
+                <div className="form-group" style={{ padding: '1rem', background: 'rgba(73, 38, 145, 0.05)', borderRadius: '8px', border: '1px solid rgba(73, 38, 145, 0.1)', flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>תאריך ושעת סגירת הרשמה (אופציונלי)</label>
+                  <input type="datetime-local" className="form-control" style={{ width: '100%' }} value={registrationDeadline} onChange={(e) => setRegistrationDeadline(e.target.value)} />
+                  <small style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', display: 'block' }}>
+                    השאירו ריק אם תרצו שההרשמה תישאר פתוחה עד מכסת המשתתפים.
                   </small>
                 </div>
               </div>

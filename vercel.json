@@ -1,4 +1,8 @@
 {
+  "crons": [{
+    "path": "/api/cron-open-registrations",
+    "schedule": "0 * * * *"
+  }],
   "rewrites": [
     {
       "source": "/events/:id",
