@@ -1,5 +1,7 @@
-import { MapPin, Clock, CalendarDays, ChevronLeft, Settings } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { MapPin, Clock, CalendarDays, ChevronLeft, Settings, ChevronDown, ChevronUp } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import './EventCard.css';
 
 interface EventCardProps {
@@ -45,69 +47,100 @@ const getButtonLabel = (mode?: string) => {
 
 const EventCard = ({ id, title, date, time, location, category, description, registrationMode, tags = [], isAdmin }: EventCardProps) => {
   const navigate = useNavigate();
+  const [isExpanded, setIsExpanded] = useState(false);
   const { dayName, gregorian, hebrewDate } = formatHebrewDate(date);
-  const shortDesc = description && description.length > 90
-    ? description.slice(0, 90).trimEnd() + '...'
-    : description;
 
   return (
     <div className="event-card-wrapper">
       {isAdmin && (
         <button
           className="admin-edit-btn"
-          onClick={(e) => { e.preventDefault(); navigate(`/admin/events/${id}/registrants`); }}
+          onClick={(e) => { e.stopPropagation(); navigate(`/admin/events/${id}/registrants`); }}
           title="ניהול אירוע"
         >
           <Settings size={16} />
         </button>
       )}
-      <Link to={`/events/${id}`} className="event-card-link">
-        <div className="event-card">
-          <div className="event-content">
+      <div className={`event-card ${isExpanded ? 'expanded' : ''}`} onClick={() => setIsExpanded(!isExpanded)}>
+        <div className="event-content">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <span className="event-category">{category}</span>
-            <h3 className="event-title">{title}</h3>
+            <button className="expand-btn" style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.2rem' }}>
+              {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            </button>
+          </div>
+          <h3 className="event-title">{title}</h3>
 
-            {shortDesc && (
-              <p className="event-desc-preview" style={{ whiteSpace: 'pre-line' }}>{shortDesc}</p>
-            )}
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                style={{ overflow: 'hidden' }}
+              >
+                {description && (
+                  <p className="event-desc-preview" style={{ whiteSpace: 'pre-line', marginBottom: '1rem' }}>{description}</p>
+                )}
 
-            {tags.length > 0 && (
-              <div className="event-tags">
-                {tags.map(tag => (
-                  <span key={tag} className="event-tag">{tag}</span>
-                ))}
-              </div>
-            )}
+                {tags.length > 0 && (
+                  <div className="event-tags">
+                    {tags.map(tag => (
+                      <span key={tag} className="event-tag">{tag}</span>
+                    ))}
+                  </div>
+                )}
 
-            <div className="event-details">
-              <div className="detail-item">
-                <CalendarDays size={15} />
-                <div className="detail-date-col">
-                  <span>יום {dayName}, {gregorian}</span>
-                  {hebrewDate && <span className="hebrew-date">{hebrewDate}</span>}
+                <div className="event-details">
+                  <div className="detail-item">
+                    <CalendarDays size={15} />
+                    <div className="detail-date-col">
+                      <span>יום {dayName}, {gregorian}</span>
+                      {hebrewDate && <span className="hebrew-date">{hebrewDate}</span>}
+                    </div>
+                  </div>
+                  <div className="detail-item">
+                    <Clock size={15} />
+                    <span>{time}</span>
+                  </div>
+                  {location && (
+                    <div className="detail-item">
+                      <MapPin size={15} />
+                      <span>{location}</span>
+                    </div>
+                  )}
                 </div>
-              </div>
-              <div className="detail-item">
-                <Clock size={15} />
-                <span>{time}</span>
-              </div>
-              {location && (
-                <div className="detail-item">
-                  <MapPin size={15} />
-                  <span>{location}</span>
+                
+                <div className="event-actions">
+                  <button 
+                    className="btn btn-secondary register-btn" 
+                    onClick={(e) => { e.stopPropagation(); navigate(`/events/${id}`); }}
+                  >
+                    {getButtonLabel(registrationMode)}
+                    <ChevronLeft size={16} />
+                  </button>
                 </div>
-              )}
-            </div>
-
-            <div className="event-actions">
-              <button className="btn btn-secondary register-btn">
-                {getButtonLabel(registrationMode)}
-                <ChevronLeft size={16} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          {!isExpanded && (
+            <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="detail-item" style={{ marginBottom: 0 }}>
+                <CalendarDays size={14} />
+                <span style={{ fontSize: '0.8rem' }}>{gregorian}</span>
+              </div>
+              <button 
+                className="btn btn-outline" 
+                style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem', borderRadius: '12px' }}
+                onClick={(e) => { e.stopPropagation(); navigate(`/events/${id}`); }}
+              >
+                פרטים <ChevronLeft size={14} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '-4px' }} />
               </button>
             </div>
-          </div>
+          )}
         </div>
-      </Link>
+      </div>
     </div>
   );
 };

@@ -4,7 +4,7 @@
   "description": "האפליקציה הרשמית של חב״ד בקמפוס בר אילן - הרשמה לאירועים, עדכונים וקהילה.",
   "icons": [
     {
-      "src": "LOGO.png",
+      "src": "logo-purple.png",
       "type": "image/png",
       "sizes": "192x192 512x512",
       "purpose": "any"
