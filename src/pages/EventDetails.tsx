@@ -213,7 +213,7 @@ const EventDetails = () => {
       if (!user) {
         audienceBlocked = false;
         audienceMsg = 'אירוע זה מיועד לקהל יעד מוגדר. אנא ציינו את הסטטוס שלכם בטופס.';
-      } else if (!userStatus || !aud.includes(userStatus)) {
+      } else if (!profile?.is_admin && (!userStatus || !aud.includes(userStatus))) {
         audienceBlocked = true;
         const labels: Record<string, string> = { student: 'סטודנטים', graduate: 'בוגרים', other: 'אחרים' };
         const groups = aud.map(a => labels[a] || a).join(' ו');

@@ -46,6 +46,7 @@ const AdminEventEditor = () => {
   const [existingFlyerUrl, setExistingFlyerUrl] = useState<string | null>(null);
   const [registrationDeadline, setRegistrationDeadline] = useState('');
   const [audience, setAudience] = useState<string[]>([]); // [] means everyone; e.g. ['student','graduate']
+  const [isNewCategory, setIsNewCategory] = useState(false);
   const [otherDetails, setOtherDetails] = useState<string[]>([]); // unique 'other' status_detail values from profiles
 
   const [saving, setSaving] = useState(false);
@@ -403,10 +404,29 @@ const AdminEventEditor = () => {
             </div>
             <div className="form-group">
               <label>קטגוריה</label>
-              <input type="text" className="form-control" placeholder='לדוגמה: שיעור תורה...' value={category} onChange={(e) => setCategory(e.target.value)} list="category-options" />
-              <datalist id="category-options">
-                {availableCategories.map((cat, i) => <option key={i} value={cat} />)}
-              </datalist>
+              {!isNewCategory && availableCategories.includes(category || '') || category === '' ? (
+                <select 
+                  className="form-control" 
+                  value={category} 
+                  onChange={(e) => {
+                    if (e.target.value === '__new__') {
+                      setIsNewCategory(true);
+                      setCategory('');
+                    } else {
+                      setCategory(e.target.value);
+                    }
+                  }}
+                >
+                  <option value="">בחר/י קטגוריה...</option>
+                  {availableCategories.map((cat, i) => <option key={i} value={cat}>{cat}</option>)}
+                  <option value="__new__" style={{ fontWeight: 'bold', color: 'var(--primary)' }}>+ קטגוריה חדשה...</option>
+                </select>
+              ) : (
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input type="text" className="form-control" placeholder='הקלידי קטגוריה חדשה...' value={category} onChange={(e) => setCategory(e.target.value)} autoFocus />
+                  <button type="button" className="btn btn-outline" onClick={() => { setIsNewCategory(false); setCategory(''); }} style={{ padding: '0 0.75rem' }}>ביטול</button>
+                </div>
+              )}
               {category && !availableCategories.includes(category) && (
                 <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                   <small style={{ color: 'var(--text-secondary)' }}>קטגוריה חדשה – </small>
