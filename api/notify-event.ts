@@ -123,7 +123,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     let sentCount = 0;
-    const errors = [];
+    const errors: any[] = [];
 
     // Send push notifications in parallel
     const sendPromises = subscriptions.map(async (sub) => {
