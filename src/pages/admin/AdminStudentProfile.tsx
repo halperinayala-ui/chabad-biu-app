@@ -12,6 +12,8 @@ const AdminStudentProfile = () => {
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasPush, setHasPush] = useState(false);
+  const [adminNotes, setAdminNotes] = useState('');
+  const [savingNotes, setSavingNotes] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -21,6 +23,7 @@ const AdminStudentProfile = () => {
     try {
       const { data: p } = await supabase.from('profiles').select('*').eq('id', studentId).single();
       setProfile(p);
+      setAdminNotes(p?.admin_notes || '');
 
       const { data: regs } = await supabase
         .from('registrations')
@@ -46,8 +49,25 @@ const AdminStudentProfile = () => {
   const absent = registrations.filter(r => r.attended === false).length;
   const rate = registrations.length > 0 ? Math.round((attended / registrations.length) * 100) : null;
 
+  const handleSaveNotes = async () => {
+    setSavingNotes(true);
+    try {
+      const { error } = await supabase.from('profiles').update({ admin_notes: adminNotes }).eq('id', studentId);
+      if (error) throw error;
+      // Optional: show a small success toast
+    } catch (err) {
+      console.error('Failed to save notes', err);
+      alert('שגיאה בשמירת ההערות');
+    } finally {
+      setSavingNotes(false);
+    }
+  };
+
   const phone = (profile.phone || '').replace(/-/g, '').replace(/^0/, '972');
   const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(`היי ${profile.full_name}!`)}`;
+
+  // The last item in the array is the oldest registration since it's sorted descending
+  const firstEventDate = registrations.length > 0 ? new Date(registrations[registrations.length - 1].created_at).toLocaleDateString('he-IL') : null;
 
   return (
     <motion.div className="admin-crm-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -72,6 +92,9 @@ const AdminStudentProfile = () => {
             {profile.heb_birthday && (
               <p style={{ margin: '0.5rem 0 0', color: 'var(--primary)', fontSize: '0.95rem', fontWeight: 600 }}>🎂 יום הולדת עברי: {profile.heb_birthday}</p>
             )}
+            {firstEventDate && (
+              <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>📅 הצטרף/ה ב: {firstEventDate}</p>
+            )}
           </div>
 
           <div className="student-card-stats" style={{ gridTemplateColumns: '1fr 1fr' }}>
@@ -92,6 +115,28 @@ const AdminStudentProfile = () => {
               <MessageCircle size={18} /> שלח/י הודעה בוואטסאפ
             </a>
           )}
+
+          <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '1.5rem' }}>
+            <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>📝 פתק מנהלים אישי</h3>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>הערות אלו גלויות למנהלים בלבד.</p>
+            <textarea
+              className="form-control"
+              rows={4}
+              placeholder="רגישויות, התנדבויות, דברים שחשוב לזכור..."
+              value={adminNotes}
+              onChange={(e) => setAdminNotes(e.target.value)}
+              style={{ resize: 'vertical', width: '100%', marginBottom: '0.5rem' }}
+            />
+            <button 
+              className="btn btn-primary" 
+              style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}
+              onClick={handleSaveNotes}
+              disabled={savingNotes || adminNotes === profile.admin_notes}
+            >
+              {savingNotes ? <Loader2 size={18} className="spinner" /> : <CheckCircle2 size={18} />}
+              שמור הערות
+            </button>
+          </div>
         </div>
 
         {/* Events History */}
