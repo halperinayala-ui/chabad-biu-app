@@ -1196,20 +1196,23 @@
   color: #c0392b;
 }
 
-/* Instagram Post Media */
 .instagram-post-media {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  height: auto;
+  max-height: 550px;
   overflow: hidden;
-  background: #fdfdfd;
+  background: #000;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .post-media-img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-height: 550px;
+  object-fit: contain;
   transition: transform 0.5s;
 }
 
@@ -1523,10 +1526,14 @@
 .instagram-post-media.inline-carousel {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  height: auto;
+  max-height: 550px;
   overflow: hidden;
   background: #000;
   cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .carousel-arrow {

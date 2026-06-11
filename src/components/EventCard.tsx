@@ -67,9 +67,6 @@ const EventCard = ({ id, title, date, time, location, category, description, reg
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
               <span className={`event-category ${isFeatured ? 'featured-category' : ''}`}>{category}</span>
-              {isFeatured && (
-                <span className="featured-badge">🔥 מוגדש</span>
-              )}
             </div>
             <button className="expand-btn" style={{ background: 'none', border: 'none', color: isFeatured ? 'var(--secondary)' : 'var(--text-secondary)', cursor: 'pointer', padding: '0.2rem' }}>
               {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}

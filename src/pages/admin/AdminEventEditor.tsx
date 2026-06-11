@@ -733,6 +733,18 @@ const AdminEventEditor = () => {
             </button>
           </div>
         )}
+        
+        {/* Bottom Save Button (Duplicate) */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+          <button 
+            className="btn btn-primary" 
+            onClick={handleSave} 
+            disabled={saving}
+            style={{ minWidth: '150px', padding: '0.8rem', fontSize: '1.1rem', fontWeight: 700 }}
+          >
+            {saving ? <span className="spinner-small" /> : (isEditMode ? 'עדכן אירוע' : 'שמור אירוע')}
+          </button>
+        </div>
       </div>
     </motion.div>
   );
