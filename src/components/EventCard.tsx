@@ -15,6 +15,7 @@ interface EventCardProps {
   registrationMode?: 'form' | 'rsvp' | 'none';
   tags?: string[];
   isAdmin?: boolean;
+  isFeatured?: boolean;
 }
 
 const HEBREW_DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
@@ -45,7 +46,7 @@ const getButtonLabel = (mode?: string) => {
   return 'לפרטים והרשמה';
 };
 
-const EventCard = ({ id, title, date, time, location, category, description, registrationMode, tags = [], isAdmin }: EventCardProps) => {
+const EventCard = ({ id, title, date, time, location, category, description, registrationMode, tags = [], isAdmin, isFeatured }: EventCardProps) => {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const { dayName, gregorian, hebrewDate } = formatHebrewDate(date);
@@ -61,15 +62,20 @@ const EventCard = ({ id, title, date, time, location, category, description, reg
           <Settings size={16} />
         </button>
       )}
-      <div className={`event-card ${isExpanded ? 'expanded' : ''}`} onClick={() => setIsExpanded(!isExpanded)}>
+      <div className={`event-card ${isExpanded ? 'expanded' : ''} ${isFeatured ? 'featured' : ''}`} onClick={() => setIsExpanded(!isExpanded)}>
         <div className="event-content">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <span className="event-category">{category}</span>
-            <button className="expand-btn" style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.2rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <span className={`event-category ${isFeatured ? 'featured-category' : ''}`}>{category}</span>
+              {isFeatured && (
+                <span className="featured-badge">🔥 מוגדש</span>
+              )}
+            </div>
+            <button className="expand-btn" style={{ background: 'none', border: 'none', color: isFeatured ? 'var(--secondary)' : 'var(--text-secondary)', cursor: 'pointer', padding: '0.2rem' }}>
               {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
             </button>
           </div>
-          <h3 className="event-title">{title}</h3>
+          <h3 className={`event-title ${isFeatured ? 'featured-title' : ''}`}>{title}</h3>
 
           <AnimatePresence>
             {isExpanded && (

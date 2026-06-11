@@ -171,3 +171,54 @@
   color: white;
   transform: scale(1.1);
 }
+
+/* ─── Featured Card (Orange Theme) ─────────────────── */
+.event-card.featured {
+  border: 2px solid rgba(221, 103, 85, 0.4);
+  box-shadow: 0 4px 20px rgba(221, 103, 85, 0.15);
+  background: linear-gradient(135deg, rgba(255, 251, 249, 0.98), rgba(255, 244, 240, 0.95));
+}
+
+.event-card.featured:hover {
+  border-color: rgba(221, 103, 85, 0.65);
+  box-shadow: 0 12px 36px rgba(221, 103, 85, 0.22);
+}
+
+.featured-category {
+  background: rgba(221, 103, 85, 0.1) !important;
+  color: var(--secondary) !important;
+}
+
+.featured-title {
+  color: #b84f3c;
+}
+
+.featured-badge {
+  background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+  color: white;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(221, 103, 85, 0.3);
+}
+
+.event-card.featured .detail-item svg {
+  color: var(--secondary);
+}
+
+.event-card.featured .btn-secondary {
+  background: linear-gradient(135deg, var(--secondary), var(--secondary-light)) !important;
+  border-color: transparent !important;
+}
+
+.event-card.featured .btn-outline {
+  color: var(--secondary) !important;
+  border-color: var(--secondary) !important;
+}
+
+.event-card.featured .btn-outline:hover {
+  background: var(--secondary) !important;
+  color: white !important;
+}

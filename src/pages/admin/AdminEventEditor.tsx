@@ -47,6 +47,7 @@ const AdminEventEditor = () => {
   const [registrationDeadline, setRegistrationDeadline] = useState('');
   const [registrationStart, setRegistrationStart] = useState('');
   const [audience, setAudience] = useState<string[]>([]); // [] means everyone; e.g. ['student','graduate']
+  const [isFeatured, setIsFeatured] = useState(false);
   const [isNewCategory, setIsNewCategory] = useState(false);
   const [otherDetails, setOtherDetails] = useState<string[]>([]); // unique 'other' status_detail values from profiles
 
@@ -125,6 +126,7 @@ const AdminEventEditor = () => {
         setRegistrationDeadline(data.registration_deadline ? new Date(new Date(data.registration_deadline).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '');
         setRegistrationStart(data.registration_start ? new Date(new Date(data.registration_start).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '');
         setAudience(data.audience || []);
+        setIsFeatured(data.is_featured || false);
         if (data.form_config && data.form_config.length > 0) {
           setFields(data.form_config);
         }
@@ -192,7 +194,8 @@ const AdminEventEditor = () => {
         flyer_image_url: finalFlyerUrl,
         registration_mode: registrationMode,
         form_config: registrationMode === 'form' ? fields : [],
-        audience: audience  // TEXT[] array, empty = everyone
+        audience: audience,  // TEXT[] array, empty = everyone
+        is_featured: isFeatured,
       };
 
       if (isEditMode) {
@@ -513,6 +516,28 @@ const AdminEventEditor = () => {
             {audience.length === 0 && (
               <p style={{ marginTop: '0.6rem', fontSize: '0.8rem', color: '#27ae60', fontWeight: 600 }}>✅ כרגע: האירוע מוצג לכולם</p>
             )}
+          </div>
+
+          {/* Featured Event Toggle */}
+          <div className="form-row" style={{ marginTop: '1.5rem', background: isFeatured ? 'rgba(221, 103, 85, 0.06)' : 'rgba(221, 103, 85, 0.03)', padding: '1.25rem 1.5rem', borderRadius: '12px', border: `1.5px solid ${isFeatured ? 'rgba(221, 103, 85, 0.4)' : 'rgba(221, 103, 85, 0.15)'}`, transition: 'all 0.3s' }}>
+            <label style={{ display: 'flex', gap: '1rem', alignItems: 'center', cursor: 'pointer', width: '100%' }}>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="checkbox"
+                  checked={isFeatured}
+                  onChange={e => setIsFeatured(e.target.checked)}
+                  style={{ width: '22px', height: '22px', accentColor: 'var(--secondary)', cursor: 'pointer' }}
+                />
+              </div>
+              <div>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: isFeatured ? 'var(--secondary)' : 'var(--text-primary)' }}>
+                  🔥 הדגש אירוע זה
+                </div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                  האירוע יופיע בצבע כתום ויבלוט בראש הרשימה
+                </div>
+              </div>
+            </label>
           </div>
 
           {/* Registration Mode Section */}

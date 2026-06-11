@@ -16,6 +16,7 @@ interface EventData {
   registration_mode?: 'form' | 'rsvp' | 'none';
   tags?: string[];
   audience?: string;
+  is_featured?: boolean;
 }
 
 const Events = () => {
@@ -40,9 +41,10 @@ const Events = () => {
 
       const { data: eventsData, error } = await supabase
         .from('events')
-        .select('id, title, event_date, event_time, location, category, description, registration_mode, tags, audience')
+        .select('id, title, event_date, event_time, location, category, description, registration_mode, tags, audience, is_featured')
         .gte('event_date', todayStr)
         .neq('category', 'other')
+        .order('is_featured', { ascending: false })
         .order('event_date', { ascending: true });
 
       if (error) throw error;
@@ -143,6 +145,7 @@ const Events = () => {
                   registrationMode={event.registration_mode}
                   tags={event.tags}
                   isAdmin={profile?.is_admin}
+                  isFeatured={event.is_featured}
                 />
               </motion.div>
             ))}
