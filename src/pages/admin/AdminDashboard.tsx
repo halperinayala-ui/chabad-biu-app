@@ -160,7 +160,7 @@ const AdminDashboard = () => {
                 title="לחץ לניהול האירוע"
               >
                 <div className="event-admin-info">
-                  <span className="event-admin-date">{ev.event_date.split('-').reverse().join('.')}</span>
+                  <span className="event-admin-date">{ev.event_date ? ev.event_date.split('-').reverse().join('.') : 'ללא תאריך'}</span>
                   <div>
                     <strong>{ev.title}</strong>
                     <span className="event-admin-cat">{ev.category}</span>
