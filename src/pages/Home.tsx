@@ -97,7 +97,7 @@ const Home = () => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        style={{ marginBottom: '1.5rem', paddingTop: '0.25rem' }}
+        style={{ marginBottom: '1.5rem', paddingTop: '1.25rem' }}
       >
         {user && firstName ? (
           <div>
