@@ -1202,11 +1202,8 @@
   height: auto;
   max-height: 550px;
   overflow: hidden;
-  background: #000;
+  background: transparent;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .post-media-img {
@@ -1529,11 +1526,8 @@
   height: auto;
   max-height: 550px;
   overflow: hidden;
-  background: #000;
+  background: transparent;
   cursor: default;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .carousel-arrow {
