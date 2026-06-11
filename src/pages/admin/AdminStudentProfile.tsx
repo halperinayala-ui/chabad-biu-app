@@ -111,6 +111,19 @@ const AdminStudentProfile = () => {
               {hasPush && <Bell size={18} color="#f39c12" fill="#f39c12" title="התראות פוש מופעלות" />}
             </h2>
             <p style={{ margin: '0.3rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }} dir="ltr">{profile.phone || '—'}</p>
+            
+            {/* User Status Badge */}
+            {profile.user_status && (
+              <p style={{ margin: '0.5rem 0 0' }}>
+                <span style={{ fontSize: '0.85rem', background: 'rgba(41, 128, 185, 0.1)', color: '#2980b9', padding: '0.2rem 0.6rem', borderRadius: '12px', fontWeight: 600 }}>
+                  {profile.user_status === 'student' ? '🎓 סטודנט' : profile.user_status === 'graduate' ? '💼 בוגר' : '👤 אחר'}
+                  {profile.user_status === 'student' && profile.study_field ? ` - ${profile.study_field}` : ''}
+                  {profile.user_status === 'student' && profile.degree_type ? ` (${profile.degree_type})` : ''}
+                  {profile.user_status === 'other' && profile.status_detail ? ` - ${profile.status_detail}` : ''}
+                </span>
+              </p>
+            )}
+
             {profile.heb_birthday && (
               <p style={{ margin: '0.5rem 0 0', color: 'var(--primary)', fontSize: '0.95rem', fontWeight: 600 }}>🎂 יום הולדת עברי: {profile.heb_birthday}</p>
             )}

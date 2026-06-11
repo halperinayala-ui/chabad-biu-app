@@ -11,6 +11,13 @@ interface StudentSummary {
   phone: string;
   gender: string;
   heb_birthday?: string;
+  user_status?: string;
+  study_field?: string;
+  degree_type?: string;
+  status_detail?: string;
+  is_admin: boolean;
+  is_vip: boolean;
+  is_blocked: boolean;
   total_registrations: number;
   attended_count: number;
   absent_count: number;
@@ -35,7 +42,7 @@ const AdminCRM = () => {
       const { data: profiles, error } = await supabase
         .from('profiles')
         .select(`
-          id, full_name, phone, gender, heb_birthday,
+          id, full_name, phone, gender, heb_birthday, user_status, study_field, degree_type, status_detail, is_admin, is_vip, is_blocked,
           registrations (
             id, attended, created_at,
             events (title, event_date)
@@ -62,6 +69,13 @@ const AdminCRM = () => {
             phone: p.phone || '—',
             gender: p.gender || 'm',
             heb_birthday: p.heb_birthday || undefined,
+            user_status: p.user_status,
+            study_field: p.study_field,
+            degree_type: p.degree_type,
+            status_detail: p.status_detail,
+            is_admin: p.is_admin || false,
+            is_vip: p.is_vip || false,
+            is_blocked: p.is_blocked || false,
             total_registrations: regs.length,
             attended_count: attended,
             absent_count: absent,
@@ -140,11 +154,24 @@ const AdminCRM = () => {
                     {student.has_push && <Bell size={14} color="#f39c12" fill="#f39c12" title="התראות פוש מופעלות" />}
                     {student.is_vip && <Star size={14} color="#f39c12" fill="#f39c12" title="משתמש VIP" />}
                     {student.is_blocked && <Ban size={14} color="#e74c3c" title="משתמש חסום (חסימה שקטה)" />}
+                    {student.is_admin && <span style={{ fontSize: '0.7rem', background: '#34495e', color: 'white', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>מנהל</span>}
                   </h3>
-                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }} dir="ltr">{student.phone}</p>
-                  {student.heb_birthday && (
-                    <span style={{ fontSize: '0.73rem', background: 'rgba(73, 38, 145, 0.08)', color: 'var(--primary)', padding: '0.15rem 0.4rem', borderRadius: '10px', marginTop: '0.25rem', display: 'inline-block', fontWeight: 600 }}>🎂 {student.heb_birthday}</span>
-                  )}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginTop: '0.2rem' }}>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }} dir="ltr">{student.phone}</p>
+                    
+                    {/* User Status Badge */}
+                    {student.user_status && (
+                      <span style={{ fontSize: '0.75rem', background: 'rgba(41, 128, 185, 0.1)', color: '#2980b9', padding: '0.15rem 0.4rem', borderRadius: '10px', fontWeight: 600 }}>
+                        {student.user_status === 'student' ? '🎓 סטודנט' : student.user_status === 'graduate' ? '💼 בוגר' : '👤 אחר'}
+                        {student.user_status === 'student' && student.study_field ? ` - ${student.study_field}` : ''}
+                        {student.user_status === 'other' && student.status_detail ? ` - ${student.status_detail}` : ''}
+                      </span>
+                    )}
+
+                    {student.heb_birthday && (
+                      <span style={{ fontSize: '0.75rem', background: 'rgba(73, 38, 145, 0.08)', color: 'var(--primary)', padding: '0.15rem 0.4rem', borderRadius: '10px', fontWeight: 600 }}>🎂 {student.heb_birthday}</span>
+                    )}
+                  </div>
                 </div>
               </div>
 
