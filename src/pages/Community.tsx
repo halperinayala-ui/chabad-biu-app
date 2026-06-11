@@ -1197,20 +1197,37 @@ const Community = () => {
                   >
                     <div 
                       className="carousel-track" 
+                      dir="ltr"
                       style={{ 
                         display: 'flex', 
                         width: '100%', 
                         height: '100%', 
                         transition: 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', 
-                        transform: `translateX(${currentSlide * 100}%)` 
+                        transform: `translateX(-${currentSlide * 100}%)` 
                       }}
                     >
                       {photos.map((photo, idx) => (
-                        <div key={photo.id} style={{ flex: '0 0 100%', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                        <div key={photo.id} style={{ flex: '0 0 100%', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                          {/* Blurred Background Layer */}
+                          <div 
+                            style={{ 
+                              position: 'absolute', 
+                              top: '-10%', left: '-10%', right: '-10%', bottom: '-10%', 
+                              backgroundImage: `url(${photo.image_url})`, 
+                              backgroundSize: 'cover', 
+                              backgroundPosition: 'center', 
+                              filter: 'blur(20px)', 
+                              opacity: 0.6, 
+                              zIndex: 0 
+                            }} 
+                          />
+                          
+                          {/* Foreground Image */}
                           <img 
                             src={photo.image_url} 
                             alt={`Gallery slide ${idx}`} 
                             className="post-media-img" 
+                            style={{ position: 'relative', zIndex: 1 }}
                           />
                         </div>
                       ))}
@@ -1307,8 +1324,27 @@ const Community = () => {
                     ></iframe>
                   </div>
                 ) : coverImage ? (
-                  <div className="instagram-post-media">
-                    <img src={coverImage} alt={item.title} className="post-media-img" />
+                  <div className="instagram-post-media" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                    {/* Blurred Background Layer */}
+                    <div 
+                      style={{ 
+                        position: 'absolute', 
+                        top: '-10%', left: '-10%', right: '-10%', bottom: '-10%', 
+                        backgroundImage: `url(${coverImage})`, 
+                        backgroundSize: 'cover', 
+                        backgroundPosition: 'center', 
+                        filter: 'blur(20px)', 
+                        opacity: 0.6, 
+                        zIndex: 0 
+                      }} 
+                    />
+                    {/* Foreground Image */}
+                    <img 
+                      src={coverImage} 
+                      alt={item.title} 
+                      className="post-media-img" 
+                      style={{ position: 'relative', zIndex: 1 }}
+                    />
                   </div>
                 ) : null
               )}
