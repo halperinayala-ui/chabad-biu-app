@@ -35,6 +35,7 @@ const AdminRegistrants = () => {
   const [activeWhatsappMenu, setActiveWhatsappMenu] = useState<string | null>(null);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [noteText, setNoteText] = useState('');
+  const [waTemplateApproved, setWaTemplateApproved] = useState('היי {name}, איזה כיף שנרשמת לאירוע {event}! אנחנו מחכים לך.');
   
 
   useEffect(() => {
@@ -44,6 +45,9 @@ const AdminRegistrants = () => {
   const fetchData = async () => {
     if (!eventId) return;
     try {
+      const { data: settingsData } = await supabase.from('settings').select('wa_template_approved').eq('id', 1).single();
+      if (settingsData?.wa_template_approved) setWaTemplateApproved(settingsData.wa_template_approved);
+
       const { data: eventData } = await supabase
         .from('events')
         .select('title, event_date')
@@ -59,7 +63,10 @@ const AdminRegistrants = () => {
 
       const { data, error } = await supabase
         .from('registrations')
-        .select('*, profiles(id, full_name, phone, gender)')
+        .select(`
+          id, status, guest_name, guest_phone, answers, created_at, attended, admin_note,
+          profiles (id, full_name, phone)
+        `)
         .eq('event_id', eventId)
         .order('created_at', { ascending: false });
 
@@ -72,18 +79,18 @@ const AdminRegistrants = () => {
     }
   };
 
-  const updateStatus = async (id: string, status: string) => {
+  const updateStatus = async (id: string, status: 'approved' | 'rejected') => {
     try {
       const { error } = await supabase.from('registrations').update({ status }).eq('id', id);
       if (error) throw error;
+      
+      const updatedReg = registrants.find(r => r.id === id);
       setRegistrants(registrants.map(r => r.id === id ? { ...r, status } : r));
-      toast.success(status === 'approved' ? 'הרשמה אושרה!' : 'הרשמה נדחתה');
+      toast.success(status === 'approved' ? 'ההרשמה אושרה' : 'ההרשמה נדחתה');
       
       // Trigger Push Notification
-      const registration = registrants.find(r => r.id === id);
-      const targetUserId = registration?.user_id;
-      
-      if (targetUserId) {
+      if (updatedReg && updatedReg.profiles?.id) {
+        const targetUserId = updatedReg.profiles.id;
         const session = await supabase.auth.getSession();
         const token = session.data.session?.access_token;
         if (token) {
@@ -94,9 +101,9 @@ const AdminRegistrants = () => {
               'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
-              title: status === 'approved' ? 'אישור הרשמה!' : 'עדכון הרשמה',
+              title: status === 'approved' ? 'ההרשמה אושרה! 🎉' : 'עדכון הרשמה',
               body: status === 'approved' 
-                ? `הרשמתך לאירוע "${eventTitle}" אושרה בהצלחה! נשמח לראותך.`
+                ? `איזה כיף! אישרנו את הרשמתך לאירוע "${eventTitle}". נתראה!`
                 : `לצערנו, ההרשמה לאירוע "${eventTitle}" לא אושרה הפעם. נשמח לראותך באירועים הבאים!`,
               url: `https://chabad-biu-app.vercel.app/events/${eventId}`,
               targetUserId: targetUserId
@@ -135,11 +142,13 @@ const AdminRegistrants = () => {
 
   const getWhatsappLink = (phone: string, template: string, name: string) => {
     let msg = '';
-    if (template === 'approved') msg = `היי ${name}, איזה כיף שנרשמת! אנחנו מחכים לך.`;
-    else if (template === 'verify') msg = `היי ${name}, ראיתי שנרשמת אלינו. האם את/ה סטודנט/ית בבר אילן?`;
-    else if (template === 'rejected') msg = `היי ${name}, לצערנו ההרשמה לאירוע זה כבר נסגרה. נשמח לראותך בפעמים הבאות!`;
-    const cleaned = phone.replace(/-/g, '').replace(/^0/, '972');
-    return `https://wa.me/${cleaned}?text=${encodeURIComponent(msg)}`;
+    if (template === 'approved') msg = waTemplateApproved.replace(/{name}/g, name).replace(/{event}/g, eventTitle);
+    else if (template === 'verify') msg = `היי ${name}, ראיתי שנרשמת אלינו לאירוע ${eventTitle}. האם את/ה סטודנט/ית בבר אילן?`;
+    else if (template === 'rejected') msg = `היי ${name}, לצערנו ההרשמה לאירוע ${eventTitle} כבר נסגרה. נשמח לראותך בפעמים הבאות!`;
+    
+    let cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) cleanPhone = '972' + cleanPhone.slice(1);
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
   };
 
   const formatDate = (dateStr: string) => {

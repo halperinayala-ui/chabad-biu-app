@@ -180,6 +180,33 @@ const About = () => {
               </svg>
               @chabadbacampus_biu
             </a>
+
+            <button
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: 'חב״ד בקמפוס בר אילן',
+                    text: 'הורידו את האפליקציה החדשה של חב״ד בקמפוס והישארו מעודכנים בכל הפעילויות והאירועים!',
+                    url: window.location.origin
+                  }).catch(console.error);
+                } else {
+                  navigator.clipboard.writeText(window.location.origin);
+                  alert('קישור הועתק!');
+                }
+              }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.75rem',
+                padding: '0.8rem 1.2rem', borderRadius: 'var(--radius)',
+                background: 'rgba(73, 38, 145, 0.08)',
+                border: '1px solid rgba(73, 38, 145, 0.2)',
+                color: 'var(--primary)', fontWeight: 600, fontSize: '0.95rem',
+                textDecoration: 'none', cursor: 'pointer',
+                justifyContent: 'center', marginTop: '0.5rem'
+              }}
+            >
+              <ExternalLink size={18} />
+              שתפו את האפליקציה עם חברים
+            </button>
           </div>
         </motion.div>
 

@@ -18,6 +18,7 @@ const AdminSettings = () => {
   
   const [newCategory, setNewCategory] = useState('');
   const [newTag, setNewTag] = useState('');
+  const [waTemplateApproved, setWaTemplateApproved] = useState('היי {name}! ההרשמה שלך לאירוע {event} אושרה בהצלחה! מחכים לראותך! צוות חב"ד בקמפוס');
 
   useEffect(() => {
     // Basic protection
@@ -41,6 +42,7 @@ const AdminSettings = () => {
       if (data) {
         setCategories(data.categories || []);
         setTags(data.tags || []);
+        if (data.wa_template_approved) setWaTemplateApproved(data.wa_template_approved);
       }
     } catch (err) {
       console.error('Error fetching settings:', err);
@@ -54,7 +56,13 @@ const AdminSettings = () => {
     try {
       const { error } = await supabase
         .from('settings')
-        .upsert({ id: 1, categories, tags, updated_at: new Date().toISOString() });
+        .upsert({ 
+          id: 1, 
+          categories, 
+          tags, 
+          wa_template_approved: waTemplateApproved,
+          updated_at: new Date().toISOString() 
+        });
 
       if (error) throw error;
       toast.success('ההגדרות נשמרו בהצלחה!');
@@ -173,6 +181,26 @@ const AdminSettings = () => {
               ))}
               {tags.length === 0 && <div className="empty-state">אין תגיות. הוסף אחת למעלה.</div>}
             </div>
+          </div>
+        </div>
+
+        {/* WhatsApp Templates Management */}
+        <div className="settings-section" style={{ marginTop: '2rem' }}>
+          <h3>תבניות הודעות בוואטסאפ</h3>
+          <p className="settings-desc">כאן תוכלו לערוך את נוסח ההודעה שתישלח כשאתם לוחצים על אייקון הוואטסאפ בטבלת הנרשמים.</p>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '1rem' }}>
+            <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+              תבנית להודעת "אישור הרשמה" (השתמשו ב- <code style={{color:'var(--primary)'}}>{"{name}"}</code> לשם הסטודנט וב- <code style={{color:'var(--primary)'}}>{"{event}"}</code> לשם האירוע)
+            </label>
+            <textarea
+              className="form-control"
+              rows={4}
+              value={waTemplateApproved}
+              onChange={(e) => setWaTemplateApproved(e.target.value)}
+              style={{ resize: 'vertical' }}
+              placeholder='היי {name}! רצינו לעדכן שההרשמה שלך לאירוע {event} אושרה!...'
+            />
           </div>
         </div>
       </div>
