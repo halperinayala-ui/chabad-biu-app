@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Search, UserCircle, Loader2 } from 'lucide-react';
+import { ArrowRight, Search, UserCircle, Loader2, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import './AdminCRM.css';
@@ -15,6 +15,7 @@ interface StudentSummary {
   attended_count: number;
   absent_count: number;
   last_event: string;
+  has_push: boolean;
 }
 
 const AdminCRM = () => {
@@ -44,6 +45,10 @@ const AdminCRM = () => {
 
       if (error) throw error;
 
+      // Fetch push subscriptions
+      const { data: pushSubs } = await supabase.from('push_subscriptions').select('user_id');
+      const pushUserIds = new Set(pushSubs?.map(p => p.user_id) || []);
+
       const summary: StudentSummary[] = (profiles || [])
         .filter((p: any) => p.registrations?.length > 0)
         .map((p: any) => {
@@ -61,6 +66,7 @@ const AdminCRM = () => {
             attended_count: attended,
             absent_count: absent,
             last_event: sorted[0]?.events?.title || '—',
+            has_push: pushUserIds.has(p.id)
           };
         });
 
@@ -129,7 +135,10 @@ const AdminCRM = () => {
                   {student.full_name.charAt(0)}
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '700' }}>{student.full_name}</h3>
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    {student.full_name}
+                    {student.has_push && <Bell size={14} color="#f39c12" fill="#f39c12" title="התראות פוש מופעלות" />}
+                  </h3>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }} dir="ltr">{student.phone}</p>
                   {student.heb_birthday && (
                     <span style={{ fontSize: '0.73rem', background: 'rgba(73, 38, 145, 0.08)', color: 'var(--primary)', padding: '0.15rem 0.4rem', borderRadius: '10px', marginTop: '0.25rem', display: 'inline-block', fontWeight: 600 }}>🎂 {student.heb_birthday}</span>

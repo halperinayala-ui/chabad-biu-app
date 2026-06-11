@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Loader2, CheckCircle2, XCircle, Clock, MessageCircle } from 'lucide-react';
+import { ArrowRight, Loader2, CheckCircle2, XCircle, Clock, MessageCircle, Bell } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import './AdminCRM.css';
@@ -11,6 +11,7 @@ const AdminStudentProfile = () => {
   const [profile, setProfile] = useState<any>(null);
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasPush, setHasPush] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -28,6 +29,9 @@ const AdminStudentProfile = () => {
         .order('created_at', { ascending: false });
 
       setRegistrations(regs || []);
+
+      const { data: pushData } = await supabase.from('push_subscriptions').select('id').eq('user_id', studentId);
+      setHasPush(pushData && pushData.length > 0);
     } catch (err) {
       console.error(err);
     } finally {
@@ -60,7 +64,10 @@ const AdminStudentProfile = () => {
             <div className="student-avatar" style={{ width: '80px', height: '80px', fontSize: '2rem', margin: '0 auto 1rem', background: profile.gender === 'f' ? 'linear-gradient(135deg, #e91e8c, #ff6b6b)' : 'linear-gradient(135deg, var(--primary), var(--secondary))' }}>
               {(profile.full_name || '?').charAt(0)}
             </div>
-            <h2 style={{ margin: 0 }}>{profile.full_name || 'לא צוין'}</h2>
+            <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+              {profile.full_name || 'לא צוין'}
+              {hasPush && <Bell size={18} color="#f39c12" fill="#f39c12" title="התראות פוש מופעלות" />}
+            </h2>
             <p style={{ margin: '0.3rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }} dir="ltr">{profile.phone || '—'}</p>
             {profile.heb_birthday && (
               <p style={{ margin: '0.5rem 0 0', color: 'var(--primary)', fontSize: '0.95rem', fontWeight: 600 }}>🎂 יום הולדת עברי: {profile.heb_birthday}</p>
