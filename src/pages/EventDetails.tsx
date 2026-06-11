@@ -108,7 +108,10 @@ const EventDetails = () => {
         }
       });
 
-      const isRestrictedGuest = !user && Array.isArray(event.audience) && event.audience.length > 0;
+      const eventAud = Array.isArray(event.audience) ? event.audience : [];
+      const isEffectivelyOpen = eventAud.length === 0 || (eventAud.includes('student') && eventAud.includes('graduate') && eventAud.includes('other'));
+
+      const isRestrictedGuest = !user && !isEffectivelyOpen;
       const requiresManualApproval = event.requires_approval || isRestrictedGuest;
       const payload: any = {
         event_id: event.id,
@@ -120,8 +123,8 @@ const EventDetails = () => {
         payload.user_id = user.id;
       } else {
         // Guest validation
-        if (Array.isArray(event.audience) && event.audience.length > 0) {
-          if (!guestStatus || !event.audience.includes(guestStatus)) {
+        if (!isEffectivelyOpen) {
+          if (!guestStatus || !eventAud.includes(guestStatus)) {
             toast.error('האירוע אינו מיועד לקבוצת היעד שסימנת. לא ניתן להשלים הרשמה.');
             setSubmitting(false);
             return;
@@ -268,13 +271,15 @@ const EventDetails = () => {
   const renderRegistrationSidebar = () => {
     // Check audience restriction
     const aud: string[] = (event.audience as any) || [];
+    const isEffectivelyOpen = aud.length === 0 || (aud.includes('student') && aud.includes('graduate') && aud.includes('other'));
     const userStatus = (profile as any)?.user_status || null;
     let audienceBlocked = false;
     let audienceMsg = '';
-    if (aud.length > 0) {
+    
+    if (!isEffectivelyOpen) {
       if (!user) {
         audienceBlocked = false;
-        audienceMsg = 'אירוע זה מיועד לקהל יעד מוגדר. אנא ציינו את הסטטוס שלכם בטופס.';
+        audienceMsg = 'אירוע זה מיועד לקהל יעד מוגדר. אנא ציינו את הסטטוס שלכם בטופס ההרשמה למטה.';
       } else if (!profile?.is_admin) {
         const isVipAllowed = profile?.is_vip && aud.includes('vip');
         if (!userStatus || (!aud.includes(userStatus) && !isVipAllowed)) {
