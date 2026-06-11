@@ -1587,7 +1587,7 @@ const Community = () => {
           imageSrc={composerPreviews[croppingFileIndex]}
           onCropDone={handleCropDone}
           onCancel={() => setCroppingFileIndex(null)}
-          aspectRatio={1} /* Or 4/5 if they prefer */
+          aspectRatio={4/5}
         />
       )}
     </div>

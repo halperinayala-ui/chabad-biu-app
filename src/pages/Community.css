@@ -1200,7 +1200,7 @@
 .instagram-post-media {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
   background: #fdfdfd;
   cursor: pointer;
@@ -1523,7 +1523,7 @@
 .instagram-post-media.inline-carousel {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
   background: #000;
   cursor: default;
