@@ -90,14 +90,14 @@ const Home = () => {
   const firstName = profile?.full_name ? profile.full_name.split(' ')[0] : null;
 
   return (
-    <div style={{ paddingTop: '0.25rem' }}>
+    <div style={{ paddingTop: '0' }}>
 
       {/* Greeting */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        style={{ marginBottom: '1.5rem' }}
+        style={{ marginBottom: '1.5rem', paddingTop: '0.25rem' }}
       >
         {user && firstName ? (
           <div>
@@ -105,7 +105,7 @@ const Home = () => {
               שלום, {firstName} 👋
             </p>
             <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.2 }}>
-              מה קורה היום בחב״ד?
+              מה קורה בחב״ד בקמפוס?
             </h1>
           </div>
         ) : (
