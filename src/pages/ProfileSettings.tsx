@@ -152,6 +152,14 @@ const ProfileSettings = () => {
     transition: 'all 0.2s',
   });
 
+  const handleDeleteAccount = () => {
+    if (window.confirm("האם את/ה בטוח/ה שברצונך למחוק את החשבון לצמיתות? כל הנתונים שלך, כולל היסטוריית הרשמות, יימחקו. פעולה זו אינה ניתנת לביטול.")) {
+      const supportPhone = '972501234567'; // Update with actual support phone if known, or generic format
+      const message = encodeURIComponent(`שלום, אבקש למחוק את החשבון שלי מהאפליקציה לצמיתות. השם שלי: ${fullName || ''}`);
+      window.open(`https://wa.me/${supportPhone}?text=${message}`, '_blank');
+    }
+  };
+
   return (
     <motion.div className="profile-page" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <div className="profile-card glass">
@@ -315,8 +323,24 @@ const ProfileSettings = () => {
             <Link to="/privacy" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>תקנון ופרטיות</Link>
             <Link to="/accessibility" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>הצהרת נגישות</Link>
           </div>
-          <button className="btn btn-outline logout-btn" onClick={handleLogout}>
+          <button className="btn btn-outline logout-btn" onClick={handleLogout} style={{ marginBottom: '1rem' }}>
             <LogOut size={18} /> התנתקות
+          </button>
+          
+          <button 
+            className="btn" 
+            onClick={handleDeleteAccount}
+            style={{ 
+              background: 'transparent', 
+              color: '#e74c3c', 
+              border: 'none', 
+              fontSize: '0.85rem', 
+              textDecoration: 'underline', 
+              padding: '0.5rem',
+              cursor: 'pointer'
+            }}
+          >
+            מחיקת חשבון לצמיתות
           </button>
         </div>
       </div>
