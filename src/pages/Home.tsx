@@ -97,12 +97,12 @@ const Home = () => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        style={{ marginBottom: '1.5rem', paddingTop: '1.25rem' }}
+        style={{ marginBottom: '1.5rem' }}
       >
         {user && firstName ? (
           <div>
-            <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>
-              שלום, {firstName} 👋
+            <p style={{ fontSize: '0.95rem', marginBottom: '0.2rem', fontWeight: 600 }}>
+              <span style={{ color: 'var(--secondary)' }}>שלום, {firstName}</span> 👋
             </p>
             <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.2 }}>
               מה קורה בחב״ד בקמפוס?
@@ -131,7 +131,7 @@ const Home = () => {
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                 <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                  האירוע הבא שלנו 🎉
+                  <span style={{ color: 'var(--secondary)' }}>האירוע הבא</span> שלנו 🎉
                 </h2>
               </div>
 
@@ -238,7 +238,7 @@ const Home = () => {
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                 <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                  מהקהילה שלנו 👥
+                  מהקהילה שלנו <span style={{ color: 'var(--secondary)' }}>👥</span>
                 </h2>
                 <Link
                   to="/community"
@@ -281,7 +281,7 @@ const Home = () => {
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                 <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                  אירועים קרובים 📅
+                  <span style={{ color: 'var(--secondary)' }}>אירועים</span> קרובים 📅
                 </h2>
                 <Link
                   to="/events"

@@ -54,7 +54,7 @@ function App() {
         </div>
 
         <Navbar />
-        <main className="container" style={{ marginTop: '60px', minHeight: 'calc(100vh - 60px)', paddingBottom: '80px', position: 'relative', zIndex: 1 }}>
+        <main className="container" style={{ marginTop: '60px', minHeight: 'calc(100vh - 60px)', paddingBottom: '80px', paddingTop: '1.25rem', position: 'relative', zIndex: 1 }}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />

@@ -68,7 +68,7 @@ const Events = () => {
       >
         <div style={{ marginBottom: '1.5rem' }}>
           <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-primary)', marginBottom: '1rem' }}>
-            אירועים קרובים 📅
+            <span style={{ color: 'var(--secondary)' }}>אירועים</span> קרובים 📅
           </h1>
           <div style={{ display: 'flex', gap: '0.6rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none' }}>
             <button

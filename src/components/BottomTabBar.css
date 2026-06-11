@@ -66,6 +66,10 @@
   font-weight: 700;
 }
 
+.tab-item.active .tab-icon-wrap svg {
+  filter: drop-shadow(0 0 4px rgba(221, 103, 85, 0.3));
+}
+
 /* Admin tab special styling */
 .tab-item.admin-tab {
   color: var(--text-secondary);
