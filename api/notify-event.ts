@@ -35,15 +35,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Verify authentication - check if the user sending this request is an admin
     const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      return res.status(401).json({ error: 'Missing authorization header' });
-    }
+    let isSenderAdmin = false;
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user } } = await supabase.auth.getUser(token);
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', user.id)
+          .single();
+        isSenderAdmin = profile?.is_admin === true;
+      }
     }
 
     // Check if the sender is asking to notify admins
@@ -51,14 +56,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const isSendingToAdmins = targetRole === 'admin';
 
     // Verify user is an admin, UNLESS they are sending a notification explicitly to admins
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile?.is_admin && !isSendingToAdmins) {
-      return res.status(403).json({ error: 'Forbidden: Admin access required' });
+    if (!isSenderAdmin && !isSendingToAdmins) {
+      return res.status(403).json({ error: 'Forbidden: Admin access required to send to users' });
     }
 
     // Get push subscriptions from the database
