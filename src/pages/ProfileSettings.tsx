@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { User, Phone, Save, LogOut, RefreshCw, CalendarDays, GraduationCap, BookOpen } from 'lucide-react';
@@ -311,6 +311,10 @@ const ProfileSettings = () => {
         </form>
 
         <div className="profile-footer">
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
+            <Link to="/privacy" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>תקנון ופרטיות</Link>
+            <Link to="/accessibility" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>הצהרת נגישות</Link>
+          </div>
           <button className="btn btn-outline logout-btn" onClick={handleLogout}>
             <LogOut size={18} /> התנתקות
           </button>

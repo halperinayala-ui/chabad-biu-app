@@ -61,6 +61,8 @@ function App() {
             <Route path="/events" element={<Events />} />
             <Route path="/community" element={<Community />} />
             <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/accessibility" element={<Accessibility />} />
             <Route path="/events/:id" element={<EventDetails />} />
             <Route path="/event/view/:id" element={<EventDetails />} />
             
