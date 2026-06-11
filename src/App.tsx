@@ -16,6 +16,8 @@ import AdminMediaManager from './pages/admin/AdminMediaManager';
 import Auth from './pages/Auth';
 import ProfileSettings from './pages/ProfileSettings';
 import Community from './pages/Community';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import Accessibility from './pages/Accessibility';
 import InstallBanner from './components/InstallBanner';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
