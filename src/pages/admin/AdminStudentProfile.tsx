@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Loader2, CheckCircle2, XCircle, Clock, MessageCircle, Bell } from 'lucide-react';
+import { ArrowRight, Loader2, CheckCircle2, XCircle, Clock, MessageCircle, Bell, Star, Ban, ShieldAlert } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import './AdminCRM.css';
@@ -54,12 +54,34 @@ const AdminStudentProfile = () => {
     try {
       const { error } = await supabase.from('profiles').update({ admin_notes: adminNotes }).eq('id', studentId);
       if (error) throw error;
-      // Optional: show a small success toast
     } catch (err) {
       console.error('Failed to save notes', err);
       alert('שגיאה בשמירת ההערות');
     } finally {
       setSavingNotes(false);
+    }
+  };
+
+  const toggleVip = async () => {
+    try {
+      const newStatus = !profile.is_vip;
+      const { error } = await supabase.from('profiles').update({ is_vip: newStatus }).eq('id', studentId);
+      if (error) throw error;
+      setProfile({ ...profile, is_vip: newStatus });
+    } catch (err) {
+      alert('שגיאה בעדכון סטטוס VIP');
+    }
+  };
+
+  const toggleBlock = async () => {
+    if (!profile.is_blocked && !window.confirm("לחסום משתמש זה? הוא לא יוכל לראות אירועים ופוסטים (חסימה שקטה).")) return;
+    try {
+      const newStatus = !profile.is_blocked;
+      const { error } = await supabase.from('profiles').update({ is_blocked: newStatus }).eq('id', studentId);
+      if (error) throw error;
+      setProfile({ ...profile, is_blocked: newStatus });
+    } catch (err) {
+      alert('שגיאה בעדכון סטטוס חסימה');
     }
   };
 
@@ -135,6 +157,44 @@ const AdminStudentProfile = () => {
             >
               {savingNotes ? <Loader2 size={18} className="spinner" /> : <CheckCircle2 size={18} />}
               שמור הערות
+            </button>
+          </div>
+
+          <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <h3 style={{ fontSize: '1rem', marginBottom: '0', color: 'var(--text-primary)' }}><ShieldAlert size={18} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '0.3rem' }}/> פעולות ניהול מתקדמות</h3>
+            
+            <button 
+              onClick={toggleVip}
+              className="btn btn-outline"
+              style={{ 
+                width: '100%', 
+                display: 'flex', 
+                justifyContent: 'center', 
+                gap: '0.5rem',
+                borderColor: profile.is_vip ? '#f39c12' : undefined,
+                color: profile.is_vip ? '#f39c12' : undefined,
+                background: profile.is_vip ? 'rgba(243, 156, 18, 0.1)' : undefined
+              }}
+            >
+              <Star size={18} fill={profile.is_vip ? '#f39c12' : 'none'} />
+              {profile.is_vip ? 'בטל סטטוס VIP' : 'סמן כ-VIP'}
+            </button>
+
+            <button 
+              onClick={toggleBlock}
+              className="btn btn-outline"
+              style={{ 
+                width: '100%', 
+                display: 'flex', 
+                justifyContent: 'center', 
+                gap: '0.5rem',
+                borderColor: profile.is_blocked ? '#e74c3c' : undefined,
+                color: profile.is_blocked ? '#e74c3c' : '#e74c3c',
+                background: profile.is_blocked ? 'rgba(231, 76, 60, 0.1)' : undefined
+              }}
+            >
+              <Ban size={18} />
+              {profile.is_blocked ? 'שחרר חסימה שקטה' : 'חסום משתמש (שקט)'}
             </button>
           </div>
         </div>

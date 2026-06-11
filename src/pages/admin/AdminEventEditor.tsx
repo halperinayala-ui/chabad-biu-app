@@ -512,6 +512,11 @@ const AdminEventEditor = () => {
                   {otherDetails.length > 0 && <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{otherDetails.join(', ')}</div>}
                 </div>
               </label>
+              {/* VIP */}
+              <label style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', cursor: 'pointer', padding: '0.5rem 0.75rem', borderRadius: '8px', background: audience.includes('vip') ? 'rgba(39,174,96,0.12)' : 'transparent', transition: 'background 0.2s' }}>
+                <input type="checkbox" checked={audience.includes('vip')} onChange={e => setAudience(prev => e.target.checked ? [...prev, 'vip'] : prev.filter(x => x !== 'vip'))} style={{ width: '18px', height: '18px', accentColor: '#27ae60' }} />
+                <div><strong>⭐ VIP (קהל מסומן)</strong></div>
+              </label>
             </div>
             {audience.length === 0 && (
               <p style={{ marginTop: '0.6rem', fontSize: '0.8rem', color: '#27ae60', fontWeight: 600 }}>✅ כרגע: האירוע מוצג לכולם</p>

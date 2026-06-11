@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Search, UserCircle, Loader2, Bell } from 'lucide-react';
+import { ArrowRight, Search, UserCircle, Loader2, Bell, Star, Ban } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import './AdminCRM.css';
@@ -135,9 +135,11 @@ const AdminCRM = () => {
                   {student.full_name.charAt(0)}
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                     {student.full_name}
                     {student.has_push && <Bell size={14} color="#f39c12" fill="#f39c12" title="התראות פוש מופעלות" />}
+                    {student.is_vip && <Star size={14} color="#f39c12" fill="#f39c12" title="משתמש VIP" />}
+                    {student.is_blocked && <Ban size={14} color="#e74c3c" title="משתמש חסום (חסימה שקטה)" />}
                   </h3>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }} dir="ltr">{student.phone}</p>
                   {student.heb_birthday && (

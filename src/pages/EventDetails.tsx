@@ -275,11 +275,14 @@ const EventDetails = () => {
       if (!user) {
         audienceBlocked = false;
         audienceMsg = 'אירוע זה מיועד לקהל יעד מוגדר. אנא ציינו את הסטטוס שלכם בטופס.';
-      } else if (!profile?.is_admin && (!userStatus || !aud.includes(userStatus))) {
-        audienceBlocked = true;
-        const labels: Record<string, string> = { student: 'סטודנטים', graduate: 'בוגרים', other: 'אחרים' };
-        const groups = aud.map(a => labels[a] || a).join(' ו');
-        audienceMsg = `אירוע זה מיועד ל${groups} בלבד. לשינוי הסטטוס שלך כנסו לאזור האישי.`;
+      } else if (!profile?.is_admin) {
+        const isVipAllowed = profile?.is_vip && aud.includes('vip');
+        if (!userStatus || (!aud.includes(userStatus) && !isVipAllowed)) {
+          audienceBlocked = true;
+          const labels: Record<string, string> = { student: 'סטודנטים', graduate: 'בוגרים', other: 'אחרים', vip: 'VIP' };
+          const groups = aud.map(a => labels[a] || a).filter(a => a !== 'VIP').join(' ו');
+          audienceMsg = `אירוע זה מיועד ל${groups} בלבד. לשינוי הסטטוס שלך כנסו לאזור האישי.`;
+        }
       }
     }
 

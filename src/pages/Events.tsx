@@ -33,6 +33,11 @@ const Events = () => {
   const fetchEventsAndSettings = async () => {
     const timeoutId = setTimeout(() => setLoading(false), 6000);
     try {
+      if (profile?.is_blocked) {
+        setEvents([]);
+        return;
+      }
+
       const { data: settingsData } = await supabase.from('settings').select('categories').eq('id', 1).single();
       if (settingsData?.categories) setCategories(settingsData.categories);
 

@@ -180,6 +180,13 @@ const Community = () => {
     try {
       setLoading(true);
       
+      if (profile?.is_blocked) {
+        setFeedItems([]);
+        setBirthdays([]);
+        setLoading(false);
+        return;
+      }
+
       // 1. Get current Hebrew Month for Birthday Banner
       const currentMonth = getHebrewMonth();
       setCurrentHebrewMonthName(currentMonth);
