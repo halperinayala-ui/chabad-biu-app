@@ -90,7 +90,7 @@ const Community = () => {
   const isGenericCaption = (caption: string) => {
     if (!caption) return true;
     const trimmed = caption.trim();
-    if (trimmed === 'תמונה ראשית' || trimmed === 'קאבר גלרייה' || trimmed === 'תמונת גלרייה' || trimmed === 'העלאת סטודנט') {
+    if (trimmed === 'תמונה ראשית' || trimmed === 'קאבר גלרייה' || trimmed === 'תמונת גלרייה' || trimmed === 'העלאת סטודנט' || trimmed === 'תמונה נוספה בעריכה') {
       return true;
     }
     return /^תמונה\s+\d+$/.test(trimmed);
@@ -1195,12 +1195,26 @@ const Community = () => {
                     onTouchStart={(e) => handleTouchStart(e, item.id)}
                     onTouchEnd={(e) => handleTouchEnd(e, item.id, photos.length, currentSlide)}
                   >
-                      <img 
-                        key={currentSlide}
-                        src={photos[currentSlide].image_url} 
-                        alt="Gallery slide" 
-                        className="post-media-img" 
-                      />
+                    <div 
+                      className="carousel-track" 
+                      style={{ 
+                        display: 'flex', 
+                        width: '100%', 
+                        height: '100%', 
+                        transition: 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', 
+                        transform: `translateX(${currentSlide * 100}%)` 
+                      }}
+                    >
+                      {photos.map((photo, idx) => (
+                        <div key={photo.id} style={{ flex: '0 0 100%', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                          <img 
+                            src={photo.image_url} 
+                            alt={`Gallery slide ${idx}`} 
+                            className="post-media-img" 
+                          />
+                        </div>
+                      ))}
+                    </div>
                     
                     {/* Student uploader badge on the active photo */}
                     {photos[currentSlide]?.profiles && !photos[currentSlide].profiles.is_admin && (
