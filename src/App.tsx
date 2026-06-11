@@ -1,8 +1,10 @@
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import BottomTabBar from './components/BottomTabBar';
 import Home from './pages/Home';
+import Events from './pages/Events';
+import About from './pages/About';
 import EventDetails from './pages/EventDetails';
 import AdminEventEditor from './pages/admin/AdminEventEditor';
 import AdminRegistrants from './pages/admin/AdminRegistrants';
@@ -18,7 +20,7 @@ import InstallBanner from './components/InstallBanner';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
-import './App.css'; 
+import './App.css';
 
 function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useAuth();
@@ -52,17 +54,19 @@ function App() {
         </div>
 
         <Navbar />
-        <main className="container" style={{ marginTop: '80px', minHeight: 'calc(100vh - 80px - 300px)', paddingBottom: '2rem', position: 'relative', zIndex: 1 }}>
+        <main className="container" style={{ marginTop: '60px', minHeight: 'calc(100vh - 60px)', paddingBottom: '80px', position: 'relative', zIndex: 1 }}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/events" element={<Events />} />
             <Route path="/community" element={<Community />} />
+            <Route path="/about" element={<About />} />
             <Route path="/events/:id" element={<EventDetails />} />
             <Route path="/event/view/:id" element={<EventDetails />} />
             
             {/* Protected User Routes */}
             <Route path="/profile" element={
-              <ProtectedRoute><ProfileSettings /></ProtectedRoute>
+              <ProtectedRoute showGuestView><ProfileSettings /></ProtectedRoute>
             } />
             
             {/* Protected Admin Routes */}
@@ -90,10 +94,9 @@ function App() {
             <Route path="/admin/crm/:studentId" element={
               <ProtectedRoute requireAdmin><AdminStudentProfile /></ProtectedRoute>
             } />
-            {/* We will add more routes later */}
           </Routes>
         </main>
-        <Footer />
+        <BottomTabBar />
       </div>
       </OnboardingGuard>
     </AuthProvider>

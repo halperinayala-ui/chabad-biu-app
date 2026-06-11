@@ -1,0 +1,93 @@
+.bottom-tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 65px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(73, 38, 145, 0.1);
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -4px 24px rgba(73, 38, 145, 0.08);
+}
+
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
+  padding: 8px 4px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.tab-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 28px;
+}
+
+.tab-active-dot {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.tab-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  font-family: 'Rubik', sans-serif;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab-item.active {
+  color: var(--primary);
+}
+
+.tab-item.active .tab-label {
+  font-weight: 700;
+}
+
+/* Admin tab special styling */
+.tab-item.admin-tab {
+  color: var(--text-secondary);
+}
+
+.tab-item.admin-tab.active {
+  color: var(--secondary);
+}
+
+.tab-item.admin-tab.active .tab-active-dot {
+  background: var(--secondary);
+}
+
+/* Tap feedback */
+.tab-item:active {
+  transform: scale(0.92);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .bottom-tab-bar {
+    background: rgba(18, 18, 30, 0.95);
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+}
