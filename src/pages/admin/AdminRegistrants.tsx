@@ -45,8 +45,13 @@ const AdminRegistrants = () => {
   const fetchData = async () => {
     if (!eventId) return;
     try {
-      const { data: settingsData } = await supabase.from('settings').select('wa_template_approved').eq('id', 1).single();
-      if (settingsData?.wa_template_approved) setWaTemplateApproved(settingsData.wa_template_approved);
+      try {
+        const { data: settingsData } = await supabase.from('settings').select('*').eq('id', 1).single();
+        if (settingsData?.wa_template_approved) setWaTemplateApproved(settingsData.wa_template_approved);
+      } catch (settingsErr) {
+        // Ignore settings fetch error so it doesn't break the whole page if column is missing
+        console.log('Could not fetch wa_template_approved, ignoring');
+      }
 
       const { data: eventData } = await supabase
         .from('events')
