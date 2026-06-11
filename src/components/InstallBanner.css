@@ -1,6 +1,6 @@
 .install-banner {
   position: fixed;
-  bottom: 80px; /* Above the bottom navigation */
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px)); /* Above the bottom navigation + safe area */
   left: 20px;
   right: 20px;
   background-color: white;
