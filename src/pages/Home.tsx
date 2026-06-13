@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { CalendarDays, MapPin, Clock, ChevronLeft, Users, Loader2, Megaphone } from 'lucide-react';
+import { CalendarDays, MapPin, Clock, ChevronLeft, Users, Loader2 } from 'lucide-react';
 
 interface EventData {
   id: string;
@@ -48,7 +48,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [events, setEvents] = useState<EventData[]>([]);
   const [recentPosts, setRecentPosts] = useState<CommunityPost[]>([]);
-  const [announcement, setAnnouncement] = useState<{ text: string, expiresAt: string } | null>(null);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ const Home = () => {
       const d = new Date();
       const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-      const [eventsRes, postsRes, settingsRes] = await Promise.all([
+      const [eventsRes, postsRes, announcementsRes] = await Promise.all([
         supabase
           .from('events')
           .select('id, title, event_date, event_time, location, category, description, registration_mode')
@@ -75,23 +75,15 @@ const Home = () => {
           .order('created_at', { ascending: false })
           .limit(3),
         supabase
-          .from('settings')
-          .select('announcement_text, announcement_expires_at')
-          .eq('id', 1)
-          .single(),
+          .from('announcements')
+          .select('id, text, emoji, expires_at')
+          .gte('expires_at', new Date().toISOString())
+          .order('created_at', { ascending: false })
       ]);
 
       setEvents(eventsRes.data || []);
       setRecentPosts(postsRes.data || []);
-      
-      if (settingsRes.data && settingsRes.data.announcement_text && settingsRes.data.announcement_expires_at) {
-        if (new Date(settingsRes.data.announcement_expires_at) > new Date()) {
-          setAnnouncement({
-            text: settingsRes.data.announcement_text,
-            expiresAt: settingsRes.data.announcement_expires_at
-          });
-        }
-      }
+      setAnnouncements(announcementsRes.data || []);
     } catch (err) {
       console.error('Error fetching home data:', err);
     } finally {
@@ -136,41 +128,41 @@ const Home = () => {
         </div>
       ) : (
         <>
-          {/* Announcement Card */}
-          {announcement && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              style={{
-                marginBottom: '2rem',
-                background: 'linear-gradient(135deg, rgba(243, 156, 18, 0.15) 0%, rgba(243, 156, 18, 0.05) 100%)',
-                border: '1px solid rgba(243, 156, 18, 0.3)',
-                borderRadius: '16px',
-                padding: '1.25rem',
-                display: 'flex',
-                gap: '1rem',
-                alignItems: 'flex-start',
-                backdropFilter: 'blur(10px)'
-              }}
-            >
-              <div style={{
-                background: 'rgba(243, 156, 18, 0.2)',
-                padding: '0.5rem',
-                borderRadius: '12px',
-                color: '#d35400',
-                flexShrink: 0
-              }}>
-                <Megaphone size={20} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#d35400', marginBottom: '0.2rem' }}>
-                  עדכון חשוב
-                </h3>
-                <p style={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: 1.5, whiteSpace: 'pre-wrap', fontWeight: 500 }}>
-                  {announcement.text}
-                </p>
-              </div>
-            </motion.div>
+          {/* Announcements List */}
+          {announcements.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginBottom: '2rem' }}>
+              {announcements.map((ann) => (
+                <motion.div
+                  key={ann.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(243, 156, 18, 0.12) 0%, rgba(243, 156, 18, 0.04) 100%)',
+                    border: '1px solid rgba(243, 156, 18, 0.25)',
+                    borderRadius: '16px',
+                    padding: '1rem 1.25rem',
+                    display: 'flex',
+                    gap: '1rem',
+                    alignItems: 'flex-start',
+                    backdropFilter: 'blur(10px)'
+                  }}
+                >
+                  <div style={{
+                    fontSize: '1.5rem',
+                    lineHeight: 1,
+                    flexShrink: 0,
+                    marginTop: '0.1rem'
+                  }}>
+                    {ann.emoji || '💜'}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: 1.5, whiteSpace: 'pre-wrap', fontWeight: 500, margin: 0 }}>
+                      {ann.text}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           )}
 
           {/* Next Event - Big Card */}

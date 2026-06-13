@@ -13,6 +13,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminCRM from './pages/admin/AdminCRM';
 import AdminStudentProfile from './pages/admin/AdminStudentProfile';
 import AdminMediaManager from './pages/admin/AdminMediaManager';
+import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import Auth from './pages/Auth';
 import ProfileSettings from './pages/ProfileSettings';
 import Community from './pages/Community';
@@ -91,6 +92,9 @@ function App() {
             } />
             <Route path="/admin/settings" element={
               <ProtectedRoute requireAdmin><AdminSettings /></ProtectedRoute>
+            } />
+            <Route path="/admin/announcements" element={
+              <ProtectedRoute requireAdmin><AdminAnnouncements /></ProtectedRoute>
             } />
             <Route path="/admin/crm" element={
               <ProtectedRoute requireAdmin><AdminCRM /></ProtectedRoute>
