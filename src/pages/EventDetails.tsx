@@ -324,46 +324,6 @@ const EventDetails = () => {
       );
     }
 
-    // Check if registration is closed
-    if (event.registration_deadline && new Date() > new Date(event.registration_deadline)) {
-      return (
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(231, 76, 60, 0.05)', borderRadius: '16px' }}
-        >
-          <Clock size={48} style={{ color: '#e74c3c', opacity: 0.5, margin: '0 auto 1rem', display: 'block' }} />
-          <h3 style={{ color: '#e74c3c', marginBottom: '0.5rem' }}>ההרשמה נסגרה</h3>
-          <p style={{ color: 'var(--text-secondary)' }}>{event.closed_message || 'ההרשמה לאירוע זה נסגרה. נשמח לראותכם בפעמים הבאות!'}</p>
-        </motion.div>
-      );
-    }
-
-    // Check audience restriction - show blocked banner (but don't hide the event)
-    if (audienceBlocked) {
-      return (
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          style={{ textAlign: 'center', padding: '2.5rem 1rem', background: 'rgba(231,76,60,0.05)', borderRadius: '16px', border: '1px solid rgba(231,76,60,0.15)' }}
-        >
-          <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🔒</div>
-          <h3 style={{ color: '#e74c3c', marginBottom: '0.75rem' }}>ההרשמה מוגבלת</h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{audienceMsg}</p>
-          {!user && (
-            <button className="btn btn-secondary" onClick={() => navigate('/auth')} style={{ justifyContent: 'center' }}>
-              התחברות / הרשמה
-            </button>
-          )}
-          {user && (
-            <button className="btn btn-outline" onClick={() => navigate('/profile')} style={{ justifyContent: 'center' }}>
-              עדכון פרופיל אישי
-            </button>
-          )}
-        </motion.div>
-      );
-    }
-
     // Already registered state
     if (myRegistration) {
       return (
@@ -408,6 +368,46 @@ const EventDetails = () => {
             {cancelling ? <Loader2 className="spinner" size={16} /> : <XCircle size={16} />}
             ביטול ההרשמה
           </button>
+        </motion.div>
+      );
+    }
+
+    // Check if registration is closed
+    if (event.registration_deadline && new Date() > new Date(event.registration_deadline)) {
+      return (
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(231, 76, 60, 0.05)', borderRadius: '16px' }}
+        >
+          <Clock size={48} style={{ color: '#e74c3c', opacity: 0.5, margin: '0 auto 1rem', display: 'block' }} />
+          <h3 style={{ color: '#e74c3c', marginBottom: '0.5rem' }}>ההרשמה נסגרה</h3>
+          <p style={{ color: 'var(--text-secondary)' }}>{event.closed_message || 'ההרשמה לאירוע זה נסגרה. נשמח לראותכם בפעמים הבאות!'}</p>
+        </motion.div>
+      );
+    }
+
+    // Check audience restriction - show blocked banner (but don't hide the event)
+    if (audienceBlocked) {
+      return (
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          style={{ textAlign: 'center', padding: '2.5rem 1rem', background: 'rgba(231,76,60,0.05)', borderRadius: '16px', border: '1px solid rgba(231,76,60,0.15)' }}
+        >
+          <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🔒</div>
+          <h3 style={{ color: '#e74c3c', marginBottom: '0.75rem' }}>ההרשמה מוגבלת</h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{audienceMsg}</p>
+          {!user && (
+            <button className="btn btn-secondary" onClick={() => navigate('/auth')} style={{ justifyContent: 'center' }}>
+              התחברות / הרשמה
+            </button>
+          )}
+          {user && (
+            <button className="btn btn-outline" onClick={() => navigate('/profile')} style={{ justifyContent: 'center' }}>
+              עדכון פרופיל אישי
+            </button>
+          )}
         </motion.div>
       );
     }
