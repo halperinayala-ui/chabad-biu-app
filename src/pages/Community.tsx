@@ -641,6 +641,19 @@ const Community = () => {
           toast.success('פוסט חדש פורסם בהצלחה!');
         }
 
+        // Trigger Inbox Notification (via RPC)
+        try {
+          await supabase.rpc('notify_users', {
+            p_title: 'פוסט חדש בקהילה!',
+            p_body: mediaOptionalTitle.trim() || mediaTitle.trim() || 'כנסו לראות מה חדש',
+            p_link: '/community',
+            p_type: 'post',
+            p_audience: [] // Send to everyone
+          });
+        } catch (inboxErr) {
+          console.error("Could not trigger inbox notification", inboxErr);
+        }
+
         // Trigger Push Notification for new post
         try {
           const session = await supabase.auth.getSession();

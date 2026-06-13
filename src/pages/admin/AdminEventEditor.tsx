@@ -207,6 +207,19 @@ const AdminEventEditor = () => {
         if (error) throw error;
         toast.success('האירוע נוצר בהצלחה!');
         
+        // Trigger Inbox Notifications (via RPC)
+        try {
+          await supabase.rpc('notify_users', {
+            p_title: 'אירוע חדש בקהילה!',
+            p_body: `האירוע "${payload.title}" נוסף. היכנסו לפרטים!`,
+            p_link: data ? `/events/${data.id}` : '/',
+            p_type: 'event',
+            p_audience: payload.audience || []
+          });
+        } catch (inboxErr) {
+          console.error("Could not trigger inbox notification", inboxErr);
+        }
+
         // Trigger Push Notification
         try {
           const session = await supabase.auth.getSession();
