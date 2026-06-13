@@ -238,9 +238,9 @@ const AdminRegistrants = () => {
             <thead>
               <tr>
                 <th>שם מלא</th>
+                <th>סטטוס</th>
                 <th>נוכחות</th>
                 <th>פעולות</th>
-                <th>סטטוס</th>
                 <th>טלפון</th>
                 <th>הערה</th>
                 <th>תשובות</th>
@@ -259,22 +259,38 @@ const AdminRegistrants = () => {
                     </button>
                   </td>
 
+                  {/* סטטוס */}
+                  <td>
+                    <span className={`status-badge status-${reg.status}`}>
+                      {reg.status === 'pending' && <><Clock size={14} /> ממתין</>}
+                      {reg.status === 'approved' && <><CheckCircle size={14} /> מאושר</>}
+                      {reg.status === 'rejected' && <><XCircle size={14} /> נדחה</>}
+                      {reg.status === 'rsvp' && <><CheckCircle size={14} /> מגיע/ה</>}
+                    </span>
+                    {reg.status === 'pending' && (
+                      <div className="approval-actions" style={{ marginTop: '0.4rem' }}>
+                        <button className="icon-btn approve-btn" title="אשר" onClick={() => updateStatus(reg.id, 'approved')}><UserCheck size={16} /></button>
+                        <button className="icon-btn reject-btn" title="דחה" onClick={() => updateStatus(reg.id, 'rejected')}><XCircle size={16} /></button>
+                      </div>
+                    )}
+                  </td>
+
                   {/* נוכחות */}
                   <td>
-                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <div style={{ display: 'flex', gap: '0.25rem' }}>
                       <button
                         title="היה"
                         onClick={() => markAttendance(reg.id, reg.attended === true ? null : true)}
-                        style={{ width: '34px', height: '34px', borderRadius: '50%', border: '2px solid', borderColor: reg.attended === true ? '#2ecc71' : '#ddd', background: reg.attended === true ? '#2ecc71' : 'white', color: reg.attended === true ? 'white' : '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                        style={{ width: '28px', height: '28px', borderRadius: '50%', border: '2px solid', borderColor: reg.attended === true ? '#2ecc71' : '#ddd', background: reg.attended === true ? '#2ecc71' : 'white', color: reg.attended === true ? 'white' : '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
                       >
-                        <Check size={16} />
+                        <Check size={14} />
                       </button>
                       <button
                         title="לא היה"
                         onClick={() => markAttendance(reg.id, reg.attended === false ? null : false)}
-                        style={{ width: '34px', height: '34px', borderRadius: '50%', border: '2px solid', borderColor: reg.attended === false ? '#e74c3c' : '#ddd', background: reg.attended === false ? '#e74c3c' : 'white', color: reg.attended === false ? 'white' : '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                        style={{ width: '28px', height: '28px', borderRadius: '50%', border: '2px solid', borderColor: reg.attended === false ? '#e74c3c' : '#ddd', background: reg.attended === false ? '#e74c3c' : 'white', color: reg.attended === false ? 'white' : '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
                       >
-                        <XIcon size={16} />
+                        <XIcon size={14} />
                       </button>
                     </div>
                   </td>
@@ -294,22 +310,6 @@ const AdminRegistrants = () => {
                         </div>
                       )}
                     </div>
-                  </td>
-
-                  {/* סטטוס */}
-                  <td>
-                    <span className={`status-badge status-${reg.status}`}>
-                      {reg.status === 'pending' && <><Clock size={14} /> ממתין</>}
-                      {reg.status === 'approved' && <><CheckCircle size={14} /> מאושר</>}
-                      {reg.status === 'rejected' && <><XCircle size={14} /> נדחה</>}
-                      {reg.status === 'rsvp' && <><CheckCircle size={14} /> מגיע/ה</>}
-                    </span>
-                    {reg.status === 'pending' && (
-                      <div className="approval-actions" style={{ marginTop: '0.4rem' }}>
-                        <button className="icon-btn approve-btn" title="אשר" onClick={() => updateStatus(reg.id, 'approved')}><UserCheck size={16} /></button>
-                        <button className="icon-btn reject-btn" title="דחה" onClick={() => updateStatus(reg.id, 'rejected')}><XCircle size={16} /></button>
-                      </div>
-                    )}
                   </td>
 
                   {/* טלפון */}
