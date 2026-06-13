@@ -19,6 +19,9 @@ const AdminSettings = () => {
   const [newCategory, setNewCategory] = useState('');
   const [newTag, setNewTag] = useState('');
   const [waTemplateApproved, setWaTemplateApproved] = useState('היי {name}! ההרשמה שלך לאירוע {event} אושרה בהצלחה! מחכים לראותך! צוות חב"ד בקמפוס');
+  const [announcementText, setAnnouncementText] = useState('');
+  const [announcementExpiresAt, setAnnouncementExpiresAt] = useState('');
+  const [sendPush, setSendPush] = useState(false);
 
   useEffect(() => {
     // Basic protection
@@ -43,6 +46,14 @@ const AdminSettings = () => {
         setCategories(data.categories || []);
         setTags(data.tags || []);
         if (data.wa_template_approved) setWaTemplateApproved(data.wa_template_approved);
+        if (data.announcement_text) setAnnouncementText(data.announcement_text);
+        
+        // Convert ISO string to format suitable for datetime-local input
+        if (data.announcement_expires_at) {
+          const date = new Date(data.announcement_expires_at);
+          date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+          setAnnouncementExpiresAt(date.toISOString().slice(0, 16));
+        }
       }
     } catch (err) {
       console.error('Error fetching settings:', err);
@@ -61,11 +72,32 @@ const AdminSettings = () => {
           categories, 
           tags, 
           wa_template_approved: waTemplateApproved,
+          announcement_text: announcementText,
+          announcement_expires_at: announcementExpiresAt ? new Date(announcementExpiresAt).toISOString() : null,
           updated_at: new Date().toISOString() 
         });
 
       if (error) throw error;
       toast.success('ההגדרות נשמרו בהצלחה!');
+
+      // Send push notification if requested
+      if (sendPush && announcementText) {
+        const session = await supabase.auth.getSession();
+        const token = session.data.session?.access_token;
+        if (token) {
+          fetch('/api/notify-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({
+              title: 'הודעה חשובה 📢',
+              body: announcementText,
+              url: window.location.origin
+            })
+          }).catch(e => console.error("Push failed", e));
+          toast.success('הודעת פוש נשלחה!');
+          setSendPush(false); // Reset checkbox
+        }
+      }
     } catch (err: any) {
       console.error('Error saving settings:', err);
       toast.error('שגיאה בשמירת הגדרות: ' + err.message);
@@ -201,6 +233,64 @@ const AdminSettings = () => {
               style={{ resize: 'vertical' }}
               placeholder='היי {name}! רצינו לעדכן שההרשמה שלך לאירוע {event} אושרה!...'
             />
+          </div>
+        </div>
+
+        {/* Announcements Management */}
+        <div className="settings-section" style={{ marginTop: '2rem', border: '1px solid var(--primary)', background: 'rgba(73, 38, 145, 0.03)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h3>הודעות כלליות בעמוד הבית 📢</h3>
+            <button 
+              className="btn btn-outline" 
+              onClick={() => { setAnnouncementText(''); setAnnouncementExpiresAt(''); }}
+              style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem' }}
+            >
+              נקה הודעה
+            </button>
+          </div>
+          <p className="settings-desc">הודעה זו תוצג בולטת בעמוד הבית עד תאריך ושעת התפוגה שתגדירו.</p>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+            <div>
+              <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: '0.4rem' }}>
+                תוכן ההודעה
+              </label>
+              <textarea
+                className="form-control"
+                rows={3}
+                value={announcementText}
+                onChange={(e) => setAnnouncementText(e.target.value)}
+                style={{ resize: 'vertical' }}
+                placeholder="למשל: שימו לב, השיעור של יום שלישי השבוע בוטל."
+              />
+            </div>
+            
+            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: '0.4rem' }}>
+                  תאריך ושעת תפוגה (מתי ההודעה תיעלם)
+                </label>
+                <input
+                  type="datetime-local"
+                  className="form-control"
+                  value={announcementExpiresAt}
+                  onChange={(e) => setAnnouncementExpiresAt(e.target.value)}
+                />
+              </div>
+              
+              <div style={{ flex: 1, minWidth: '200px', display: 'flex', alignItems: 'center', gap: '0.5rem', paddingBottom: '0.5rem' }}>
+                <input 
+                  type="checkbox" 
+                  id="sendPushCheckbox" 
+                  checked={sendPush} 
+                  onChange={(e) => setSendPush(e.target.checked)}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                />
+                <label htmlFor="sendPushCheckbox" style={{ fontSize: '0.95rem', fontWeight: 600, cursor: 'pointer', color: 'var(--text-primary)' }}>
+                  שלח גם כהתראת פוש (Push)
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>

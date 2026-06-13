@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { CalendarDays, MapPin, Clock, ChevronLeft, Users, Loader2 } from 'lucide-react';
+import { CalendarDays, MapPin, Clock, ChevronLeft, Users, Loader2, Megaphone } from 'lucide-react';
 
 interface EventData {
   id: string;
@@ -48,6 +48,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [events, setEvents] = useState<EventData[]>([]);
   const [recentPosts, setRecentPosts] = useState<CommunityPost[]>([]);
+  const [announcement, setAnnouncement] = useState<{ text: string, expiresAt: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -60,7 +61,7 @@ const Home = () => {
       const d = new Date();
       const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-      const [eventsRes, postsRes] = await Promise.all([
+      const [eventsRes, postsRes, settingsRes] = await Promise.all([
         supabase
           .from('events')
           .select('id, title, event_date, event_time, location, category, description, registration_mode')
@@ -73,10 +74,24 @@ const Home = () => {
           .select('id, image_url, caption')
           .order('created_at', { ascending: false })
           .limit(3),
+        supabase
+          .from('settings')
+          .select('announcement_text, announcement_expires_at')
+          .eq('id', 1)
+          .single(),
       ]);
 
       setEvents(eventsRes.data || []);
       setRecentPosts(postsRes.data || []);
+      
+      if (settingsRes.data && settingsRes.data.announcement_text && settingsRes.data.announcement_expires_at) {
+        if (new Date(settingsRes.data.announcement_expires_at) > new Date()) {
+          setAnnouncement({
+            text: settingsRes.data.announcement_text,
+            expiresAt: settingsRes.data.announcement_expires_at
+          });
+        }
+      }
     } catch (err) {
       console.error('Error fetching home data:', err);
     } finally {
@@ -121,6 +136,43 @@ const Home = () => {
         </div>
       ) : (
         <>
+          {/* Announcement Card */}
+          {announcement && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                marginBottom: '2rem',
+                background: 'linear-gradient(135deg, rgba(243, 156, 18, 0.15) 0%, rgba(243, 156, 18, 0.05) 100%)',
+                border: '1px solid rgba(243, 156, 18, 0.3)',
+                borderRadius: '16px',
+                padding: '1.25rem',
+                display: 'flex',
+                gap: '1rem',
+                alignItems: 'flex-start',
+                backdropFilter: 'blur(10px)'
+              }}
+            >
+              <div style={{
+                background: 'rgba(243, 156, 18, 0.2)',
+                padding: '0.5rem',
+                borderRadius: '12px',
+                color: '#d35400',
+                flexShrink: 0
+              }}>
+                <Megaphone size={20} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#d35400', marginBottom: '0.2rem' }}>
+                  עדכון חשוב
+                </h3>
+                <p style={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: 1.5, whiteSpace: 'pre-wrap', fontWeight: 500 }}>
+                  {announcement.text}
+                </p>
+              </div>
+            </motion.div>
+          )}
+
           {/* Next Event - Big Card */}
           {nextEvent ? (
             <motion.div
