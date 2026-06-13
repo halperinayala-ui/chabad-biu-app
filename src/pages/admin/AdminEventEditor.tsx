@@ -206,41 +206,44 @@ const AdminEventEditor = () => {
         const { error, data } = await supabase.from('events').insert(payload).select().single();
         if (error) throw error;
         toast.success('האירוע נוצר בהצלחה!');
-        
-        // Trigger Inbox Notifications (via RPC)
-        try {
-          await supabase.rpc('notify_users', {
-            p_title: 'אירוע חדש בקהילה!',
-            p_body: `האירוע "${payload.title}" נוסף. היכנסו לפרטים!`,
-            p_link: data ? `/events/${data.id}` : '/',
-            p_type: 'event',
-            p_audience: payload.audience || []
-          });
-        } catch (inboxErr) {
-          console.error("Could not trigger inbox notification", inboxErr);
-        }
+        const isTestEvent = payload.title.toLowerCase().includes('test') || payload.title.includes('בדיקה');
 
-        // Trigger Push Notification
-        try {
-          const session = await supabase.auth.getSession();
-          const token = session.data.session?.access_token;
-          if (token) {
-            fetch('/api/notify-event', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-              },
-              body: JSON.stringify({
-                title: 'אירוע חדש בחב"ד בקמפוס!',
-                body: payload.title,
-                url: data ? `https://chabad-biu-app.vercel.app/events/${data.id}` : 'https://chabad-biu-app.vercel.app/',
-                audience: payload.audience
-              })
-            }).catch(e => console.error("Push notification trigger failed:", e));
+        if (!isTestEvent) {
+          // Trigger Inbox Notifications (via RPC)
+          try {
+            await supabase.rpc('notify_users', {
+              p_title: 'אירוע חדש בקהילה!',
+              p_body: `האירוע "${payload.title}" נוסף. היכנסו לפרטים!`,
+              p_link: data ? `/events/${data.id}` : '/',
+              p_type: 'event',
+              p_audience: payload.audience || []
+            });
+          } catch (inboxErr) {
+            console.error("Could not trigger inbox notification", inboxErr);
           }
-        } catch (pushErr) {
-          console.error("Could not trigger push notification", pushErr);
+
+          // Trigger Push Notification
+          try {
+            const session = await supabase.auth.getSession();
+            const token = session.data.session?.access_token;
+            if (token) {
+              fetch('/api/notify-event', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                  title: 'אירוע חדש בחב"ד בקמפוס!',
+                  body: payload.title,
+                  url: data ? `https://chabad-biu-app.vercel.app/events/${data.id}` : 'https://chabad-biu-app.vercel.app/',
+                  audience: payload.audience
+                })
+              }).catch(e => console.error("Push notification trigger failed:", e));
+            }
+          } catch (pushErr) {
+            console.error("Could not trigger push notification", pushErr);
+          }
         }
       }
       
