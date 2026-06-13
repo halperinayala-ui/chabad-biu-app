@@ -238,13 +238,13 @@ const AdminRegistrants = () => {
             <thead>
               <tr>
                 <th>שם מלא</th>
-                <th>טלפון</th>
-                <th>הרשמה</th>
-                <th>תשובות</th>
-                <th>סטטוס</th>
                 <th>נוכחות</th>
-                <th>הערה</th>
                 <th>פעולות</th>
+                <th>סטטוס</th>
+                <th>טלפון</th>
+                <th>הערה</th>
+                <th>תשובות</th>
+                <th>הרשמה</th>
               </tr>
             </thead>
             <tbody>
@@ -258,31 +258,8 @@ const AdminRegistrants = () => {
                       {getName(reg)}
                     </button>
                   </td>
-                  <td dir="ltr" style={{ textAlign: 'right' }}>{getPhone(reg)}</td>
-                  <td>{formatDate(reg.created_at)}</td>
-                  <td>
-                    {reg.answers && Object.entries(reg.answers).length > 0
-                      ? Object.entries(reg.answers).map(([key, val]) => (
-                          <span key={key} className="answer-badge" title={key}>{String(val)}</span>
-                        ))
-                      : <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>—</span>
-                    }
-                  </td>
-                  <td>
-                    <span className={`status-badge status-${reg.status}`}>
-                      {reg.status === 'pending' && <><Clock size={14} /> ממתין</>}
-                      {reg.status === 'approved' && <><CheckCircle size={14} /> מאושר</>}
-                      {reg.status === 'rejected' && <><XCircle size={14} /> נדחה</>}
-                      {reg.status === 'rsvp' && <><CheckCircle size={14} /> מגיע/ה</>}
-                    </span>
-                    {reg.status === 'pending' && (
-                      <div className="approval-actions" style={{ marginTop: '0.4rem' }}>
-                        <button className="icon-btn approve-btn" title="אשר" onClick={() => updateStatus(reg.id, 'approved')}><UserCheck size={16} /></button>
-                        <button className="icon-btn reject-btn" title="דחה" onClick={() => updateStatus(reg.id, 'rejected')}><XCircle size={16} /></button>
-                      </div>
-                    )}
-                  </td>
 
+                  {/* נוכחות */}
                   <td>
                     <div style={{ display: 'flex', gap: '0.4rem' }}>
                       <button
@@ -302,6 +279,43 @@ const AdminRegistrants = () => {
                     </div>
                   </td>
 
+                  {/* פעולות */}
+                  <td className="actions-cell">
+                    <div className="whatsapp-dropdown-container">
+                      <button className="icon-btn wa-btn" title="וואטסאפ" onClick={() => setActiveWhatsappMenu(activeWhatsappMenu === reg.id ? null : reg.id)}>
+                        <MessageCircle size={18} />
+                      </button>
+                      {activeWhatsappMenu === reg.id && (
+                        <div className="whatsapp-dropdown menu-active">
+                          <div className="dropdown-title">תבניות הודעה:</div>
+                          <a href={getWhatsappLink(getPhone(reg), 'approved', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">✅ אישור השתתפות</a>
+                          <a href={getWhatsappLink(getPhone(reg), 'verify', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">❓ בירור סטודנט/ית</a>
+                          <a href={getWhatsappLink(getPhone(reg), 'rejected', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">❌ הרשמה נסגרה</a>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* סטטוס */}
+                  <td>
+                    <span className={`status-badge status-${reg.status}`}>
+                      {reg.status === 'pending' && <><Clock size={14} /> ממתין</>}
+                      {reg.status === 'approved' && <><CheckCircle size={14} /> מאושר</>}
+                      {reg.status === 'rejected' && <><XCircle size={14} /> נדחה</>}
+                      {reg.status === 'rsvp' && <><CheckCircle size={14} /> מגיע/ה</>}
+                    </span>
+                    {reg.status === 'pending' && (
+                      <div className="approval-actions" style={{ marginTop: '0.4rem' }}>
+                        <button className="icon-btn approve-btn" title="אשר" onClick={() => updateStatus(reg.id, 'approved')}><UserCheck size={16} /></button>
+                        <button className="icon-btn reject-btn" title="דחה" onClick={() => updateStatus(reg.id, 'rejected')}><XCircle size={16} /></button>
+                      </div>
+                    )}
+                  </td>
+
+                  {/* טלפון */}
+                  <td dir="ltr" style={{ textAlign: 'right' }}>{getPhone(reg)}</td>
+
+                  {/* הערה */}
                   <td>
                     {editingNote === reg.id ? (
                       <div style={{ display: 'flex', gap: '0.3rem' }}>
@@ -321,21 +335,18 @@ const AdminRegistrants = () => {
                     )}
                   </td>
 
-                  <td className="actions-cell">
-                    <div className="whatsapp-dropdown-container">
-                      <button className="icon-btn wa-btn" title="וואטסאפ" onClick={() => setActiveWhatsappMenu(activeWhatsappMenu === reg.id ? null : reg.id)}>
-                        <MessageCircle size={18} />
-                      </button>
-                      {activeWhatsappMenu === reg.id && (
-                        <div className="whatsapp-dropdown menu-active">
-                          <div className="dropdown-title">תבניות הודעה:</div>
-                          <a href={getWhatsappLink(getPhone(reg), 'approved', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">✅ אישור השתתפות</a>
-                          <a href={getWhatsappLink(getPhone(reg), 'verify', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">❓ בירור סטודנט/ית</a>
-                          <a href={getWhatsappLink(getPhone(reg), 'rejected', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">❌ הרשמה נסגרה</a>
-                        </div>
-                      )}
-                    </div>
+                  {/* תשובות */}
+                  <td>
+                    {reg.answers && Object.entries(reg.answers).length > 0
+                      ? Object.entries(reg.answers).map(([key, val]) => (
+                          <span key={key} className="answer-badge" title={key}>{String(val)}</span>
+                        ))
+                      : <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>—</span>
+                    }
                   </td>
+
+                  {/* הרשמה */}
+                  <td>{formatDate(reg.created_at)}</td>
                 </tr>
               ))}
             </tbody>
