@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, ArrowRight, Loader2, Megaphone } from 'lucide-react';
+import { Plus, Trash2, ArrowRight, Loader2, Megaphone, Edit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
