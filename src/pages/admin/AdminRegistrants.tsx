@@ -239,8 +239,8 @@ const AdminRegistrants = () => {
               <tr>
                 <th>שם מלא</th>
                 <th>סטטוס</th>
-                <th>נוכחות</th>
                 <th>פעולות</th>
+                <th>נוכחות</th>
                 <th>טלפון</th>
                 <th>הערה</th>
                 <th>תשובות</th>
@@ -275,31 +275,11 @@ const AdminRegistrants = () => {
                     )}
                   </td>
 
-                  {/* נוכחות */}
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.25rem' }}>
-                      <button
-                        title="היה"
-                        onClick={() => markAttendance(reg.id, reg.attended === true ? null : true)}
-                        style={{ width: '28px', height: '28px', borderRadius: '50%', border: '2px solid', borderColor: reg.attended === true ? '#2ecc71' : '#ddd', background: reg.attended === true ? '#2ecc71' : 'white', color: reg.attended === true ? 'white' : '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                      >
-                        <Check size={14} />
-                      </button>
-                      <button
-                        title="לא היה"
-                        onClick={() => markAttendance(reg.id, reg.attended === false ? null : false)}
-                        style={{ width: '28px', height: '28px', borderRadius: '50%', border: '2px solid', borderColor: reg.attended === false ? '#e74c3c' : '#ddd', background: reg.attended === false ? '#e74c3c' : 'white', color: reg.attended === false ? 'white' : '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                      >
-                        <XIcon size={14} />
-                      </button>
-                    </div>
-                  </td>
-
                   {/* פעולות */}
                   <td className="actions-cell">
                     <div className="whatsapp-dropdown-container">
                       <button className="icon-btn wa-btn" title="וואטסאפ" onClick={() => setActiveWhatsappMenu(activeWhatsappMenu === reg.id ? null : reg.id)}>
-                        <MessageCircle size={18} />
+                        <MessageCircle size={16} />
                       </button>
                       {activeWhatsappMenu === reg.id && (
                         <div className="whatsapp-dropdown menu-active">
@@ -309,6 +289,26 @@ const AdminRegistrants = () => {
                           <a href={getWhatsappLink(getPhone(reg), 'rejected', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">❌ הרשמה נסגרה</a>
                         </div>
                       )}
+                    </div>
+                  </td>
+
+                  {/* נוכחות */}
+                  <td>
+                    <div style={{ display: 'flex', gap: '0.2rem' }}>
+                      <button
+                        title="היה"
+                        onClick={() => markAttendance(reg.id, reg.attended === true ? null : true)}
+                        style={{ width: '24px', height: '24px', borderRadius: '50%', border: '2px solid', borderColor: reg.attended === true ? '#2ecc71' : '#ddd', background: reg.attended === true ? '#2ecc71' : 'white', color: reg.attended === true ? 'white' : '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', padding: 0 }}
+                      >
+                        <Check size={12} />
+                      </button>
+                      <button
+                        title="לא היה"
+                        onClick={() => markAttendance(reg.id, reg.attended === false ? null : false)}
+                        style={{ width: '24px', height: '24px', borderRadius: '50%', border: '2px solid', borderColor: reg.attended === false ? '#e74c3c' : '#ddd', background: reg.attended === false ? '#e74c3c' : 'white', color: reg.attended === false ? 'white' : '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', padding: 0 }}
+                      >
+                        <XIcon size={12} />
+                      </button>
                     </div>
                   </td>
 

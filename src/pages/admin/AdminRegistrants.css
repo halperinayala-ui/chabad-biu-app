@@ -201,3 +201,25 @@
   background: rgba(37, 211, 102, 0.05);
   color: #128C7E;
 }
+
+@media (max-width: 768px) {
+  .registrants-table th,
+  .registrants-table td {
+    padding: 0.5rem 0.2rem;
+    font-size: 0.8rem;
+  }
+  
+  .status-badge {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+    gap: 0.2rem;
+  }
+  
+  .icon-btn {
+    padding: 0.2rem;
+  }
+  
+  .actions-cell {
+    gap: 0.25rem;
+  }
+}
