@@ -141,10 +141,13 @@ const EventDetails = () => {
         }
       }
 
-      const { data, error } = await supabase.from('registrations').insert(payload).select('id, status').single();
+      const { error } = await supabase.from('registrations').insert(payload);
       if (error) throw error;
 
-      setMyRegistration(data);
+      setMyRegistration({
+        id: crypto.randomUUID(), // Mock ID for UI state
+        status: payload.status
+      } as any);
       toast.success(requiresManualApproval ? 'בקשתך נשלחה! נחזור אליך בקרוב.' : 'נרשמת בהצלחה! נתראה באירוע 🎉');
       
       // Trigger Admin Notification
