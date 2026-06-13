@@ -27,6 +27,7 @@ const AdminAnnouncements = () => {
   const [expiresAt, setExpiresAt] = useState('');
   const [sendPush, setSendPush] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile && !profile.is_admin) {
@@ -61,17 +62,22 @@ const AdminAnnouncements = () => {
 
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('announcements')
-        .insert({
-          text: text.trim(),
-          emoji: emoji || '💜',
-          expires_at: new Date(expiresAt).toISOString()
-        });
+      const payload = {
+        text: text.trim(),
+        emoji: emoji || '💜',
+        expires_at: new Date(expiresAt).toISOString()
+      };
 
-      if (error) throw error;
+      if (editingId) {
+        const { error } = await supabase.from('announcements').update(payload).eq('id', editingId);
+        if (error) throw error;
+        toast.success('ההודעה עודכנה בהצלחה!');
+      } else {
+        const { error } = await supabase.from('announcements').insert(payload);
+        if (error) throw error;
+        toast.success('ההודעה פורסמה בהצלחה!');
+      }
       
-      toast.success('ההודעה פורסמה בהצלחה!');
       setIsModalOpen(false);
       resetForm();
       fetchAnnouncements();
@@ -113,11 +119,26 @@ const AdminAnnouncements = () => {
     }
   };
 
+  const handleEdit = (ann: Announcement) => {
+    setText(ann.text);
+    setEmoji(ann.emoji);
+    
+    // Format date for datetime-local input
+    const date = new Date(ann.expires_at);
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    setExpiresAt(date.toISOString().slice(0, 16));
+    
+    setEditingId(ann.id);
+    setSendPush(false);
+    setIsModalOpen(true);
+  };
+
   const resetForm = () => {
     setText('');
     setEmoji('💜');
     setExpiresAt('');
     setSendPush(false);
+    setEditingId(null);
   };
 
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '5rem' }}><Loader2 className="spinner" size={40} /></div>;
@@ -133,7 +154,7 @@ const AdminAnnouncements = () => {
           <span>חזרה</span>
         </button>
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+          <button className="btn btn-primary" onClick={() => { resetForm(); setIsModalOpen(true); }}>
             <Plus size={18} />
             <span>הודעה חדשה</span>
           </button>
@@ -158,10 +179,12 @@ const AdminAnnouncements = () => {
             marginBottom: '2rem',
             boxShadow: '0 8px 30px rgba(0,0,0,0.1)'
           }}>
-            <h3 style={{ marginTop: 0, marginBottom: '1rem', color: 'var(--text-primary)' }}>פרסום הודעה חדשה</h3>
+            <h3 style={{ marginTop: 0, marginBottom: '1rem', color: 'var(--text-primary)' }}>
+              {editingId ? 'עריכת הודעה' : 'פרסום הודעה חדשה'}
+            </h3>
             
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-              <div style={{ width: '80px' }}>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ width: '80px', flexShrink: 0 }}>
                 <label style={{ fontSize: '0.9rem', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>אייקון</label>
                 <input 
                   type="text" 
@@ -171,11 +194,11 @@ const AdminAnnouncements = () => {
                   style={{ textAlign: 'center', fontSize: '1.2rem', padding: '0.5rem' }}
                 />
               </div>
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: '200px' }}>
                 <label style={{ fontSize: '0.9rem', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>תוכן ההודעה</label>
                 <textarea
                   className="form-control"
-                  rows={2}
+                  rows={3}
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   style={{ resize: 'vertical' }}
@@ -210,9 +233,9 @@ const AdminAnnouncements = () => {
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-              <button className="btn btn-outline" onClick={() => setIsModalOpen(false)} disabled={saving}>ביטול</button>
+              <button className="btn btn-outline" onClick={() => { setIsModalOpen(false); resetForm(); }} disabled={saving}>ביטול</button>
               <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-                {saving ? <Loader2 className="spinner" size={18} /> : 'פרסם הודעה'}
+                {saving ? <Loader2 className="spinner" size={18} /> : (editingId ? 'שמור שינויים' : 'פרסם הודעה')}
               </button>
             </div>
           </div>
@@ -224,17 +247,22 @@ const AdminAnnouncements = () => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
             {activeAnnouncements.map(ann => (
-              <div key={ann.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(39, 174, 96, 0.05)', border: '1px solid rgba(39, 174, 96, 0.2)', padding: '1rem', borderRadius: '12px' }}>
+              <div key={ann.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(39, 174, 96, 0.05)', border: '1px solid rgba(39, 174, 96, 0.2)', padding: '1rem', borderRadius: '12px', flexWrap: 'wrap' }}>
                 <div style={{ fontSize: '2rem' }}>{ann.emoji}</div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: '150px' }}>
                   <p style={{ margin: 0, fontWeight: 500 }}>{ann.text}</p>
                   <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
                     פג תוקף: {new Date(ann.expires_at).toLocaleString('he-IL')}
                   </p>
                 </div>
-                <button className="icon-btn delete-btn" onClick={() => handleDelete(ann.id)}>
-                  <Trash2 size={18} />
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button className="icon-btn" onClick={() => handleEdit(ann)} title="ערוך הודעה">
+                    <Edit size={18} />
+                  </button>
+                  <button className="icon-btn delete-btn" onClick={() => handleDelete(ann.id)} title="מחק הודעה">
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -246,17 +274,22 @@ const AdminAnnouncements = () => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {expiredAnnouncements.map(ann => (
-              <div key={ann.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--surface)', border: '1px solid var(--border)', padding: '1rem', borderRadius: '12px', opacity: 0.7 }}>
+              <div key={ann.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--surface)', border: '1px solid var(--border)', padding: '1rem', borderRadius: '12px', opacity: 0.7, flexWrap: 'wrap' }}>
                 <div style={{ fontSize: '2rem', filter: 'grayscale(1)' }}>{ann.emoji}</div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: '150px' }}>
                   <p style={{ margin: 0 }}>{ann.text}</p>
                   <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
                     פג תוקף ב: {new Date(ann.expires_at).toLocaleString('he-IL')}
                   </p>
                 </div>
-                <button className="icon-btn delete-btn" onClick={() => handleDelete(ann.id)}>
-                  <Trash2 size={18} />
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button className="icon-btn" onClick={() => handleEdit(ann)} title="שכפל / ערוך הודעה">
+                    <Edit size={18} />
+                  </button>
+                  <button className="icon-btn delete-btn" onClick={() => handleDelete(ann.id)} title="מחק הודעה">
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
