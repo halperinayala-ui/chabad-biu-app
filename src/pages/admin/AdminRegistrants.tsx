@@ -282,12 +282,18 @@ const AdminRegistrants = () => {
                         <MessageCircle size={16} />
                       </button>
                       {activeWhatsappMenu === reg.id && (
-                        <div className="whatsapp-dropdown menu-active">
-                          <div className="dropdown-title">תבניות הודעה:</div>
-                          <a href={getWhatsappLink(getPhone(reg), 'approved', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">✅ אישור השתתפות</a>
-                          <a href={getWhatsappLink(getPhone(reg), 'verify', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">❓ בירור סטודנט/ית</a>
-                          <a href={getWhatsappLink(getPhone(reg), 'rejected', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item">❌ הרשמה נסגרה</a>
-                        </div>
+                        <>
+                          <div
+                            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 90 }}
+                            onClick={() => setActiveWhatsappMenu(null)}
+                          />
+                          <div className="whatsapp-dropdown menu-active" style={{ zIndex: 100 }}>
+                            <div className="dropdown-title">תבניות הודעה:</div>
+                            <a href={getWhatsappLink(getPhone(reg), 'approved', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item" onClick={() => setActiveWhatsappMenu(null)}>✅ אישור השתתפות</a>
+                            <a href={getWhatsappLink(getPhone(reg), 'verify', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item" onClick={() => setActiveWhatsappMenu(null)}>❓ בירור סטודנט/ית</a>
+                            <a href={getWhatsappLink(getPhone(reg), 'rejected', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item" onClick={() => setActiveWhatsappMenu(null)}>❌ הרשמה נסגרה</a>
+                          </div>
+                        </>
                       )}
                     </div>
                   </td>
