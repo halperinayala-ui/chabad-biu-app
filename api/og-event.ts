@@ -28,8 +28,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
 
-    // Determine the best image to show (prefer flyer, then header, then default)
-    const imageUrl = event.flyer_image_url || event.header_image_url || `${baseUrl}/sharing-banner.png`;
+    // Determine the best image to show (prefer header, then flyer, then default)
+    const imageUrl = event.header_image_url || event.flyer_image_url || `${baseUrl}/sharing-banner.png`;
     
     // Clean up description for the meta tag
     const cleanDescription = (event.description || 'לחצו לפרטים והרשמה!')
