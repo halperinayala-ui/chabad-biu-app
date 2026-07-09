@@ -60,8 +60,8 @@ const AdminEventEditor = () => {
   const [savedTemplates, setSavedTemplates] = useState<Record<string, any>>({});
 
   useEffect(() => {
-    const raw = localStorage.getItem('event_templates_v2');
-    if (raw) setSavedTemplates(JSON.parse(raw));
+    // Legacy support: if there are templates in local storage and none in cloud, we could migrate them, 
+    // but the user already lost them. We just rely on the cloud now.
   }, []);
 
   // Dynamic Form State
@@ -87,6 +87,9 @@ const AdminEventEditor = () => {
       if (!error && data) {
         setAvailableCategories(data.categories || []);
         setAvailableTags(data.tags || []);
+        if (data.event_templates) {
+          setSavedTemplates(data.event_templates);
+        }
       }
       // Fetch unique 'other' status details from profiles
       const { data: profilesData } = await supabase
@@ -268,15 +271,22 @@ const AdminEventEditor = () => {
     setFields(fields.map(f => f.id === id ? { ...f, [key]: value } : f));
   };
 
-  const saveAsTemplate = () => {
+  const saveAsTemplate = async () => {
     if (!templateName.trim()) { toast.error('הכניסי שם לתבנית'); return; }
     const template = { title, category, location, description, requiresApproval, maxRegistrants, closedMessage, tags, registrationMode, fields, registrationDeadline };
     const updated = { ...savedTemplates, [templateName.trim()]: template };
-    localStorage.setItem('event_templates_v2', JSON.stringify(updated));
-    setSavedTemplates(updated);
-    setTemplateName('');
-    setShowTemplateModal(false);
-    toast.success(`תבנית "${templateName.trim()}" נשמרה!`);
+    
+    try {
+      const { error } = await supabase.from('settings').update({ event_templates: updated }).eq('id', 1);
+      if (error) throw error;
+      setSavedTemplates(updated);
+      setTemplateName('');
+      setShowTemplateModal(false);
+      toast.success(`תבנית "${templateName.trim()}" נשמרה בענן!`);
+    } catch (err) {
+      console.error(err);
+      toast.error('שגיאה בשמירת התבנית לענן');
+    }
   };
 
   const loadTemplate = (name: string) => {
@@ -291,12 +301,19 @@ const AdminEventEditor = () => {
     toast.success(`תבנית "${name}" נטענה! עדכני תאריך ושעה ושמרי.`);
   };
 
-  const deleteTemplate = (name: string) => {
+  const deleteTemplate = async (name: string) => {
     const updated = { ...savedTemplates };
     delete updated[name];
-    localStorage.setItem('event_templates_v2', JSON.stringify(updated));
-    setSavedTemplates(updated);
-    toast.success(`תבנית "${name}" נמחקה.`);
+    
+    try {
+      const { error } = await supabase.from('settings').update({ event_templates: updated }).eq('id', 1);
+      if (error) throw error;
+      setSavedTemplates(updated);
+      toast.success(`תבנית "${name}" נמחקה.`);
+    } catch (err) {
+      console.error(err);
+      toast.error('שגיאה במחיקת תבנית');
+    }
   };
 
   const handleArchive = async () => {
