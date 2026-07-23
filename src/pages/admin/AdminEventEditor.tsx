@@ -641,16 +641,17 @@ const AdminEventEditor = () => {
               </div>
               
               <div className="form-group" style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(73, 38, 145, 0.03)', borderRadius: '8px', border: '1px solid rgba(73, 38, 145, 0.08)' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>הודעה שתוצג כשההרשמה סגורה / מלאה</label>
-                <input 
-                  type="text" 
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>✍️ הודעה אישית שתוצג כשההרשמה מלאה / סגורה</label>
+                <textarea 
                   className="form-control" 
-                  placeholder="ההרשמה לאירוע זה נסגרה. נשמח לראותכם בפעמים הבאות!" 
+                  rows={3}
+                  placeholder="לדוגמה: ההרשמה לאירוע זה מלאה! ניתן לפנות אלינו בוואטסאפ להצטרפות לרשימת המתנה." 
                   value={closedMessage} 
                   onChange={(e) => setClosedMessage(e.target.value)} 
+                  style={{ width: '100%', resize: 'vertical' }}
                 />
-                <small style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', display: 'block' }}>
-                  הודעה זו תופיע לסטודנטים אם מכסת המשתתפים תתמלא או אם תבחר/י לסגור את ההרשמה.
+                <small style={{ color: 'var(--text-secondary)', marginTop: '0.4rem', display: 'block' }}>
+                  הודעה זו תופיע לסטודנטים במידה ומכסת המשתתפים התמלאה או במידה וההרשמה נסגרה.
                 </small>
               </div>
             </>

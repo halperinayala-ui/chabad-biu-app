@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarDays, Clock, MapPin, ArrowRight, Image as ImageIcon, Loader2, CheckCircle2, XCircle, Settings, Share, Edit } from 'lucide-react';
+import { CalendarDays, Clock, MapPin, ArrowRight, Image as ImageIcon, Loader2, CheckCircle2, XCircle, Settings, Share, Edit, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -54,9 +54,11 @@ const EventDetails = () => {
   const [cancelling, setCancelling] = useState(false);
   const [guestStatus, setGuestStatus] = useState('');
   const [guestStatusDetails, setGuestStatusDetails] = useState('');
+  const [registeredCount, setRegisteredCount] = useState<number>(0);
 
   useEffect(() => {
     fetchEvent();
+    fetchRegistrationsCount();
   }, [id]);
 
   useEffect(() => {
@@ -64,6 +66,22 @@ const EventDetails = () => {
       checkExistingRegistration();
     }
   }, [event, user]);
+
+  const fetchRegistrationsCount = async () => {
+    if (!id) return;
+    try {
+      const { count, error } = await supabase
+        .from('registrations')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', id)
+        .neq('status', 'rejected');
+      if (!error && count !== null) {
+        setRegisteredCount(count);
+      }
+    } catch (err) {
+      console.error('Error fetching registrations count:', err);
+    }
+  };
 
   const fetchEvent = async () => {
     try {
@@ -94,6 +112,21 @@ const EventDetails = () => {
 
     setSubmitting(true);
     try {
+      // Check capacity limit
+      if (event.max_registrants && event.max_registrants > 0) {
+        const { count } = await supabase
+          .from('registrations')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', event.id)
+          .neq('status', 'rejected');
+        if (count !== null && count >= event.max_registrants) {
+          setRegisteredCount(count);
+          toast.error(`מצטערים, ההרשמה לאירוע זה הגיעה למכסה המרבית (${event.max_registrants}/${event.max_registrants}) ונסגרה.`);
+          setSubmitting(false);
+          return;
+        }
+      }
+
       const formData = new FormData(formRef.current!);
       const answers: Record<string, any> = {};
       
@@ -144,6 +177,7 @@ const EventDetails = () => {
       const { error } = await supabase.from('registrations').insert(payload);
       if (error) throw error;
 
+      setRegisteredCount(prev => prev + 1);
       setMyRegistration({
         id: crypto.randomUUID(), // Mock ID for UI state
         status: payload.status
@@ -189,6 +223,21 @@ const EventDetails = () => {
     if (!event) return;
     setSubmitting(true);
     try {
+      // Check capacity limit
+      if (event.max_registrants && event.max_registrants > 0) {
+        const { count } = await supabase
+          .from('registrations')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', event.id)
+          .neq('status', 'rejected');
+        if (count !== null && count >= event.max_registrants) {
+          setRegisteredCount(count);
+          toast.error(`מצטערים, ההרשמה לאירוע זה הגיעה למכסה המרבית (${event.max_registrants}/${event.max_registrants}) ונסגרה.`);
+          setSubmitting(false);
+          return;
+        }
+      }
+
       const { data, error } = await supabase.from('registrations').insert({
         event_id: event.id,
         user_id: user.id,
@@ -196,6 +245,7 @@ const EventDetails = () => {
         answers: {},
       }).select('id, status').single();
       if (error) throw error;
+      setRegisteredCount(prev => prev + 1);
       setMyRegistration(data);
       toast.success(profile?.gender === 'female' ? 'אחלה! רשמנו אותך 🎉' : 'אחלה! רשמנו אותך 🎉');
 
@@ -233,6 +283,7 @@ const EventDetails = () => {
       const { error } = await supabase.from('registrations').delete().eq('id', myRegistration.id);
       if (error) throw error;
       setMyRegistration(null);
+      setRegisteredCount(prev => Math.max(0, prev - 1));
       toast.success('ההרשמה בוטלה.');
 
       // Notify admins about cancellation
@@ -375,17 +426,47 @@ const EventDetails = () => {
       );
     }
 
-    // Check if registration is closed
+    // Check if registration is closed by deadline
     if (event.registration_deadline && new Date() > new Date(event.registration_deadline)) {
       return (
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(231, 76, 60, 0.05)', borderRadius: '16px' }}
+          style={{ textAlign: 'center', padding: '3rem 1.5rem', background: 'rgba(231, 76, 60, 0.05)', borderRadius: '16px', border: '1px solid rgba(231, 76, 60, 0.15)' }}
         >
           <Clock size={48} style={{ color: '#e74c3c', opacity: 0.5, margin: '0 auto 1rem', display: 'block' }} />
-          <h3 style={{ color: '#e74c3c', marginBottom: '0.5rem' }}>ההרשמה נסגרה</h3>
-          <p style={{ color: 'var(--text-secondary)' }}>{event.closed_message || 'ההרשמה לאירוע זה נסגרה. נשמח לראותכם בפעמים הבאות!'}</p>
+          <h3 style={{ color: '#e74c3c', marginBottom: '0.75rem', fontSize: '1.4rem' }}>ההרשמה נסגרה</h3>
+          <p style={{ color: 'var(--text-primary)', fontSize: '1.05rem', lineHeight: 1.5, whiteSpace: 'pre-line' }}>
+            {event.closed_message || 'ההרשמה לאירוע זה נסגרה. נשמח לראותכם בפעמים הבאות!'}
+          </p>
+        </motion.div>
+      );
+    }
+
+    // Check if registration limit reached
+    const isFull = Boolean(
+      event.max_registrants && 
+      event.max_registrants > 0 && 
+      registeredCount >= event.max_registrants
+    );
+
+    if (isFull) {
+      return (
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          style={{ textAlign: 'center', padding: '3rem 1.5rem', background: 'rgba(231, 76, 60, 0.05)', borderRadius: '16px', border: '1px solid rgba(231, 76, 60, 0.2)' }}
+        >
+          <Users size={48} style={{ color: '#e74c3c', opacity: 0.6, margin: '0 auto 1rem', display: 'block' }} />
+          <h3 style={{ color: '#e74c3c', marginBottom: '0.75rem', fontSize: '1.4rem' }}>ההרשמה מלאה</h3>
+          <p style={{ color: 'var(--text-primary)', fontSize: '1.05rem', lineHeight: 1.5, whiteSpace: 'pre-line' }}>
+            {event.closed_message || `הגענו למכסת המשתתפים המרבית עבור אירוע זה (${registeredCount}/${event.max_registrants}).`}
+          </p>
+          {event.closed_message && (
+            <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '1rem', fontSize: '0.85rem' }}>
+              (הגענו למכסה המרבית של {event.max_registrants} נרשמים)
+            </small>
+          )}
         </motion.div>
       );
     }
@@ -430,6 +511,26 @@ const EventDetails = () => {
     if (event.registration_mode === 'rsvp' && user) {
       return (
         <div style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
+          {event.max_registrants && event.max_registrants > 0 && (
+            <div style={{
+              marginBottom: '1.25rem',
+              padding: '0.6rem 1rem',
+              borderRadius: '12px',
+              backgroundColor: registeredCount >= event.max_registrants - 5 ? 'rgba(230, 126, 34, 0.1)' : 'rgba(73, 38, 145, 0.08)',
+              border: `1px solid ${registeredCount >= event.max_registrants - 5 ? 'rgba(230, 126, 34, 0.3)' : 'rgba(73, 38, 145, 0.2)'}`,
+              color: registeredCount >= event.max_registrants - 5 ? '#d35400' : 'var(--primary)',
+              fontSize: '0.9rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              justifyContent: 'center'
+            }}>
+              <Users size={16} />
+              <span>
+                נרשמו {registeredCount} מתוך {event.max_registrants} (נותרו {Math.max(0, event.max_registrants - registeredCount)} מקומות)
+              </span>
+            </div>
+          )}
           <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
             לחצו לאישור הגעה מהיר – ללא מילוי טפסים!
           </p>
@@ -454,6 +555,26 @@ const EventDetails = () => {
     // Full form mode (or RSVP for guests)
     return (
       <form ref={formRef} className="dynamic-form" onSubmit={handleFormSubmit}>
+        {event.max_registrants && event.max_registrants > 0 && (
+          <div style={{
+            marginBottom: '1.25rem',
+            padding: '0.6rem 1rem',
+            borderRadius: '12px',
+            backgroundColor: registeredCount >= event.max_registrants - 5 ? 'rgba(230, 126, 34, 0.1)' : 'rgba(73, 38, 145, 0.08)',
+            border: `1px solid ${registeredCount >= event.max_registrants - 5 ? 'rgba(230, 126, 34, 0.3)' : 'rgba(73, 38, 145, 0.2)'}`,
+            color: registeredCount >= event.max_registrants - 5 ? '#d35400' : 'var(--primary)',
+            fontSize: '0.9rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            justifyContent: 'center'
+          }}>
+            <Users size={16} />
+            <span>
+              נרשמו {registeredCount} מתוך {event.max_registrants} (נותרו {Math.max(0, event.max_registrants - registeredCount)} מקומות)
+            </span>
+          </div>
+        )}
         
         {audienceMsg && !audienceBlocked && !user && (
           <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(243, 156, 18, 0.1)', border: '1px solid rgba(243, 156, 18, 0.3)', borderRadius: '12px', color: '#d35400', fontSize: '0.95rem' }}>

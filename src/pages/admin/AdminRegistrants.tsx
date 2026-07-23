@@ -31,6 +31,7 @@ const AdminRegistrants = () => {
   const [registrants, setRegistrants] = useState<Registrant[]>([]);
   const [eventTitle, setEventTitle] = useState('');
   const [eventDate, setEventDate] = useState('');
+  const [maxRegistrants, setMaxRegistrants] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeWhatsappMenu, setActiveWhatsappMenu] = useState<string | null>(null);
   const [editingNote, setEditingNote] = useState<string | null>(null);
@@ -55,12 +56,13 @@ const AdminRegistrants = () => {
 
       const { data: eventData } = await supabase
         .from('events')
-        .select('title, event_date')
+        .select('title, event_date, max_registrants')
         .eq('id', eventId)
         .single();
       if (eventData) {
         setEventTitle(eventData.title);
         setEventDate(eventData.event_date);
+        if (eventData.max_registrants) setMaxRegistrants(eventData.max_registrants);
         // isPastEvent: true if event date is today or earlier
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -197,8 +199,13 @@ const AdminRegistrants = () => {
       {/* Stats */}
       <div className="stats-row">
         <div className="stat-card glass">
-          <div className="stat-value">{registrants.length}</div>
-          <div className="stat-label">סך נרשמים</div>
+          <div className="stat-value">
+            {registrants.length}{maxRegistrants ? ` / ${maxRegistrants}` : ''}
+          </div>
+          <div className="stat-label">
+            סך נרשמים
+            {maxRegistrants && registrants.filter(r => r.status !== 'rejected').length >= maxRegistrants ? ' (מלא 🔒)' : ''}
+          </div>
         </div>
         <div className="stat-card glass">
           <div className="stat-value" style={{ color: '#2ecc71' }}>{registrants.filter(r => r.status === 'approved' || r.status === 'rsvp').length}</div>
