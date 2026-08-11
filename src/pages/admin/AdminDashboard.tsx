@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Plus, Users, Settings, BarChart2, Archive, CalendarDays, ChevronLeft, Edit, Megaphone } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { formatHebrewDate } from '../../utils/dateUtils';
 import './AdminDashboard.css';
 
 interface EventRow {
@@ -161,7 +162,13 @@ const AdminDashboard = () => {
                 title="לחץ לניהול האירוע"
               >
                 <div className="event-admin-info">
-                  <span className="event-admin-date">{ev.event_date ? ev.event_date.split('-').reverse().join('.') : 'ללא תאריך'}</span>
+                  <span className="event-admin-date">
+                    {(() => {
+                      if (!ev.event_date) return 'ללא תאריך';
+                      const { gregorian, hebrewDate } = formatHebrewDate(ev.event_date);
+                      return hebrewDate ? `${gregorian} | ${hebrewDate}` : gregorian;
+                    })()}
+                  </span>
                   <div>
                     <strong>{ev.title}</strong>
                     <span className="event-admin-cat">{ev.category}</span>

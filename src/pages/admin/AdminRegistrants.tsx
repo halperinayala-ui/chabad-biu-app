@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle, XCircle, Clock, MessageCircle, UserCheck, Load
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
+import { formatHebrewDate } from '../../utils/dateUtils';
 import './AdminRegistrants.css';
 
 interface Registrant {
@@ -178,7 +179,14 @@ const AdminRegistrants = () => {
             <span>חזרה ללוח בקרה</span>
           </button>
           <h1 style={{ marginTop: '0.5rem' }}>ניהול אירוע: {eventTitle}</h1>
-          {eventDate && <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem' }}>{eventDate.split('-').reverse().join('.')}</p>}
+          {eventDate && (
+            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem' }}>
+              {(() => {
+                const { gregorian, hebrewDate } = formatHebrewDate(eventDate);
+                return hebrewDate ? `${gregorian} | ${hebrewDate}` : gregorian;
+              })()}
+            </p>
+          )}
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => navigate(`/events/${eventId}`)}>

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { CalendarDays, MapPin, Clock, ChevronLeft, Users, Loader2 } from 'lucide-react';
+import { formatHebrewDate } from '../utils/dateUtils';
 
 interface EventData {
   id: string;
@@ -30,10 +31,16 @@ const formatEventDate = (dateStr: string) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const diffDays = Math.round((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return 'היום';
-  if (diffDays === 1) return 'מחר';
-  if (diffDays < 7) return `יום ${WEEKDAYS[date.getDay()]}`;
-  return date.toLocaleDateString('he-IL', { day: 'numeric', month: 'long' });
+  
+  const { hebrewDate } = formatHebrewDate(dateStr);
+  const hebSuffix = hebrewDate ? ` | ${hebrewDate}` : '';
+
+  if (diffDays === 0) return `היום${hebSuffix}`;
+  if (diffDays === 1) return `מחר${hebSuffix}`;
+  if (diffDays < 7) return `יום ${WEEKDAYS[date.getDay()]}${hebSuffix}`;
+  
+  const gregorian = date.toLocaleDateString('he-IL', { day: 'numeric', month: 'long' });
+  return `${gregorian}${hebSuffix}`;
 };
 
 const getCategoryEmoji = (cat: string) => {

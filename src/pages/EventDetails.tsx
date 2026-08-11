@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CalendarDays, Clock, MapPin, ArrowRight, Image as ImageIcon, Loader2, CheckCircle2, XCircle, Settings, Share, Edit, Users } from 'lucide-react';
+import { formatHebrewDate } from '../utils/dateUtils';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -743,7 +744,12 @@ const EventDetails = () => {
                 <CalendarDays className="meta-icon" />
                 <div className="meta-text">
                   <span className="meta-label">תאריך</span>
-                  <span className="meta-value">{event.event_date.split('-').reverse().join('.')}</span>
+                  <span className="meta-value">
+                    {(() => {
+                      const { gregorian, hebrewDate } = formatHebrewDate(event.event_date);
+                      return hebrewDate ? `${gregorian} | ${hebrewDate}` : gregorian;
+                    })()}
+                  </span>
                 </div>
               </div>
               <div className="meta-card">
