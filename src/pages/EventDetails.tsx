@@ -506,26 +506,7 @@ const EventDetails = () => {
     if (event.registration_mode === 'rsvp' && user) {
       return (
         <div style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
-          {event.max_registrants && event.max_registrants > 0 && (
-            <div style={{
-              marginBottom: '1.25rem',
-              padding: '0.6rem 1rem',
-              borderRadius: '12px',
-              backgroundColor: registeredCount >= event.max_registrants - 5 ? 'rgba(230, 126, 34, 0.1)' : 'rgba(73, 38, 145, 0.08)',
-              border: `1px solid ${registeredCount >= event.max_registrants - 5 ? 'rgba(230, 126, 34, 0.3)' : 'rgba(73, 38, 145, 0.2)'}`,
-              color: registeredCount >= event.max_registrants - 5 ? '#d35400' : 'var(--primary)',
-              fontSize: '0.9rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              justifyContent: 'center'
-            }}>
-              <Users size={16} />
-              <span>
-                נרשמו {registeredCount} מתוך {event.max_registrants} (נותרו {Math.max(0, event.max_registrants - registeredCount)} מקומות)
-              </span>
-            </div>
-          )}
+
           <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
             לחצו לאישור הגעה מהיר – ללא מילוי טפסים!
           </p>
@@ -550,26 +531,7 @@ const EventDetails = () => {
     // Full form mode (or RSVP for guests)
     return (
       <form ref={formRef} className="dynamic-form" onSubmit={handleFormSubmit}>
-        {event.max_registrants && event.max_registrants > 0 && (
-          <div style={{
-            marginBottom: '1.25rem',
-            padding: '0.6rem 1rem',
-            borderRadius: '12px',
-            backgroundColor: registeredCount >= event.max_registrants - 5 ? 'rgba(230, 126, 34, 0.1)' : 'rgba(73, 38, 145, 0.08)',
-            border: `1px solid ${registeredCount >= event.max_registrants - 5 ? 'rgba(230, 126, 34, 0.3)' : 'rgba(73, 38, 145, 0.2)'}`,
-            color: registeredCount >= event.max_registrants - 5 ? '#d35400' : 'var(--primary)',
-            fontSize: '0.9rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            justifyContent: 'center'
-          }}>
-            <Users size={16} />
-            <span>
-              נרשמו {registeredCount} מתוך {event.max_registrants} (נותרו {Math.max(0, event.max_registrants - registeredCount)} מקומות)
-            </span>
-          </div>
-        )}
+
         
         {audienceMsg && !audienceBlocked && !user && (
           <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(243, 156, 18, 0.1)', border: '1px solid rgba(243, 156, 18, 0.3)', borderRadius: '12px', color: '#d35400', fontSize: '0.95rem' }}>
