@@ -12,7 +12,8 @@ interface EventCardProps {
   location: string;
   category: string;
   description?: string;
-  registrationMode?: 'form' | 'rsvp' | 'none';
+  registrationMode?: 'form' | 'rsvp' | 'none' | 'external';
+  externalLink?: string | null;
   tags?: string[];
   isAdmin?: boolean;
   isFeatured?: boolean;
@@ -46,8 +47,16 @@ const getButtonLabel = (mode?: string) => {
   return 'לפרטים והרשמה';
 };
 
-const EventCard = ({ id, title, date, time, location, category, description, registrationMode, tags = [], isAdmin, isFeatured }: EventCardProps) => {
+const EventCard = ({ id, title, date, time, location, category, description, registrationMode, externalLink, tags = [], isAdmin, isFeatured }: EventCardProps) => {
   const navigate = useNavigate();
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (registrationMode === 'external' && externalLink) {
+      window.open(externalLink, '_blank');
+    } else {
+      navigate(`/events/${id}`);
+    }
+  };
   const [isExpanded, setIsExpanded] = useState(false);
   const { dayName, gregorian, hebrewDate } = formatHebrewDate(date);
 
@@ -62,7 +71,13 @@ const EventCard = ({ id, title, date, time, location, category, description, reg
           <Settings size={16} />
         </button>
       )}
-      <div className={`event-card ${isExpanded ? 'expanded' : ''} ${isFeatured ? 'featured' : ''}`} onClick={() => setIsExpanded(!isExpanded)}>
+      <div className={`event-card ${isExpanded ? 'expanded' : ''} ${isFeatured ? 'featured' : ''}`} onClick={(e) => {
+        if (registrationMode === 'external' && externalLink) {
+          window.open(externalLink, '_blank');
+        } else {
+          setIsExpanded(!isExpanded);
+        }
+      }}>
         <div className="event-content">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -117,7 +132,7 @@ const EventCard = ({ id, title, date, time, location, category, description, reg
                 <div className="event-actions">
                   <button 
                     className="btn btn-secondary register-btn" 
-                    onClick={(e) => { e.stopPropagation(); navigate(`/events/${id}`); }}
+                    onClick={handleCardClick}
                   >
                     {getButtonLabel(registrationMode)}
                     <ChevronLeft size={16} />
@@ -136,7 +151,7 @@ const EventCard = ({ id, title, date, time, location, category, description, reg
               <button 
                 className="btn btn-outline" 
                 style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem', borderRadius: '12px' }}
-                onClick={(e) => { e.stopPropagation(); navigate(`/events/${id}`); }}
+                onClick={handleCardClick}
               >
                 פרטים <ChevronLeft size={14} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '-4px' }} />
               </button>

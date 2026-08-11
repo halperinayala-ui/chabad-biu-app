@@ -30,10 +30,11 @@ interface EventData {
   closed_message: string;
   form_config: FormField[];
   tags: string[];
-  registration_mode: 'form' | 'rsvp' | 'none';
+  registration_mode: 'form' | 'rsvp' | 'none' | 'external';
   registration_deadline: string | null;
   registration_start: string | null;
   audience?: string;
+  external_registration_link?: string | null;
 }
 
 interface Registration {
@@ -498,6 +499,26 @@ const EventDetails = () => {
           <CalendarDays size={48} style={{ color: 'var(--primary)', opacity: 0.5, margin: '0 auto 1rem', display: 'block' }} />
           <h3 style={{ color: 'var(--primary)' }}>כניסה חופשית</h3>
           <p>מחכים לכם שם!</p>
+        </div>
+      );
+    }
+
+    // External registration mode
+    if (event.registration_mode === 'external') {
+      return (
+        <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(73, 38, 145, 0.05)', borderRadius: '16px' }}>
+          <h3 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>הרשמה לאירוע זה מתבצעת בקישור חיצוני</h3>
+          {event.external_registration_link ? (
+            <button
+              className="btn btn-secondary"
+              style={{ padding: '1rem 2rem', fontSize: '1.2rem', borderRadius: '12px', display: 'inline-flex', gap: '0.5rem', alignItems: 'center' }}
+              onClick={() => window.open(event.external_registration_link!, '_blank')}
+            >
+              להרשמה לחץ כאן <ArrowRight size={20} />
+            </button>
+          ) : (
+            <p style={{ color: 'red' }}>קישור ההרשמה טרם פורסם</p>
+          )}
         </div>
       );
     }

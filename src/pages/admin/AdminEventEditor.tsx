@@ -38,6 +38,7 @@ const AdminEventEditor = () => {
   // Tags, RSVP, Images
   const [tags, setTags] = useState<string[]>([]);
   const [registrationMode, setRegistrationMode] = useState('form'); 
+  const [externalLink, setExternalLink] = useState('');
   const [headerImage, setHeaderImage] = useState<File | null>(null);
   const [flyerImage, setFlyerImage] = useState<File | null>(null);
   
@@ -124,6 +125,7 @@ const AdminEventEditor = () => {
         setClosedMessage(data.closed_message || '');
         setTags(data.tags || []);
         setRegistrationMode(data.registration_mode || 'form');
+        setExternalLink(data.external_registration_link || '');
         setExistingHeaderUrl(data.header_image_url);
         setExistingFlyerUrl(data.flyer_image_url);
         setRegistrationDeadline(data.registration_deadline ? new Date(new Date(data.registration_deadline).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '');
@@ -196,6 +198,7 @@ const AdminEventEditor = () => {
         header_image_url: finalHeaderUrl,
         flyer_image_url: finalFlyerUrl,
         registration_mode: registrationMode,
+        external_registration_link: registrationMode === 'external' ? externalLink : null,
         form_config: registrationMode === 'form' ? fields : [],
         audience: audience,  // TEXT[] array, empty = everyone
         is_featured: isFeatured,
@@ -296,6 +299,7 @@ const AdminEventEditor = () => {
     setDescription(t.description || ''); setRequiresApproval(t.requiresApproval || false);
     setMaxRegistrants(t.maxRegistrants || ''); setClosedMessage(t.closedMessage || '');
     setTags(t.tags || []); setRegistrationMode(t.registrationMode || 'form');
+    setExternalLink(t.externalLink || '');
     setFields(t.fields || []); setRegistrationDeadline(t.registrationDeadline || '');
     setShowTemplateModal(false);
     toast.success(`תבנית "${name}" נטענה! עדכני תאריך ושעה ושמרי.`);
@@ -604,8 +608,29 @@ const AdminEventEditor = () => {
                     <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>אירוע פתוח, אין צורך להירשם.</div>
                   </div>
                 </label>
+                <label className="radio-label" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', cursor: 'pointer' }}>
+                  <input type="radio" name="regMode" value="external" checked={registrationMode === 'external'} onChange={(e) => setRegistrationMode(e.target.value)} style={{ width: '20px', height: '20px', accentColor: 'var(--primary)' }} />
+                  <div>
+                    <strong>הרשמה חיצונית (קישור)</strong>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>הסטודנטים יופנו להרשמה דרך מערכת חיצונית (למשל, טיקצ'אק).</div>
+                  </div>
+                </label>
               </div>
             </div>
+            
+            {registrationMode === 'external' && (
+              <div className="form-group animate-fade-in-up" style={{ width: '100%', marginTop: '1rem' }}>
+                <label className="form-label">קישור להרשמה חיצונית <span className="required-star">*</span></label>
+                <input 
+                  type="url" 
+                  className="form-control" 
+                  placeholder="https://example.com/register" 
+                  value={externalLink} 
+                  onChange={e => setExternalLink(e.target.value)} 
+                  required 
+                />
+              </div>
+            )}
           </div>
 
           {(registrationMode === 'form' || registrationMode === 'rsvp') && (

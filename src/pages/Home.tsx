@@ -13,7 +13,8 @@ interface EventData {
   location: string;
   category: string;
   description?: string;
-  registration_mode?: 'form' | 'rsvp' | 'none';
+  registration_mode?: 'form' | 'rsvp' | 'none' | 'external';
+  external_registration_link?: string | null;
 }
 
 interface CommunityPost {
@@ -64,7 +65,7 @@ const Home = () => {
       const [eventsRes, postsRes, announcementsRes] = await Promise.all([
         supabase
           .from('events')
-          .select('id, title, event_date, event_time, location, category, description, registration_mode')
+          .select('id, title, event_date, event_time, location, category, description, registration_mode, external_registration_link')
           .gte('event_date', todayStr)
           .neq('category', 'other')
           .order('event_date', { ascending: true })
@@ -180,7 +181,13 @@ const Home = () => {
               </div>
 
               <div
-                onClick={() => navigate(`/events/${nextEvent.id}`)}
+                onClick={() => {
+                  if (nextEvent.registration_mode === 'external' && nextEvent.external_registration_link) {
+                    window.open(nextEvent.external_registration_link, '_blank');
+                  } else {
+                    navigate(`/events/${nextEvent.id}`);
+                  }
+                }}
                 style={{
                   background: 'linear-gradient(135deg, var(--primary) 0%, #6B3FA0 50%, var(--primary-light) 100%)',
                   borderRadius: '20px',
@@ -346,7 +353,13 @@ const Home = () => {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + i * 0.08 }}
-                    onClick={() => navigate(`/events/${event.id}`)}
+                    onClick={() => {
+                      if (event.registration_mode === 'external' && event.external_registration_link) {
+                        window.open(event.external_registration_link, '_blank');
+                      } else {
+                        navigate(`/events/${event.id}`);
+                      }
+                    }}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '1rem',
                       background: 'var(--surface)',

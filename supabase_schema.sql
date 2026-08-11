@@ -296,3 +296,9 @@ ALTER TABLE public.events ADD COLUMN IF NOT EXISTS registration_deadline TIMESTA
 -- ==========================================
 ALTER TABLE public.gallery_posts ADD COLUMN IF NOT EXISTS is_cover BOOLEAN DEFAULT false;
 
+-- ==========================================
+-- PHASE 10 MIGRATION: External Registration
+-- ==========================================
+ALTER TABLE public.events DROP CONSTRAINT IF EXISTS events_registration_mode_check;
+ALTER TABLE public.events ADD CONSTRAINT events_registration_mode_check CHECK (registration_mode IN ('form', 'rsvp', 'none', 'external'));
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS external_registration_link TEXT;

@@ -13,7 +13,8 @@ interface EventData {
   location: string;
   category: string;
   description?: string;
-  registration_mode?: 'form' | 'rsvp' | 'none';
+  registration_mode?: 'form' | 'rsvp' | 'none' | 'external';
+  external_registration_link?: string | null;
   tags?: string[];
   audience?: string;
   is_featured?: boolean;
@@ -46,7 +47,7 @@ const Events = () => {
 
       const { data: eventsData, error } = await supabase
         .from('events')
-        .select('id, title, event_date, event_time, location, category, description, registration_mode, tags, audience, is_featured')
+        .select('id, title, event_date, event_time, location, category, description, registration_mode, external_registration_link, tags, audience, is_featured')
         .gte('event_date', todayStr)
         .neq('category', 'other')
         .order('is_featured', { ascending: false })
@@ -148,6 +149,7 @@ const Events = () => {
                   category={event.category}
                   description={event.description}
                   registrationMode={event.registration_mode}
+                  externalLink={event.external_registration_link}
                   tags={event.tags}
                   isAdmin={profile?.is_admin}
                   isFeatured={event.is_featured}
