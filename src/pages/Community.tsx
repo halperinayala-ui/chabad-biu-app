@@ -232,7 +232,8 @@ const Community = () => {
       const eventsData: any[] = [];
       if (pastEvents && pastEvents.length > 0) {
         for (const ev of pastEvents) {
-          const { data: posts } = await supabase
+          let postsData = null;
+          const { data: posts, error: postsErr } = await supabase
             .from('gallery_posts')
             .select(`
               id, image_url, caption, created_at, is_cover,
@@ -241,6 +242,20 @@ const Community = () => {
             .eq('event_id', ev.id)
             .order('is_cover', { ascending: false, nullsFirst: false })
             .order('created_at', { ascending: false });
+
+          if (postsErr && (postsErr.code === 'PGRST204' || postsErr.message?.includes('is_cover'))) {
+            const { data: fallbackPosts } = await supabase
+              .from('gallery_posts')
+              .select(`
+                id, image_url, caption, created_at,
+                profiles (full_name, gender, is_admin)
+              `)
+              .eq('event_id', ev.id)
+              .order('created_at', { ascending: false });
+            postsData = fallbackPosts;
+          } else {
+            postsData = posts;
+          }
 
           const { data: comments } = await supabase
             .from('comments')
@@ -258,7 +273,7 @@ const Community = () => {
             event_date: ev.event_date,
             category: ev.category,
             allow_student_uploads: ev.allow_student_uploads || false,
-            posts: (posts || []) as any[],
+            posts: (postsData || []) as any[],
             comments: (comments || []) as any[]
           });
         }
