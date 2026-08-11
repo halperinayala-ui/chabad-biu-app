@@ -121,7 +121,7 @@ const EventDetails = () => {
           .neq('status', 'rejected');
         if (count !== null && count >= event.max_registrants) {
           setRegisteredCount(count);
-          toast.error(`מצטערים, ההרשמה לאירוע זה הגיעה למכסה המרבית (${event.max_registrants}/${event.max_registrants}) ונסגרה.`);
+          toast.error('מצטערים, ההרשמה לאירוע זה הגיעה למכסה המרבית ונסגרה.');
           setSubmitting(false);
           return;
         }
@@ -232,7 +232,7 @@ const EventDetails = () => {
           .neq('status', 'rejected');
         if (count !== null && count >= event.max_registrants) {
           setRegisteredCount(count);
-          toast.error(`מצטערים, ההרשמה לאירוע זה הגיעה למכסה המרבית (${event.max_registrants}/${event.max_registrants}) ונסגרה.`);
+          toast.error('מצטערים, ההרשמה לאירוע זה הגיעה למכסה המרבית ונסגרה.');
           setSubmitting(false);
           return;
         }
@@ -460,13 +460,8 @@ const EventDetails = () => {
           <Users size={48} style={{ color: '#e74c3c', opacity: 0.6, margin: '0 auto 1rem', display: 'block' }} />
           <h3 style={{ color: '#e74c3c', marginBottom: '0.75rem', fontSize: '1.4rem' }}>ההרשמה מלאה</h3>
           <p style={{ color: 'var(--text-primary)', fontSize: '1.05rem', lineHeight: 1.5, whiteSpace: 'pre-line' }}>
-            {event.closed_message || `הגענו למכסת המשתתפים המרבית עבור אירוע זה (${registeredCount}/${event.max_registrants}).`}
+            {event.closed_message || 'לצערנו אזלו המקומות לאירוע זה, ההרשמה נסגרה.'}
           </p>
-          {event.closed_message && (
-            <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '1rem', fontSize: '0.85rem' }}>
-              (הגענו למכסה המרבית של {event.max_registrants} נרשמים)
-            </small>
-          )}
         </motion.div>
       );
     }
