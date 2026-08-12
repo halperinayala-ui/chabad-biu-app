@@ -30,17 +30,33 @@
   background-clip: text;
 }
 
-.cal-month-label {
+.cal-month-jump-row {
   display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 0.6rem;
   flex-wrap: wrap;
+  margin-top: 0.2rem;
 }
 
-.cal-heb-month {
-  font-size: 1.3rem;
+.cal-select-picker {
+  padding: 0.35rem 0.75rem;
+  border-radius: 10px;
+  border: 1.5px solid rgba(73, 38, 145, 0.2);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--primary);
   font-weight: 800;
-  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cal-select-picker:hover,
+.cal-select-picker:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(73, 38, 145, 0.1);
+  background: white;
 }
 
 .cal-greg-month {
@@ -582,9 +598,9 @@
   align-items: flex-start;
   gap: 0.75rem;
   padding: 0.7rem 1rem;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.07);
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   position: relative;
 }
 
@@ -624,18 +640,43 @@
   line-height: 1.5;
 }
 
-.plan-event-delete {
-  color: #e74c3c;
-  opacity: 0.5;
-  transition: opacity 0.2s;
+.plan-event-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   flex-shrink: 0;
-  padding: 0.2rem;
-  border-radius: 6px;
 }
 
-.plan-event-delete:hover {
+.plan-event-action-btn {
+  border: none;
+  background: transparent;
+  padding: 0.35rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plan-event-action-btn.edit-btn {
+  color: var(--primary);
+  opacity: 0.7;
+}
+
+.plan-event-action-btn.edit-btn:hover {
   opacity: 1;
-  background: rgba(231, 76, 60, 0.08);
+  background: rgba(73, 38, 145, 0.1);
+}
+
+.plan-event-action-btn.del-btn {
+  color: #e74c3c;
+  opacity: 0.6;
+}
+
+.plan-event-action-btn.del-btn:hover {
+  opacity: 1;
+  background: rgba(231, 76, 60, 0.1);
 }
 
 .delete-confirm {
@@ -678,7 +719,7 @@
   padding: 0.75rem 0;
 }
 
-/* ─── Add Event Form ──────────────────────────────────────────────────────── */
+/* ─── Add / Edit Event Form ───────────────────────────────────────────────── */
 .modal-add-btn {
   display: flex;
   align-items: center;
@@ -748,7 +789,7 @@
   line-height: 1.5;
 }
 
-/* Color picker */
+/* Color picker with labels */
 .color-picker {
   display: flex;
   gap: 0.5rem;
@@ -756,13 +797,16 @@
 }
 
 .color-btn {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 3px solid transparent;
   cursor: pointer;
   transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
   padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .color-btn:hover {
@@ -773,6 +817,13 @@
   border-color: white;
   box-shadow: 0 0 0 2px currentColor, 0 3px 10px rgba(0,0,0,0.25);
   transform: scale(1.1);
+}
+
+.color-active-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-top: 0.35rem;
+  display: block;
 }
 
 .form-error {
@@ -795,7 +846,7 @@
   font-size: 0.9rem;
 }
 
-/* ─── Monthly Summary ─────────────────────────────────────────────────────── */
+/* ─── Monthly Summary List ─────────────────────────────────────────────────── */
 .cal-month-summary {
   margin-top: 1rem;
 }
@@ -819,12 +870,12 @@
   border-bottom: none;
 }
 
-.summary-item:hover {
-  background: rgba(73, 38, 145, 0.03);
+.clickable-summary-item {
+  cursor: pointer;
 }
 
-.summary-item-holiday {
-  background: rgba(233, 30, 140, 0.03);
+.clickable-summary-item:hover {
+  background: rgba(73, 38, 145, 0.05);
 }
 
 .summary-date {
@@ -889,37 +940,17 @@
   border-radius: 6px;
 }
 
-.summary-holiday-tag {
-  font-size: 0.88rem;
-  font-weight: 800;
-  padding: 0.25rem 0.75rem;
-  border-radius: 10px;
+.summary-action-hint {
+  color: var(--primary);
+  opacity: 0.4;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  padding-right: 0.5rem;
 }
 
-.tag-holiday {
-  background: linear-gradient(135deg, #e91e8c, #492691);
-  color: white;
-}
-
-.tag-fast {
-  background: #2c3e50;
-  color: white;
-}
-
-.tag-chol-hamoed {
-  background: rgba(230, 126, 34, 0.15);
-  color: #d35400;
-}
-
-.tag-minor {
-  background: rgba(39, 174, 96, 0.15);
-  color: #27ae60;
-}
-
-.tag-chabad {
-  background: rgba(73, 38, 145, 0.12);
-  color: #492691;
-  border: 1px solid rgba(73, 38, 145, 0.2);
+.clickable-summary-item:hover .summary-action-hint {
+  opacity: 1;
 }
 
 .summary-empty {
@@ -958,8 +989,9 @@
     font-size: 1.6rem;
   }
 
-  .cal-heb-month {
-    font-size: 1.1rem;
+  .cal-select-picker {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
   }
 
   .rc-badge,

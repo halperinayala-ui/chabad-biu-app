@@ -43,6 +43,17 @@ export const getHebrewYear = (date: Date): string => {
   }
 };
 
+/** Returns the numeric Hebrew year (e.g. 5786) for a given Gregorian date */
+export const getHebrewYearNum = (date: Date): number => {
+  try {
+    const parts = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { year: 'numeric' }).formatToParts(date);
+    const yPart = parts.find(p => p.type === 'year');
+    return yPart ? parseInt(yPart.value, 10) : 5786;
+  } catch {
+    return 5786;
+  }
+};
+
 /** Returns the Hebrew day number (1–30) for a given Gregorian date */
 export const getHebrewDay = (date: Date): number => {
   try {
@@ -73,6 +84,34 @@ export const toDateStr = (date: Date): string => {
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
+};
+
+/** Finds a Gregorian Date matching a given target Hebrew month name and numeric Hebrew year */
+export const findHebrewMonthDate = (targetMonthName: string, targetYearNum: number): Date => {
+  const estGregYear = targetYearNum - 3761;
+  const start = new Date(estGregYear, 8, 1); // Sept 1
+  const end = new Date(estGregYear + 1, 10, 1); // Nov 1 next year
+
+  let cursor = new Date(start);
+  while (cursor <= end) {
+    const m = getHebrewMonthName(cursor);
+    const yNum = getHebrewYearNum(cursor);
+
+    if (m === targetMonthName && yNum === targetYearNum) {
+      return cursor;
+    }
+    cursor.setDate(cursor.getDate() + 4);
+  }
+
+  // Fallback: search broad range
+  cursor = new Date(estGregYear, 0, 1);
+  for (let i = 0; i < 400; i += 3) {
+    const m = getHebrewMonthName(cursor);
+    if (m === targetMonthName) return new Date(cursor);
+    cursor.setDate(cursor.getDate() + 3);
+  }
+
+  return new Date();
 };
 
 // ─── Jewish Holidays Detector ─────────────────────────────────────────────────
@@ -201,6 +240,7 @@ export interface HebrewMonthGridInfo {
   lastDay: Date;
   hebrewMonthName: string;
   hebrewYearName: string;
+  hebrewYearNum: number;
   gregRangeStr: string;
   days: CalendarDay[];
 }
@@ -233,6 +273,7 @@ export const getHebrewCalendarGrid = (refDate: Date): HebrewMonthGridInfo => {
 
   const hebrewMonthName = getHebrewMonthName(firstDay);
   const hebrewYearName = getHebrewYear(firstDay);
+  const hebrewYearNum = getHebrewYearNum(firstDay);
 
   // Gregorian label range
   const fmtGreg = (d: Date) => d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -276,6 +317,7 @@ export const getHebrewCalendarGrid = (refDate: Date): HebrewMonthGridInfo => {
     lastDay,
     hebrewMonthName,
     hebrewYearName,
+    hebrewYearNum,
     gregRangeStr,
     days,
   };
