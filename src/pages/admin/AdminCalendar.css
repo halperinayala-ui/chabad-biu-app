@@ -34,6 +34,7 @@
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .cal-heb-month {
@@ -43,7 +44,7 @@
 }
 
 .cal-greg-month {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--text-secondary);
   font-weight: 500;
 }
@@ -97,7 +98,7 @@
 .cal-legend {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1rem;
   margin-bottom: 1rem;
   flex-wrap: wrap;
 }
@@ -121,20 +122,31 @@
 .sys-dot { background: #492691; }
 .plan-dot { background: #e91e8c; }
 
+.holiday-legend {
+  background: linear-gradient(135deg, rgba(233, 30, 140, 0.12), rgba(73, 38, 145, 0.12));
+  border: 1px solid rgba(233, 30, 140, 0.3);
+  padding: 0.18rem 0.65rem;
+  border-radius: 8px;
+  color: #b0006d;
+  font-weight: 700;
+}
+
 .shab-legend {
   background: rgba(255, 215, 0, 0.15);
   border: 1px solid rgba(255, 193, 7, 0.4);
-  padding: 0.15rem 0.6rem;
+  padding: 0.18rem 0.65rem;
   border-radius: 8px;
   color: #b8860b;
+  font-weight: 700;
 }
 
 .rc-legend {
   background: rgba(73, 38, 145, 0.08);
   border: 1px solid rgba(73, 38, 145, 0.2);
-  padding: 0.15rem 0.6rem;
+  padding: 0.18rem 0.65rem;
   border-radius: 8px;
   color: var(--primary);
+  font-weight: 700;
 }
 
 /* ─── Calendar Grid Container ─────────────────────────────────────────────── */
@@ -181,7 +193,7 @@
 
 /* ─── Individual Day Cell ─────────────────────────────────────────────────── */
 .cal-day {
-  min-height: 90px;
+  min-height: 96px;
   padding: 0.5rem 0.4rem 0.3rem;
   border-left: 1px solid rgba(73, 38, 145, 0.06);
   border-bottom: 1px solid rgba(73, 38, 145, 0.06);
@@ -200,7 +212,6 @@
   z-index: 1;
 }
 
-/* Every 7th cell (Saturday) — no left border needed */
 .cal-day:nth-child(7n) {
   border-left: none;
 }
@@ -208,7 +219,7 @@
 /* Cells outside current month */
 .cal-day.other-month {
   background: rgba(0, 0, 0, 0.018);
-  opacity: 0.55;
+  opacity: 0.45;
 }
 
 /* Shabbat column */
@@ -230,6 +241,15 @@
 .cal-day.rosh-chodesh .heb-num {
   color: var(--primary);
   font-weight: 900;
+}
+
+/* Holiday cell background accent */
+.cal-day.has-holiday.holiday-type-holiday {
+  background: rgba(233, 30, 140, 0.05);
+}
+
+.cal-day.has-holiday.holiday-type-chabad {
+  background: rgba(127, 88, 194, 0.06);
 }
 
 /* ─── Day Cell Inner Elements ─────────────────────────────────────────────── */
@@ -286,6 +306,49 @@
   font-size: 0.7rem;
   font-weight: 800;
   margin-top: 1px;
+}
+
+/* ─── Holiday Pill on Day Cell ────────────────────────────────────────────── */
+.cal-holiday-pill {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
+  margin-top: 2px;
+}
+
+.holiday-holiday {
+  background: linear-gradient(135deg, #e91e8c, #492691);
+  color: white;
+  box-shadow: 0 2px 6px rgba(233, 30, 140, 0.25);
+}
+
+.holiday-fast {
+  background: rgba(50, 50, 50, 0.85);
+  color: white;
+}
+
+.holiday-chol-hamoed {
+  background: rgba(230, 126, 34, 0.15);
+  color: #d35400;
+  border: 1px solid rgba(230, 126, 34, 0.3);
+}
+
+.holiday-minor {
+  background: rgba(39, 174, 96, 0.12);
+  color: #27ae60;
+  border: 1px solid rgba(39, 174, 96, 0.25);
+}
+
+.holiday-chabad {
+  background: linear-gradient(135deg, rgba(73, 38, 145, 0.18), rgba(127, 88, 194, 0.18));
+  color: #492691;
+  border: 1px solid rgba(73, 38, 145, 0.3);
 }
 
 /* ─── Event Pills on Day Cell ─────────────────────────────────────────────── */
@@ -419,6 +482,46 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+/* Modal Holiday Banner */
+.modal-holiday-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.holiday-banner-holiday {
+  background: linear-gradient(135deg, #e91e8c, #492691);
+  color: white;
+  box-shadow: 0 4px 14px rgba(233, 30, 140, 0.3);
+}
+
+.holiday-banner-fast {
+  background: #2c3e50;
+  color: white;
+}
+
+.holiday-banner-chol-hamoed {
+  background: rgba(230, 126, 34, 0.15);
+  color: #d35400;
+  border: 1px solid rgba(230, 126, 34, 0.3);
+}
+
+.holiday-banner-minor {
+  background: rgba(39, 174, 96, 0.12);
+  color: #27ae60;
+  border: 1px solid rgba(39, 174, 96, 0.25);
+}
+
+.holiday-banner-chabad {
+  background: linear-gradient(135deg, rgba(73, 38, 145, 0.15), rgba(127, 88, 194, 0.15));
+  color: var(--primary);
+  border: 1.5px solid rgba(73, 38, 145, 0.25);
 }
 
 /* ─── Modal Sections ──────────────────────────────────────────────────────── */
@@ -720,6 +823,10 @@
   background: rgba(73, 38, 145, 0.03);
 }
 
+.summary-item-holiday {
+  background: rgba(233, 30, 140, 0.03);
+}
+
 .summary-date {
   display: flex;
   flex-direction: column;
@@ -771,6 +878,39 @@
   border-radius: 6px;
 }
 
+.summary-holiday-tag {
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 0.25rem 0.75rem;
+  border-radius: 10px;
+}
+
+.tag-holiday {
+  background: linear-gradient(135deg, #e91e8c, #492691);
+  color: white;
+}
+
+.tag-fast {
+  background: #2c3e50;
+  color: white;
+}
+
+.tag-chol-hamoed {
+  background: rgba(230, 126, 34, 0.15);
+  color: #d35400;
+}
+
+.tag-minor {
+  background: rgba(39, 174, 96, 0.15);
+  color: #27ae60;
+}
+
+.tag-chabad {
+  background: rgba(73, 38, 145, 0.12);
+  color: #492691;
+  border: 1px solid rgba(73, 38, 145, 0.2);
+}
+
 .summary-empty {
   text-align: center;
   color: var(--text-secondary);
@@ -781,7 +921,7 @@
 /* ─── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .cal-day {
-    min-height: 68px;
+    min-height: 72px;
     padding: 0.35rem 0.25rem 0.2rem;
   }
 
@@ -791,6 +931,11 @@
 
   .cal-day-greg {
     font-size: 0.64rem;
+  }
+
+  .cal-holiday-pill {
+    font-size: 0.52rem;
+    padding: 1px 3px;
   }
 
   .cal-event-pill {

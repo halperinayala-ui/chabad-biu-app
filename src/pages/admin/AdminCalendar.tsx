@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, Plus, X, CalendarDays, Clock, Tag, Trash2 } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Plus, X, CalendarDays, Clock, Tag, Trash2, Sparkles } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -47,7 +47,7 @@ const COLUMN_HEADERS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 const AdminCalendar = () => {
   const { profile } = useAuth();
 
-  // State for the currently viewed Hebrew month (represented by any date in that month)
+  // State for currently viewed Hebrew month
   const [refDate, setRefDate] = useState<Date>(new Date());
 
   const [calEvents, setCalEvents] = useState<CalendarEvent[]>([]);
@@ -113,14 +113,12 @@ const AdminCalendar = () => {
   // ─── Navigation ─────────────────────────────────────────────────────────────
 
   const prevMonth = () => {
-    // Go to the last day of the previous Hebrew month
     const prev = new Date(firstDay);
     prev.setDate(prev.getDate() - 1);
     setRefDate(prev);
   };
 
   const nextMonth = () => {
-    // Go to the 1st day of the next Hebrew month
     const next = new Date(lastDay);
     next.setDate(next.getDate() + 1);
     setRefDate(next);
@@ -243,6 +241,7 @@ const AdminCalendar = () => {
       <div className="cal-legend">
         <span className="legend-item"><span className="legend-dot sys-dot" />אירוע רשום</span>
         <span className="legend-item"><span className="legend-dot plan-dot" />אירוע תכנון</span>
+        <span className="legend-item holiday-legend">🍷 חגים ומועדים</span>
         <span className="legend-item shab-legend">שבת</span>
         <span className="legend-item rc-legend">ר"ח</span>
       </div>
@@ -272,6 +271,7 @@ const AdminCalendar = () => {
                     day.isToday ? 'today' : '',
                     day.isShabbat ? 'shabbat' : '',
                     day.isRoshChodesh && day.isCurrentMonth ? 'rosh-chodesh' : '',
+                    day.holiday ? `has-holiday holiday-type-${day.holiday.type}` : '',
                   ].filter(Boolean).join(' ')}
                   onClick={() => handleDayClick(day)}
                   whileHover={{ scale: 1.02 }}
@@ -290,6 +290,13 @@ const AdminCalendar = () => {
 
                   {/* Gregorian date */}
                   <div className="cal-day-greg">{day.gregDay}</div>
+
+                  {/* Holiday Badge (if present) */}
+                  {day.holiday && (
+                    <span className={`cal-holiday-pill holiday-${day.holiday.type}`} title={day.holiday.name}>
+                      ✨ {day.holiday.name}
+                    </span>
+                  )}
 
                   {/* Events dots / pills */}
                   {totalEvents > 0 && (
@@ -357,6 +364,16 @@ const AdminCalendar = () => {
 
               <div className="cal-modal-body">
 
+                {/* Holiday banner inside modal */}
+                {dayModal.day.holiday && (
+                  <div className={`modal-holiday-banner holiday-banner-${dayModal.day.holiday.type}`}>
+                    <Sparkles size={18} />
+                    <div>
+                      <strong>{dayModal.day.holiday.name}</strong>
+                    </div>
+                  </div>
+                )}
+
                 {/* System events */}
                 {dayModal.sysEvents.length > 0 && (
                   <section className="modal-section">
@@ -414,7 +431,7 @@ const AdminCalendar = () => {
                 )}
 
                 {dayModal.calEvents.length === 0 && dayModal.sysEvents.length === 0 && !showForm && (
-                  <p className="modal-empty">אין אירועים ביום זה</p>
+                  <p className="modal-empty">אין אירועים רשומים ביום זה</p>
                 )}
 
                 {/* Add event form */}
@@ -500,23 +517,42 @@ const AdminCalendar = () => {
       <div className="cal-month-summary">
         <h2 className="section-title">
           <CalendarDays size={18} style={{ marginLeft: '0.4rem', verticalAlign: 'middle' }} />
-          אירועים בחודש {hebrewMonthName}
+          מועדים ואירועים בחודש {hebrewMonthName}
         </h2>
 
         {(() => {
           const monthSys = sysEvents.filter(e => e.event_date >= firstDayStr && e.event_date <= lastDayStr);
           const monthCal = calEvents.filter(e => e.event_date >= firstDayStr && e.event_date <= lastDayStr);
 
-          if (monthSys.length === 0 && monthCal.length === 0) {
-            return <p className="summary-empty">אין אירועים מתוכננים בחודש {hebrewMonthName}</p>;
-          }
+          // Get all holidays in this Hebrew month from grid
+          const monthHolidays = grid
+            .filter(d => d.isCurrentMonth && d.holiday)
+            .map(d => ({
+              dateStr: d.dateStr,
+              title: d.holiday!.name,
+              type: 'holiday' as const,
+              holidayType: d.holiday!.type,
+            }));
 
           // Merge & sort
-          type MergedItem = { dateStr: string; title: string; type: 'sys' | 'cal'; color?: string; time?: string };
+          type MergedItem = {
+            dateStr: string;
+            title: string;
+            type: 'sys' | 'cal' | 'holiday';
+            color?: string;
+            time?: string;
+            holidayType?: string;
+          };
+
           const merged: MergedItem[] = [
+            ...monthHolidays,
             ...monthSys.map(e => ({ dateStr: e.event_date, title: e.title, type: 'sys' as const })),
             ...monthCal.map(e => ({ dateStr: e.event_date, title: e.title, type: 'cal' as const, color: e.color, time: e.event_time })),
           ].sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+
+          if (merged.length === 0) {
+            return <p className="summary-empty">אין אירועים או חגים בחודש {hebrewMonthName}</p>;
+          }
 
           return (
             <div className="summary-list glass">
@@ -525,18 +561,26 @@ const AdminCalendar = () => {
                 const dt = new Date(y, m - 1, d);
                 const dayName = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'][dt.getDay()];
                 return (
-                  <div key={i} className="summary-item">
+                  <div key={i} className={`summary-item${item.type === 'holiday' ? ' summary-item-holiday' : ''}`}>
                     <div className="summary-date">
                       <span className="summary-day-num">{d}</span>
                       <span className="summary-day-name">{dayName}</span>
                     </div>
                     <div className="summary-info">
-                      <span
-                        className="summary-type-dot"
-                        style={{ background: item.type === 'cal' ? item.color : '#492691' }}
-                      />
-                      <span className="summary-title">{item.title}</span>
-                      {item.time && <span className="summary-time">{item.time}</span>}
+                      {item.type === 'holiday' ? (
+                        <span className={`summary-holiday-tag tag-${item.holidayType}`}>
+                          ✨ {item.title}
+                        </span>
+                      ) : (
+                        <>
+                          <span
+                            className="summary-type-dot"
+                            style={{ background: item.type === 'cal' ? item.color : '#492691' }}
+                          />
+                          <span className="summary-title">{item.title}</span>
+                          {item.time && <span className="summary-time">{item.time}</span>}
+                        </>
+                      )}
                     </div>
                   </div>
                 );

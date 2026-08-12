@@ -75,6 +75,113 @@ export const toDateStr = (date: Date): string => {
   return `${y}-${m}-${d}`;
 };
 
+// ─── Jewish Holidays Detector ─────────────────────────────────────────────────
+
+export interface JewishHoliday {
+  name: string;
+  type: 'holiday' | 'fast' | 'chol-hamoed' | 'minor' | 'chabad';
+}
+
+export const getHebrewHoliday = (date: Date): JewishHoliday | null => {
+  const hebDay = getHebrewDay(date);
+  const hebMonth = getHebrewMonthName(date);
+  const dayOfWeek = date.getDay(); // 0=Sun, 6=Sat
+
+  if (hebMonth === 'תשרי') {
+    if (hebDay === 1 || hebDay === 2) return { name: 'ראש השנה', type: 'holiday' };
+    if (hebDay === 3 && dayOfWeek !== 6) return { name: 'צום גדליה', type: 'fast' };
+    if (hebDay === 4 && dayOfWeek === 0) return { name: 'צום גדליה (נדחה)', type: 'fast' };
+    if (hebDay === 9) return { name: 'ערב יום כיפור', type: 'minor' };
+    if (hebDay === 10) return { name: 'יום כיפור', type: 'holiday' };
+    if (hebDay === 14) return { name: 'ערב סוכות', type: 'minor' };
+    if (hebDay === 15) return { name: 'חג הסוכות', type: 'holiday' };
+    if (hebDay >= 16 && hebDay <= 20) return { name: 'חול המועד סוכות', type: 'chol-hamoed' };
+    if (hebDay === 21) return { name: 'הושענא רבה', type: 'minor' };
+    if (hebDay === 22) return { name: 'שמיני עצרת / שמחת תורה', type: 'holiday' };
+  }
+
+  if (hebMonth === 'כסלו') {
+    if (hebDay === 19) return { name: 'י״ט כסלו (חג הגאולה)', type: 'chabad' };
+    if (hebDay >= 25) {
+      const candle = hebDay - 24;
+      const candleNames = ['', 'ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שביעי', 'שמיני'];
+      return { name: `חנוכה (נר ${candleNames[candle] || candle})`, type: 'holiday' };
+    }
+  }
+
+  if (hebMonth === 'טבת') {
+    if (hebDay <= 3) {
+      let cursor = new Date(date);
+      let candle = 0;
+      while (true) {
+        const m = getHebrewMonthName(cursor);
+        const dy = getHebrewDay(cursor);
+        if (m === 'כסלו' && dy === 25) {
+          candle = Math.round((date.getTime() - cursor.getTime()) / 86400000) + 1;
+          break;
+        }
+        cursor.setDate(cursor.getDate() - 1);
+        if (Math.round((date.getTime() - cursor.getTime()) / 86400000) > 10) break;
+      }
+      if (candle >= 1 && candle <= 8) {
+        const candleNames = ['', 'ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שביעי', 'שמיני'];
+        return { name: `חנוכה (נר ${candleNames[candle] || candle})`, type: 'holiday' };
+      }
+    }
+    if (hebDay === 10) return { name: 'צום עשרה בטבת', type: 'fast' };
+  }
+
+  if (hebMonth === 'שבט') {
+    if (hebDay === 15) return { name: 'ט״ו בשבט', type: 'minor' };
+  }
+
+  if (hebMonth === 'אדר' || hebMonth === 'אדר ב׳') {
+    if (hebDay === 13 && dayOfWeek !== 6) return { name: 'תענית אסתר', type: 'fast' };
+    if (hebDay === 11 && dayOfWeek === 4) return { name: 'תענית אסתר (מוקדמת)', type: 'fast' };
+    if (hebDay === 14) return { name: 'פורים', type: 'holiday' };
+    if (hebDay === 15) return { name: 'שושן פורים', type: 'holiday' };
+  }
+
+  if (hebMonth === 'אדר א׳') {
+    if (hebDay === 14) return { name: 'פורים קטן', type: 'minor' };
+    if (hebDay === 15) return { name: 'שושן פורים קטן', type: 'minor' };
+  }
+
+  if (hebMonth === 'ניסן') {
+    if (hebDay === 11) return { name: 'י״א ניסן (יום הולדת הרבי)', type: 'chabad' };
+    if (hebDay === 14) return { name: 'ערב פסח', type: 'minor' };
+    if (hebDay === 15) return { name: 'חג הפסח', type: 'holiday' };
+    if (hebDay >= 16 && hebDay <= 20) return { name: 'חול המועד פסח', type: 'chol-hamoed' };
+    if (hebDay === 21) return { name: 'שביעי של פסח', type: 'holiday' };
+  }
+
+  if (hebMonth === 'אייר') {
+    if (hebDay === 18) return { name: 'ל״ג בעומר', type: 'minor' };
+  }
+
+  if (hebMonth === 'סיוון') {
+    if (hebDay === 5) return { name: 'ערב שבועות', type: 'minor' };
+    if (hebDay === 6) return { name: 'חג השבועות', type: 'holiday' };
+  }
+
+  if (hebMonth === 'תמוז') {
+    if (hebDay === 3) return { name: 'ג׳ תמוז (יום ההילולא)', type: 'chabad' };
+    if (hebDay === 12 || hebDay === 13) return { name: 'י״ב-י״ג תמוז (חג הגאולה)', type: 'chabad' };
+    if (hebDay === 17 && dayOfWeek !== 6) return { name: 'צום י״ז בתמוז', type: 'fast' };
+    if (hebDay === 18 && dayOfWeek === 0) return { name: 'צום י״ז בתמוז (נדחה)', type: 'fast' };
+  }
+
+  if (hebMonth === 'אב') {
+    if (hebDay === 9 && dayOfWeek !== 6) return { name: 'צום תשעה באב', type: 'fast' };
+    if (hebDay === 10 && dayOfWeek === 0) return { name: 'צום תשעה באב (נדחה)', type: 'fast' };
+    if (hebDay === 15) return { name: 'ט״ו באב', type: 'minor' };
+  }
+
+  return null;
+};
+
+// ─── Grid Builder ────────────────────────────────────────────────────────────
+
 export interface CalendarDay {
   date: Date;
   dateStr: string;        // YYYY-MM-DD
@@ -82,10 +189,11 @@ export interface CalendarDay {
   hebrewMonth: string;    // e.g. "אלול"
   gregDay: number;
   gregMonth: number;
-  isCurrentMonth: boolean; // Belongs to the targeted Hebrew month
+  isCurrentMonth: boolean; // Belongs to targeted Hebrew month
   isToday: boolean;
   isShabbat: boolean;
   isRoshChodesh: boolean;
+  holiday: JewishHoliday | null;
 }
 
 export interface HebrewMonthGridInfo {
@@ -98,9 +206,7 @@ export interface HebrewMonthGridInfo {
 }
 
 /**
- * Builds a true Hebrew-month-centered calendar grid.
- * Finds 1st of Hebrew month to last day of Hebrew month,
- * and pads with Sunday-Saturday bounds.
+ * Builds a true Hebrew-month-centered calendar grid with full holiday annotations.
  */
 export const getHebrewCalendarGrid = (refDate: Date): HebrewMonthGridInfo => {
   const todayStr = toDateStr(new Date());
@@ -159,6 +265,7 @@ export const getHebrewCalendarGrid = (refDate: Date): HebrewMonthGridInfo => {
       isToday: dateStr === todayStr,
       isShabbat: isShabbat(curr),
       isRoshChodesh: isRoshChodesh(curr),
+      holiday: getHebrewHoliday(curr),
     });
 
     curr.setDate(curr.getDate() + 1);
