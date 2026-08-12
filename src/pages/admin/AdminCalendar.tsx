@@ -1,11 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, Plus, X, CalendarDays, Clock, Tag, Trash2, ChevronDown } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Plus, X, CalendarDays, Clock, Tag, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import {
-  buildCalendarGrid,
-  getCalendarMonthTitle,
+  getHebrewCalendarGrid,
   toDateStr,
 } from '../../utils/dateUtils';
 import type { CalendarDay } from '../../utils/dateUtils';
@@ -47,10 +46,9 @@ const COLUMN_HEADERS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 
 const AdminCalendar = () => {
   const { profile } = useAuth();
-  const today = new Date();
 
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  // State for the currently viewed Hebrew month (represented by any date in that month)
+  const [refDate, setRefDate] = useState<Date>(new Date());
 
   const [calEvents, setCalEvents] = useState<CalendarEvent[]>([]);
   const [sysEvents, setSysEvents] = useState<SystemEvent[]>([]);
@@ -72,15 +70,24 @@ const AdminCalendar = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const grid = buildCalendarGrid(viewYear, viewMonth);
-  const { hebrewMonth, hebrewYear, gregLabel } = getCalendarMonthTitle(viewYear, viewMonth);
+  // Calculate Hebrew month grid & info
+  const {
+    firstDay,
+    lastDay,
+    hebrewMonthName,
+    hebrewYearName,
+    gregRangeStr,
+    days: grid,
+  } = getHebrewCalendarGrid(refDate);
+
+  const firstDayStr = toDateStr(firstDay);
+  const lastDayStr = toDateStr(lastDay);
 
   // ─── Fetch ──────────────────────────────────────────────────────────────────
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch calendar_events for this month + neighbors (load 3 months for smooth nav)
       const { data: cal } = await supabase
         .from('calendar_events')
         .select('id, title, event_date, event_time, color, notes')
@@ -106,18 +113,21 @@ const AdminCalendar = () => {
   // ─── Navigation ─────────────────────────────────────────────────────────────
 
   const prevMonth = () => {
-    if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11); }
-    else setViewMonth(m => m - 1);
+    // Go to the last day of the previous Hebrew month
+    const prev = new Date(firstDay);
+    prev.setDate(prev.getDate() - 1);
+    setRefDate(prev);
   };
 
   const nextMonth = () => {
-    if (viewMonth === 11) { setViewYear(y => y + 1); setViewMonth(0); }
-    else setViewMonth(m => m + 1);
+    // Go to the 1st day of the next Hebrew month
+    const next = new Date(lastDay);
+    next.setDate(next.getDate() + 1);
+    setRefDate(next);
   };
 
   const goToToday = () => {
-    setViewYear(today.getFullYear());
-    setViewMonth(today.getMonth());
+    setRefDate(new Date());
   };
 
   // ─── Day click ──────────────────────────────────────────────────────────────
@@ -212,18 +222,18 @@ const AdminCalendar = () => {
       {/* ── Header ── */}
       <div className="cal-header">
         <div className="cal-header-titles">
-          <h1 className="cal-main-title">לוח שנה</h1>
+          <h1 className="cal-main-title">לוח שנה עברי</h1>
           <div className="cal-month-label">
-            <span className="cal-heb-month">{hebrewMonth} {hebrewYear}</span>
-            <span className="cal-greg-month">{gregLabel}</span>
+            <span className="cal-heb-month">חודש {hebrewMonthName} {hebrewYearName}</span>
+            <span className="cal-greg-month">({gregRangeStr})</span>
           </div>
         </div>
         <div className="cal-nav-controls">
-          <button className="cal-nav-btn" onClick={prevMonth} title="חודש קודם">
+          <button className="cal-nav-btn" onClick={prevMonth} title="חודש עברי קודם">
             <ChevronRight size={20} />
           </button>
           <button className="cal-today-btn" onClick={goToToday}>היום</button>
-          <button className="cal-nav-btn" onClick={nextMonth} title="חודש הבא">
+          <button className="cal-nav-btn" onClick={nextMonth} title="חודש עברי הבא">
             <ChevronLeft size={20} />
           </button>
         </div>
@@ -247,7 +257,7 @@ const AdminCalendar = () => {
         </div>
 
         {loading ? (
-          <div className="cal-loading">טוען לוח...</div>
+          <div className="cal-loading">טוען לוח עברי...</div>
         ) : (
           <div className="cal-days-grid">
             {grid.map((day) => {
@@ -490,17 +500,15 @@ const AdminCalendar = () => {
       <div className="cal-month-summary">
         <h2 className="section-title">
           <CalendarDays size={18} style={{ marginLeft: '0.4rem', verticalAlign: 'middle' }} />
-          אירועים החודש
+          אירועים בחודש {hebrewMonthName}
         </h2>
 
         {(() => {
-          // Filter events that fall in viewYear/viewMonth
-          const monthStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
-          const monthSys = sysEvents.filter(e => e.event_date?.startsWith(monthStr));
-          const monthCal = calEvents.filter(e => e.event_date?.startsWith(monthStr));
+          const monthSys = sysEvents.filter(e => e.event_date >= firstDayStr && e.event_date <= lastDayStr);
+          const monthCal = calEvents.filter(e => e.event_date >= firstDayStr && e.event_date <= lastDayStr);
 
           if (monthSys.length === 0 && monthCal.length === 0) {
-            return <p className="summary-empty">אין אירועים מתוכננים החודש</p>;
+            return <p className="summary-empty">אין אירועים מתוכננים בחודש {hebrewMonthName}</p>;
           }
 
           // Merge & sort
