@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   getHebrewCalendarGrid,
+  formatHebrewDate,
   toDateStr,
 } from '../../utils/dateUtils';
 import type { CalendarDay } from '../../utils/dateUtils';
@@ -513,74 +514,54 @@ const AdminCalendar = () => {
         )}
       </AnimatePresence>
 
-      {/* ── Monthly summary sidebar / list ── */}
+      {/* ── Monthly summary list ── */}
       <div className="cal-month-summary">
         <h2 className="section-title">
           <CalendarDays size={18} style={{ marginLeft: '0.4rem', verticalAlign: 'middle' }} />
-          מועדים ואירועים בחודש {hebrewMonthName}
+          אירועים בחודש {hebrewMonthName}
         </h2>
 
         {(() => {
           const monthSys = sysEvents.filter(e => e.event_date >= firstDayStr && e.event_date <= lastDayStr);
           const monthCal = calEvents.filter(e => e.event_date >= firstDayStr && e.event_date <= lastDayStr);
 
-          // Get all holidays in this Hebrew month from grid
-          const monthHolidays = grid
-            .filter(d => d.isCurrentMonth && d.holiday)
-            .map(d => ({
-              dateStr: d.dateStr,
-              title: d.holiday!.name,
-              type: 'holiday' as const,
-              holidayType: d.holiday!.type,
-            }));
-
-          // Merge & sort
+          // Merge & sort ONLY actual events (no automatic holidays in this list)
           type MergedItem = {
             dateStr: string;
             title: string;
-            type: 'sys' | 'cal' | 'holiday';
+            type: 'sys' | 'cal';
             color?: string;
             time?: string;
-            holidayType?: string;
           };
 
           const merged: MergedItem[] = [
-            ...monthHolidays,
             ...monthSys.map(e => ({ dateStr: e.event_date, title: e.title, type: 'sys' as const })),
             ...monthCal.map(e => ({ dateStr: e.event_date, title: e.title, type: 'cal' as const, color: e.color, time: e.event_time })),
           ].sort((a, b) => a.dateStr.localeCompare(b.dateStr));
 
           if (merged.length === 0) {
-            return <p className="summary-empty">אין אירועים או חגים בחודש {hebrewMonthName}</p>;
+            return <p className="summary-empty">אין אירועים מתוכננים בחודש {hebrewMonthName}</p>;
           }
 
           return (
             <div className="summary-list glass">
               {merged.map((item, i) => {
-                const [y, m, d] = item.dateStr.split('-').map(Number);
-                const dt = new Date(y, m - 1, d);
-                const dayName = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'][dt.getDay()];
+                const { dayName, hebrewDate, gregorian } = formatHebrewDate(item.dateStr);
+                const shortGreg = gregorian.slice(0, 5); // DD.MM
+
                 return (
-                  <div key={i} className={`summary-item${item.type === 'holiday' ? ' summary-item-holiday' : ''}`}>
+                  <div key={i} className="summary-item">
                     <div className="summary-date">
-                      <span className="summary-day-num">{d}</span>
-                      <span className="summary-day-name">{dayName}</span>
+                      <span className="summary-heb-date">{hebrewDate}</span>
+                      <span className="summary-greg-sub">יום {dayName} | {shortGreg}</span>
                     </div>
                     <div className="summary-info">
-                      {item.type === 'holiday' ? (
-                        <span className={`summary-holiday-tag tag-${item.holidayType}`}>
-                          ✨ {item.title}
-                        </span>
-                      ) : (
-                        <>
-                          <span
-                            className="summary-type-dot"
-                            style={{ background: item.type === 'cal' ? item.color : '#492691' }}
-                          />
-                          <span className="summary-title">{item.title}</span>
-                          {item.time && <span className="summary-time">{item.time}</span>}
-                        </>
-                      )}
+                      <span
+                        className="summary-type-dot"
+                        style={{ background: item.type === 'cal' ? item.color : '#492691' }}
+                      />
+                      <span className="summary-title">{item.title}</span>
+                      {item.time && <span className="summary-time">{item.time}</span>}
                     </div>
                   </div>
                 );
