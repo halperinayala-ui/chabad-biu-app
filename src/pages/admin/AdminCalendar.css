@@ -330,10 +330,10 @@
 .cal-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  z-index: 1000;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 3000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -813,7 +813,7 @@
 
   .cal-modal {
     max-width: 100%;
-    border-radius: 20px 20px 0 0;
+    border-radius: 24px 24px 0 0;
     position: fixed;
     bottom: 0;
     left: 0;
@@ -821,8 +821,13 @@
     max-height: 85vh;
   }
 
+  .cal-modal-body {
+    padding: 1.25rem 1.5rem calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+
   .cal-modal-overlay {
     align-items: flex-end;
     padding: 0;
+    z-index: 3000;
   }
 }
