@@ -129,11 +129,29 @@ const AdminCalendar = () => {
     setRefDate(new Date());
   };
 
+  // ─── Smart Deduplication Helper ─────────────────────────────────────────────
+
+  const eventsOnDay = (dateStr: string) => {
+    const dayCal = calEvents.filter(e => e.event_date === dateStr);
+    const daySys = sysEvents.filter(e => e.event_date === dateStr);
+
+    // Filter out planning events that already match a published system event title on the same date
+    const filteredCal = dayCal.filter(calEv => {
+      const calTitleClean = calEv.title.trim().toLowerCase();
+      const hasMatchingSys = daySys.some(sysEv => {
+        const sysTitleClean = sysEv.title.trim().toLowerCase();
+        return sysTitleClean.includes(calTitleClean) || calTitleClean.includes(sysTitleClean);
+      });
+      return !hasMatchingSys;
+    });
+
+    return { cal: filteredCal, sys: daySys };
+  };
+
   // ─── Day click ──────────────────────────────────────────────────────────────
 
   const handleDayClick = (day: CalendarDay) => {
-    const dayCalEvents = calEvents.filter(e => e.event_date === day.dateStr);
-    const daySysEvents = sysEvents.filter(e => e.event_date === day.dateStr);
+    const { cal: dayCalEvents, sys: daySysEvents } = eventsOnDay(day.dateStr);
     setDayModal({ open: true, day, calEvents: dayCalEvents, sysEvents: daySysEvents });
     setShowForm(false);
     setFormTitle('');
@@ -205,13 +223,6 @@ const AdminCalendar = () => {
       setDeleting(false);
     }
   };
-
-  // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-  const eventsOnDay = (dateStr: string) => ({
-    cal: calEvents.filter(e => e.event_date === dateStr),
-    sys: sysEvents.filter(e => e.event_date === dateStr),
-  });
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
@@ -380,7 +391,7 @@ const AdminCalendar = () => {
                   <section className="modal-section">
                     <h3 className="modal-section-title">
                       <CalendarDays size={15} />
-                      אירועים רשומים
+                      אירועים רשומים (פורסם לסטודנטים)
                     </h3>
                     {dayModal.sysEvents.map(e => (
                       <div key={e.id} className="modal-sys-event">
@@ -432,7 +443,7 @@ const AdminCalendar = () => {
                 )}
 
                 {dayModal.calEvents.length === 0 && dayModal.sysEvents.length === 0 && !showForm && (
-                  <p className="modal-empty">אין אירועים רשומים ביום זה</p>
+                  <p className="modal-empty">אין אירועים ביום זה</p>
                 )}
 
                 {/* Add event form */}
@@ -525,7 +536,19 @@ const AdminCalendar = () => {
           const monthSys = sysEvents.filter(e => e.event_date >= firstDayStr && e.event_date <= lastDayStr);
           const monthCal = calEvents.filter(e => e.event_date >= firstDayStr && e.event_date <= lastDayStr);
 
-          // Merge & sort ONLY actual events (no automatic holidays in this list)
+          // Deduplicate planning events if an official system event exists on the same date with similar title
+          const filteredMonthCal = monthCal.filter(calEv => {
+            const calTitleClean = calEv.title.trim().toLowerCase();
+            const hasMatchingSys = monthSys.some(sysEv => {
+              return sysEv.event_date === calEv.event_date && (
+                sysEv.title.trim().toLowerCase().includes(calTitleClean) ||
+                calTitleClean.includes(sysEv.title.trim().toLowerCase())
+              );
+            });
+            return !hasMatchingSys;
+          });
+
+          // Merge & sort
           type MergedItem = {
             dateStr: string;
             title: string;
@@ -536,7 +559,7 @@ const AdminCalendar = () => {
 
           const merged: MergedItem[] = [
             ...monthSys.map(e => ({ dateStr: e.event_date, title: e.title, type: 'sys' as const })),
-            ...monthCal.map(e => ({ dateStr: e.event_date, title: e.title, type: 'cal' as const, color: e.color, time: e.event_time })),
+            ...filteredMonthCal.map(e => ({ dateStr: e.event_date, title: e.title, type: 'cal' as const, color: e.color, time: e.event_time })),
           ].sort((a, b) => a.dateStr.localeCompare(b.dateStr));
 
           if (merged.length === 0) {
@@ -547,7 +570,7 @@ const AdminCalendar = () => {
             <div className="summary-list glass">
               {merged.map((item, i) => {
                 const { dayName, hebrewDate, gregorian } = formatHebrewDate(item.dateStr);
-                const shortGreg = gregorian.slice(0, 5); // DD.MM
+                const shortGreg = gregorian.slice(0, 5);
 
                 return (
                   <div key={i} className="summary-item">
@@ -561,6 +584,7 @@ const AdminCalendar = () => {
                         style={{ background: item.type === 'cal' ? item.color : '#492691' }}
                       />
                       <span className="summary-title">{item.title}</span>
+                      {item.type === 'sys' && <span className="summary-published-badge">פורסם</span>}
                       {item.time && <span className="summary-time">{item.time}</span>}
                     </div>
                   </div>
