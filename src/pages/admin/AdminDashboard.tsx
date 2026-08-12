@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Plus, Users, Settings, BarChart2, Archive, CalendarDays, ChevronLeft, Edit, Megaphone } from 'lucide-react';
+import { Plus, Users, Settings, BarChart2, Archive, CalendarDays, CalendarCheck, ChevronLeft, Edit, Megaphone } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatHebrewDate } from '../../utils/dateUtils';
 import './AdminDashboard.css';
@@ -71,6 +71,7 @@ const AdminDashboard = () => {
 
   const cards = [
     { icon: <Plus size={28} />, label: 'אירוע חדש', desc: 'הקמת אירוע חדש עם טופס הרשמה', color: '#492691', action: () => navigate('/admin/events/new') },
+    { icon: <CalendarCheck size={28} />, label: 'לוח שנה עברי', desc: 'תכנון שנתי, אירועים מתוכננים וחגים', color: '#7f58c2', action: () => navigate('/admin/calendar') },
     { icon: <Users size={28} />, label: 'CRM סטודנטים', desc: 'צפייה בפרופילים, היסטוריית השתתפות', color: '#e91e8c', action: () => navigate('/admin/crm') },
     { icon: <Megaphone size={28} />, label: 'ניהול הודעות', desc: 'פרסום הודעות פוש ועדכונים בעמוד הבית', color: '#f39c12', action: () => navigate('/admin/announcements') },
     { icon: <Users size={28} />, label: 'ניהול פיד וקהילה 👥', desc: 'פרסום פוסטים, תמונות ושיעורים ישירות מהפיד', color: '#27ae60', action: () => navigate('/community') },
