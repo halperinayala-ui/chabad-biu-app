@@ -43,11 +43,15 @@ const BlessingRequest = () => {
   useEffect(() => {
     document.title = 'טופס לשליחת שמות ובקשת ברכה בציון הקדוש של הרבי';
 
-    const imageUrl = `${window.location.origin}/title-pan.jpeg`;
+    const domain = window.location.origin.includes('localhost') 
+      ? 'https://chabad-biu-app.vercel.app' 
+      : window.location.origin;
+    const imageUrl = `${domain}/title-pan.jpeg`;
     const metaTags = [
       { property: 'og:title', content: 'טופס לשליחת שמות ובקשת ברכה בציון הקדוש של הרבי' },
       { property: 'og:description', content: 'מילוי שמות, החלטות טובות ובקשות ברכה להעברה ישירה לציון הקדוש של הרבי מליובאוויטש' },
       { property: 'og:image', content: imageUrl },
+      { property: 'og:image:secure_url', content: imageUrl },
       { name: 'twitter:image', content: imageUrl }
     ];
 
