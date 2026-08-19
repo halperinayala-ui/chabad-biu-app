@@ -78,8 +78,8 @@ const AdminBlessingRequests = () => {
       return;
     }
 
-    const todayDate = new Date().toLocaleDateString('he-IL');
-    const header = `פ"נ - שמות ובקשות ברכה להעברה לציון הקדוש של הרבי מליובאוויטש (${todayDate})\n------------------------------------------------------------\n`;
+    const hebDateStr = todayHebrewDate.hebrewDate || '';
+    const header = `מבקשים להזכיר לברכה אצל כ"ק אדמו"ר${hebDateStr ? ` (${hebDateStr})` : ''}\n------------------------------------------------------------\n`;
     
     const lines = filteredRequests.map((req, idx) => `${idx + 1}. ${req.formatted_text}`);
     const fullText = header + lines.join('\n\n');
@@ -211,10 +211,12 @@ const AdminBlessingRequests = () => {
     <motion.div className="admin-blessing-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {/* Header for PRINT ONLY */}
       <div className="print-only-header">
-        <h1>פ״נ - שמות ובקשות ברכה לציון הרבי מליובאוויטש</h1>
-        <p>
-          תאריך: {todayHebrewDate.hebrewDate ? `${todayHebrewDate.gregorian} | ${todayHebrewDate.hebrewDate}` : todayHebrewDate.gregorian} | סה״כ שמות: {filteredRequests.length}
-        </p>
+        <h1>מבקשים להזכיר לברכה אצל כ"ק אדמו"ר</h1>
+        {todayHebrewDate.hebrewDate && (
+          <p style={{ marginTop: '0.4rem', fontSize: '13pt' }}>
+            {todayHebrewDate.hebrewDate}
+          </p>
+        )}
       </div>
 
       {/* Normal Admin Header */}
