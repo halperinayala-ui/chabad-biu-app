@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Info, Bell, Scroll } from 'lucide-react';
+import { Info, Bell } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { NotificationCenter } from './NotificationCenter';
@@ -8,7 +8,7 @@ import './Navbar.css';
 
 const Navbar = () => {
   const location = useLocation();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -44,18 +44,6 @@ const Navbar = () => {
           </Link>
 
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            {profile?.is_admin && (
-              <Link
-                to="/admin/blessings"
-                className={`navbar-about-btn ${location.pathname === '/admin/blessings' ? 'active' : ''}`}
-                title="ניהול פ״נ ובקשות ברכה"
-                style={{ background: 'rgba(211, 84, 0, 0.12)', color: '#d35400', border: '1px solid rgba(211, 84, 0, 0.25)', fontWeight: 700 }}
-              >
-                <Scroll size={18} />
-                <span>ניהול פ״נ</span>
-              </Link>
-            )}
-
             {user && (
               <button 
                 className="navbar-about-btn" 
