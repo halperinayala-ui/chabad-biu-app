@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Sparkles, Send, CheckCircle2, HeartHandshake, Eye, ArrowRight, Scroll, LayoutDashboard } from 'lucide-react';
@@ -39,6 +39,26 @@ const BlessingRequest = () => {
   const [blessingRequest, setBlessingRequest] = useState('');
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  useEffect(() => {
+    document.title = 'טופס לשליחת שמות ובקשת ברכה בציון הקדוש של הרבי';
+
+    const imageUrl = `${window.location.origin}/title-pan.jpeg`;
+    const metaTags = [
+      { property: 'og:title', content: 'טופס לשליחת שמות ובקשת ברכה בציון הקדוש של הרבי' },
+      { property: 'og:description', content: 'מילוי שמות, החלטות טובות ובקשות ברכה להעברה ישירה לציון הקדוש של הרבי מליובאוויטש' },
+      { property: 'og:image', content: imageUrl },
+      { name: 'twitter:image', content: imageUrl }
+    ];
+
+    metaTags.forEach(({ property, name, content }) => {
+      const selector = property ? `meta[property="${property}"]` : `meta[name="${name}"]`;
+      let element = document.querySelector(selector);
+      if (element) {
+        element.setAttribute('content', content);
+      }
+    });
+  }, []);
 
   const formattedPreview = formatBlessingSentence({
     gender,
@@ -130,6 +150,14 @@ const BlessingRequest = () => {
               </Link>
             </div>
           )}
+
+          <div className="blessing-title-image-wrapper">
+            <img 
+              src="/title-pan.jpeg" 
+              alt="טופס לשליחת שמות ובקשת ברכה בציון הקדוש של הרבי" 
+              className="blessing-title-image"
+            />
+          </div>
 
           <h1 className="blessing-title">כתיבה לרבי מליובאוויטש</h1>
           <p className="blessing-subtitle">
