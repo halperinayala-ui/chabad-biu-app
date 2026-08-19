@@ -4,6 +4,80 @@ export const HEB_LETTERS = ['', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 
   'יא', 'יב', 'יג', 'יד', 'טו', 'טז', 'יז', 'יח', 'יט', 'כ',
   'כא', 'כב', 'כג', 'כד', 'כה', 'כו', 'כז', 'כח', 'כט', 'ל'];
 
+/** Converts a numeric Hebrew year (e.g. 5786 or 786) to Hebrew Gematria letters (e.g. "תשפ״ו") */
+export const toHebrewYearLetters = (yearNum: number): string => {
+  if (!yearNum || isNaN(yearNum)) return '';
+  let remainder = yearNum % 1000; // e.g. 786 from 5786
+  
+  let result = '';
+
+  // Hundreds: 400 = ת, 300 = ש, 200 = ר, 100 = ק
+  const hundredsMap: [number, string][] = [
+    [400, 'ת'],
+    [300, 'ש'],
+    [200, 'ר'],
+    [100, 'ק']
+  ];
+
+  for (const [val, letter] of hundredsMap) {
+    while (remainder >= val) {
+      result += letter;
+      remainder -= val;
+    }
+  }
+
+  // Tens: 90=צ, 80=פ, 70=ע, 60=ס, 50=נ, 40=מ, 30=ל, 20=כ, 10=י
+  const tensMap: [number, string][] = [
+    [90, 'צ'],
+    [80, 'פ'],
+    [70, 'ע'],
+    [60, 'ס'],
+    [50, 'נ'],
+    [40, 'מ'],
+    [30, 'ל'],
+    [20, 'כ'],
+    [10, 'י']
+  ];
+
+  for (const [val, letter] of tensMap) {
+    if (remainder >= val) {
+      result += letter;
+      remainder -= val;
+      break;
+    }
+  }
+
+  // Ones: 9=ט, 8=ח, 7=ז, 6=ו, 5=ה, 4=ד, 3=ג, 2=ב, 1=א
+  const onesMap: [number, string][] = [
+    [9, 'ט'],
+    [8, 'ח'],
+    [7, 'ז'],
+    [6, 'ו'],
+    [5, 'ה'],
+    [4, 'ד'],
+    [3, 'ג'],
+    [2, 'ב'],
+    [1, 'א']
+  ];
+
+  for (const [val, letter] of onesMap) {
+    if (remainder >= val) {
+      result += letter;
+      remainder -= val;
+      break;
+    }
+  }
+
+  // Format with Gershayim (״) before last letter if length > 1
+  if (result.length > 1) {
+    return result.slice(0, -1) + '״' + result.slice(-1);
+  } else if (result.length === 1) {
+    return result + '׳';
+  }
+
+  return result;
+};
+
 export const formatHebrewDate = (dateStr: string) => {
   if (!dateStr) return { dayName: '', gregorian: '', hebrewDate: '' };
   
@@ -13,9 +87,10 @@ export const formatHebrewDate = (dateStr: string) => {
   try {
     const hebrewMonthName = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { month: 'long' }).format(d);
     const hebrewDayNum = parseInt(new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { day: 'numeric' }).format(d), 10);
-    const hebrewYearStr = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { year: 'numeric' }).format(d);
+    const hebrewYearNum = getHebrewYearNum(d);
+    const hebrewYearLetters = toHebrewYearLetters(hebrewYearNum);
     const hebrewDayStr = HEB_LETTERS[hebrewDayNum] ? `${HEB_LETTERS[hebrewDayNum]}` : `${hebrewDayNum}`;
-    const hebrewDate = `${hebrewDayStr} ב${hebrewMonthName} ${hebrewYearStr}`;
+    const hebrewDate = `${hebrewDayStr} ב${hebrewMonthName} ${hebrewYearLetters}`;
     const gregorian = `${String(day).padStart(2,'0')}.${String(month).padStart(2,'0')}.${year}`;
     return { dayName, gregorian, hebrewDate };
   } catch {
@@ -35,10 +110,11 @@ export const getHebrewMonthName = (date: Date): string => {
   }
 };
 
-/** Returns the Hebrew year string (e.g. "תשפ״ו") for a given Gregorian date */
+/** Returns the Hebrew year string in letters (e.g. "תשפ״ו") for a given Gregorian date */
 export const getHebrewYear = (date: Date): string => {
   try {
-    return new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { year: 'numeric' }).format(date);
+    const yNum = getHebrewYearNum(date);
+    return toHebrewYearLetters(yNum);
   } catch {
     return '';
   }
