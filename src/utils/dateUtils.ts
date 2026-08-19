@@ -13,8 +13,9 @@ export const formatHebrewDate = (dateStr: string) => {
   try {
     const hebrewMonthName = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { month: 'long' }).format(d);
     const hebrewDayNum = parseInt(new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { day: 'numeric' }).format(d), 10);
+    const hebrewYearStr = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { year: 'numeric' }).format(d);
     const hebrewDayStr = HEB_LETTERS[hebrewDayNum] ? `${HEB_LETTERS[hebrewDayNum]}` : `${hebrewDayNum}`;
-    const hebrewDate = `${hebrewDayStr} ב${hebrewMonthName}`;
+    const hebrewDate = `${hebrewDayStr} ב${hebrewMonthName} ${hebrewYearStr}`;
     const gregorian = `${String(day).padStart(2,'0')}.${String(month).padStart(2,'0')}.${year}`;
     return { dayName, gregorian, hebrewDate };
   } catch {

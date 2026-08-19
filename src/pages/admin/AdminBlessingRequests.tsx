@@ -346,9 +346,6 @@ const AdminBlessingRequests = () => {
                 <p className="item-text">
                   {req.formatted_text}
                 </p>
-                <div className="item-meta">
-                  <span>תאריך שליחה: {new Date(req.created_at).toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' })}</span>
-                </div>
               </div>
 
               <div className="item-actions">
