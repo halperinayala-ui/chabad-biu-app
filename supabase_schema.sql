@@ -302,3 +302,24 @@ ALTER TABLE public.gallery_posts ADD COLUMN IF NOT EXISTS is_cover BOOLEAN DEFAU
 ALTER TABLE public.events DROP CONSTRAINT IF EXISTS events_registration_mode_check;
 ALTER TABLE public.events ADD CONSTRAINT events_registration_mode_check CHECK (registration_mode IN ('form', 'rsvp', 'none', 'external'));
 ALTER TABLE public.events ADD COLUMN IF NOT EXISTS external_registration_link TEXT;
+
+-- ==========================================
+-- PHASE 11 MIGRATION: Blessing Requests (פ"נ)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.blessing_requests (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    gender TEXT NOT NULL CHECK (gender IN ('male', 'female')),
+    full_name TEXT NOT NULL,
+    mother_name TEXT NOT NULL,
+    good_resolution TEXT,
+    blessing_request TEXT,
+    formatted_text TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.blessing_requests ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can submit a blessing request" ON public.blessing_requests FOR INSERT WITH CHECK (true);
+CREATE POLICY "Admins can view and manage blessing requests" ON public.blessing_requests FOR ALL USING (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
+);
+

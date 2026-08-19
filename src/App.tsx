@@ -15,6 +15,8 @@ import AdminStudentProfile from './pages/admin/AdminStudentProfile';
 import AdminMediaManager from './pages/admin/AdminMediaManager';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import AdminCalendar from './pages/admin/AdminCalendar';
+import AdminBlessingRequests from './pages/admin/AdminBlessingRequests';
+import BlessingRequest from './pages/BlessingRequest';
 import Auth from './pages/Auth';
 import ProfileSettings from './pages/ProfileSettings';
 import Community from './pages/Community';
@@ -70,6 +72,10 @@ function App() {
             <Route path="/events/:id" element={<EventDetails />} />
             <Route path="/event/view/:id" element={<EventDetails />} />
             
+            {/* Public Blessing Request Routes (פ"נ) */}
+            <Route path="/pan" element={<BlessingRequest />} />
+            <Route path="/blessing-request" element={<BlessingRequest />} />
+            
             {/* Protected User Routes */}
             <Route path="/profile" element={
               <ProtectedRoute showGuestView><ProfileSettings /></ProtectedRoute>
@@ -105,6 +111,12 @@ function App() {
             } />
             <Route path="/admin/crm/:studentId" element={
               <ProtectedRoute requireAdmin><AdminStudentProfile /></ProtectedRoute>
+            } />
+            <Route path="/admin/blessings" element={
+              <ProtectedRoute requireAdmin><AdminBlessingRequests /></ProtectedRoute>
+            } />
+            <Route path="/admin/pan" element={
+              <ProtectedRoute requireAdmin><AdminBlessingRequests /></ProtectedRoute>
             } />
           </Routes>
         </main>
