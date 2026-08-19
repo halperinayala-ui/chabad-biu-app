@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, Send, CheckCircle2, HeartHandshake, Eye, ArrowRight } from 'lucide-react';
+import { Sparkles, Send, CheckCircle2, HeartHandshake, Eye, ArrowRight, Scroll, LayoutDashboard } from 'lucide-react';
 import { blessingService, formatBlessingSentence } from '../utils/blessingService';
+import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import './BlessingRequest.css';
 
@@ -29,6 +30,7 @@ const BLESSING_CHIPS = [
 
 const BlessingRequest = () => {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [fullName, setFullName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -105,6 +107,30 @@ const BlessingRequest = () => {
     >
       <div className="blessing-card">
         <div className="blessing-header">
+          {profile?.is_admin && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+              <Link 
+                to="/admin/blessings" 
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  background: 'linear-gradient(135deg, #1e293b, #0f172a)',
+                  color: '#fff',
+                  padding: '0.5rem 1.1rem',
+                  borderRadius: '20px',
+                  fontSize: '0.88rem',
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  boxShadow: '0 4px 12px rgba(15, 23, 42, 0.2)'
+                }}
+              >
+                <LayoutDashboard size={16} />
+                <span>מעבר לדף ניהול והדפסת שמות (מנהל)</span>
+              </Link>
+            </div>
+          )}
+
           <h1 className="blessing-title">כתיבה לרבי מליובאוויטש</h1>
           <p className="blessing-subtitle">
             טופס לשליחת שמות ובקשת ברכה בציון הקדוש של הרבי
