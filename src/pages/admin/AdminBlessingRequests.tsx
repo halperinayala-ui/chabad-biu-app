@@ -81,7 +81,7 @@ const AdminBlessingRequests = () => {
     const hebDateStr = todayHebrewDate.hebrewDate || '';
     const header = `מבקשים להזכיר לברכה אצל כ"ק אדמו"ר${hebDateStr ? ` (${hebDateStr})` : ''}\n------------------------------------------------------------\n`;
     
-    const lines = filteredRequests.map((req, idx) => `${idx + 1}. ${req.formatted_text}`);
+    const lines = filteredRequests.map(req => req.formatted_text);
     const fullText = header + lines.join('\n\n');
 
     navigator.clipboard.writeText(fullText);
