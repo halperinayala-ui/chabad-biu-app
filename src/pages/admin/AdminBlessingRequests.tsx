@@ -15,6 +15,9 @@ const AdminBlessingRequests = () => {
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const [copied, setCopied] = useState(false);
 
+  // Selection & Batch Delete state
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
   // Modal state (Add / Edit)
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<BlessingRequestItem | null>(null);
@@ -126,10 +129,61 @@ const AdminBlessingRequests = () => {
     try {
       await blessingService.deleteRequest(id);
       setRequests(prev => prev.filter(r => r.id !== id));
+      setSelectedIds(prev => prev.filter(item => item !== id));
       toast.success('הבקשה נמחקה');
     } catch (e) {
       toast.error('שגיאה במחיקת הבקשה');
     }
+  };
+
+  const handleDeleteFirst16 = async () => {
+    if (requests.length === 0) {
+      toast.error('אין שמות ברשימה');
+      return;
+    }
+
+    const countToDelete = Math.min(16, requests.length);
+    const targetItems = requests.slice(0, countToDelete);
+    const idsToDelete = targetItems.map(item => item.id);
+
+    if (!window.confirm(`האם למחוק את ${idsToDelete.length} השמות הראשונים שכבר הוכנסו לרבי?`)) return;
+
+    try {
+      await blessingService.deleteBatchRequests(idsToDelete);
+      setRequests(prev => prev.filter(r => !idsToDelete.includes(r.id)));
+      setSelectedIds(prev => prev.filter(id => !idsToDelete.includes(id)));
+      toast.success(`${idsToDelete.length} השמות הראשונים נמחקו בהצלחה!`);
+    } catch (e) {
+      toast.error('שגיאה במחיקת השמות');
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(`האם למחוק את ${selectedIds.length} השמות המסומנים?`)) return;
+
+    try {
+      await blessingService.deleteBatchRequests(selectedIds);
+      setRequests(prev => prev.filter(r => !selectedIds.includes(r.id)));
+      setSelectedIds([]);
+      toast.success(`${selectedIds.length} השמות המסומנים נמחקו בהצלחה!`);
+    } catch (e) {
+      toast.error('שגיאה במחיקת השמות');
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredRequests.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredRequests.map(r => r.id));
+    }
+  };
+
+  const toggleSelectOne = (id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
   };
 
   const handleOpenAdd = () => {
@@ -253,6 +307,27 @@ const AdminBlessingRequests = () => {
           </button>
 
           <button 
+            className="btn-copy" 
+            style={{ background: '#fef2f2', color: '#dc2626', borderColor: '#fca5a5', fontWeight: 700 }}
+            onClick={handleDeleteFirst16}
+            title="מחיקת 16 השמות הראשונים שכבר הוכנסו לרבי"
+          >
+            <Trash2 size={18} />
+            <span>מחיקת 16 הראשונים</span>
+          </button>
+
+          {selectedIds.length > 0 && (
+            <button 
+              className="btn-copy" 
+              style={{ background: '#dc2626', color: '#fff', borderColor: '#b91c1c', fontWeight: 700 }}
+              onClick={handleDeleteSelected}
+            >
+              <Trash2 size={18} />
+              <span>מחיקת {selectedIds.length} מסומנים</span>
+            </button>
+          )}
+
+          <button 
             className="btn btn-primary" 
             style={{ borderRadius: '14px', padding: '0.75rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
             onClick={handleOpenAdd}
@@ -332,6 +407,20 @@ const AdminBlessingRequests = () => {
 
       {/* Requests List */}
       <div className="requests-container">
+        {filteredRequests.length > 0 && (
+          <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1.25rem', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
+            <input 
+              type="checkbox" 
+              checked={selectedIds.length === filteredRequests.length && filteredRequests.length > 0}
+              onChange={toggleSelectAll}
+              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#475569' }}>
+              {selectedIds.length > 0 ? `סומנו ${selectedIds.length} מתוך ${filteredRequests.length} שמות` : 'סימון הכל / בחירת שמות למחיקה'}
+            </span>
+          </div>
+        )}
+
         {loading ? (
           <p style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>טוען בקשות...</p>
         ) : filteredRequests.length === 0 ? (
@@ -341,6 +430,14 @@ const AdminBlessingRequests = () => {
         ) : (
           filteredRequests.map((req, idx) => (
             <div key={req.id} className="request-item-row">
+              <div className="no-print" style={{ display: 'flex', alignItems: 'center', marginLeft: '0.5rem' }}>
+                <input 
+                  type="checkbox" 
+                  checked={selectedIds.includes(req.id)}
+                  onChange={() => toggleSelectOne(req.id)}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                />
+              </div>
               <div className="item-index">{idx + 1}</div>
               <div className="item-body">
                 <p className="item-text">

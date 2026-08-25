@@ -161,6 +161,27 @@ export const blessingService = {
     }
   },
 
+  // Delete multiple requests in batch
+  async deleteBatchRequests(ids: string[]): Promise<void> {
+    if (!ids || ids.length === 0) return;
+    const idSet = new Set(ids);
+
+    // 1. Remove from LocalStorage
+    const localDataRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (localDataRaw) {
+      const localItems: BlessingRequestItem[] = JSON.parse(localDataRaw);
+      const filtered = localItems.filter(item => !idSet.has(item.id));
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(filtered));
+    }
+
+    // 2. Remove from Supabase
+    try {
+      await supabase.from('blessing_requests').delete().in('id', ids);
+    } catch (e) {
+      console.warn('Supabase batch delete failed.', e);
+    }
+  },
+
   // Update an existing request
   async updateRequest(id: string, payload: {
     gender: 'male' | 'female';
