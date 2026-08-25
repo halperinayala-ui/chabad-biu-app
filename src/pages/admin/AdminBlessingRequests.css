@@ -264,7 +264,7 @@
     font-size: 11pt !important;
   }
 
-  .navbar, .bottom-tab-bar, .admin-blessing-header, .stats-grid, .filter-bar, .item-actions, .global-bg, .btn, .item-index {
+  .navbar, .bottom-tab-bar, .admin-blessing-header, .stats-grid, .filter-bar, .item-actions, .global-bg, .btn, .item-index, .no-print, input[type="checkbox"] {
     display: none !important;
   }
 
