@@ -62,7 +62,7 @@ export const blessingService = {
       const { data, error } = await supabase
         .from('blessing_requests')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true });
 
       if (!error && data) {
         supabaseItems = data.map((d: any) => ({
@@ -88,7 +88,7 @@ export const blessingService = {
     });
 
     const result = Array.from(mergedMap.values()).sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
 
     return result;
