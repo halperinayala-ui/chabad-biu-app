@@ -285,29 +285,29 @@ const AdminBlessingRequests = () => {
           </div>
         </div>
 
-        <div className="admin-blessing-actions">
-          <button className="btn-print" onClick={handlePrint}>
+        <div className="admin-blessing-actions no-print">
+          <button className="btn-print no-print" onClick={handlePrint}>
             <Printer size={18} />
             <span>הדפסת פ״נ מרוכז</span>
           </button>
 
-          <button className="btn-copy" style={{ background: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' }} onClick={handleDownloadPDF}>
+          <button className="btn-copy no-print" style={{ background: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' }} onClick={handleDownloadPDF}>
             <FileText size={18} />
             <span>הורדת PDF</span>
           </button>
 
-          <button className="btn-copy" onClick={handleCopyAll}>
+          <button className="btn-copy no-print" onClick={handleCopyAll}>
             {copied ? <Check size={18} style={{ color: '#10b981' }} /> : <Copy size={18} />}
             <span>{copied ? 'הועתק!' : 'העתקת כל השמות'}</span>
           </button>
 
-          <button className="btn-copy" onClick={handleExportCSV}>
+          <button className="btn-copy no-print" onClick={handleExportCSV}>
             <Download size={18} />
             <span>ייצוא CSV</span>
           </button>
 
           <button 
-            className="btn-copy" 
+            className="btn-copy no-print" 
             style={{ background: '#fef2f2', color: '#dc2626', borderColor: '#fca5a5', fontWeight: 700 }}
             onClick={handleDeleteFirst16}
             title="מחיקת 16 השמות הראשונים שכבר הוכנסו לרבי"
@@ -318,7 +318,7 @@ const AdminBlessingRequests = () => {
 
           {selectedIds.length > 0 && (
             <button 
-              className="btn-copy" 
+              className="btn-copy no-print" 
               style={{ background: '#dc2626', color: '#fff', borderColor: '#b91c1c', fontWeight: 700 }}
               onClick={handleDeleteSelected}
             >
@@ -328,7 +328,7 @@ const AdminBlessingRequests = () => {
           )}
 
           <button 
-            className="btn btn-primary" 
+            className="btn btn-primary no-print" 
             style={{ borderRadius: '14px', padding: '0.75rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
             onClick={handleOpenAdd}
           >
