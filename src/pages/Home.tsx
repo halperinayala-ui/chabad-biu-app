@@ -130,59 +130,7 @@ const Home = () => {
         )}
       </motion.div>
 
-      {/* Blessing Request / Rebbe's Pan Banner */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        style={{ marginBottom: '1.75rem' }}
-      >
-        <Link
-          to="/pan"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
-            borderRadius: '20px',
-            padding: '1.25rem 1.5rem',
-            color: '#fff',
-            textDecoration: 'none',
-            boxShadow: '0 10px 25px rgba(49, 46, 129, 0.25)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            position: 'relative',
-            overflow: 'hidden'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', zIndex: 1 }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '14px',
-              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 6px 14px rgba(245, 158, 11, 0.4)'
-            }}>
-              <Scroll size={26} color="#fff" />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24' }}>
-                <Sparkles size={14} />
-                <span>כתיבה לרבי מליובאוויטש</span>
-              </div>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0.2rem 0 0.1rem', color: '#fff' }}>
-                שליחת בקשת ברכה לציון הקדוש 📜
-              </h2>
-              <p style={{ fontSize: '0.85rem', margin: 0, color: '#e0e7ff', opacity: 0.9 }}>
-                לחצו כאן למילוי שמות, החלטות טובות ובקשות ברכה
-              </p>
-            </div>
-          </div>
-          <ChevronLeft size={24} style={{ color: '#fbbf24', zIndex: 1, flexShrink: 0 }} />
-        </Link>
-      </motion.div>
+
 
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}>
