@@ -323,3 +323,13 @@ CREATE POLICY "Admins can view and manage blessing requests" ON public.blessing_
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
 );
 
+-- ==========================================
+-- PHASE 12 MIGRATION: Registrations DELETE policy
+-- ==========================================
+DROP POLICY IF EXISTS "Admins can delete any registration, users can delete own." ON public.registrations;
+CREATE POLICY "Admins can delete any registration, users can delete own." 
+ON public.registrations FOR DELETE 
+USING (
+  auth.uid() = user_id OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
+);
+

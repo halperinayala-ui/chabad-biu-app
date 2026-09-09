@@ -226,7 +226,10 @@ const AdminStudentProfile = () => {
                   {reg.answers && Object.keys(reg.answers).length > 0 && (
                     <div style={{ marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
                       {Object.entries(reg.answers).map(([k, v]) => (
-                        <span key={k} style={{ fontSize: '0.75rem', background: 'rgba(73,38,145,0.08)', color: 'var(--primary)', padding: '0.15rem 0.5rem', borderRadius: '10px' }} title={k}>{String(v)}</span>
+                        <span key={k} style={{ fontSize: '0.75rem', background: 'rgba(73,38,145,0.08)', color: 'var(--primary)', padding: '0.2rem 0.55rem', borderRadius: '8px', display: 'inline-flex', gap: '0.3rem', alignItems: 'baseline', border: '1px solid rgba(73,38,145,0.12)' }}>
+                          <strong style={{ fontWeight: '700' }}>{k}:</strong>
+                          <span style={{ color: 'var(--text-primary)' }}>{String(v)}</span>
+                        </span>
                       ))}
                     </div>
                   )}
