@@ -191,12 +191,24 @@ const AdminRegistrants = () => {
     }
   };
 
-  const getName = (reg: Registrant) => reg.profiles?.full_name || reg.guest_name || '—';
-  const getPhone = (reg: Registrant) => reg.profiles?.phone || reg.guest_phone || '—';
+  const getName = (reg: Registrant) => 
+    reg.profiles?.full_name || 
+    reg.guest_name || 
+    reg.answers?.['שם מלא'] || 
+    reg.answers?.['שם'] || 
+    '—';
+
+  const getPhone = (reg: Registrant) => 
+    reg.profiles?.phone || 
+    reg.guest_phone || 
+    reg.answers?.['טלפון'] || 
+    reg.answers?.['מספר טלפון'] || 
+    reg.answers?.['נייד'] || 
+    '—';
 
   // Duplicate detection maps
   const phoneCounts = registrants.reduce((acc: Record<string, number>, reg) => {
-    const raw = reg.profiles?.phone || reg.guest_phone || '';
+    const raw = getPhone(reg);
     const clean = raw.replace(/\D/g, '');
     if (clean.length >= 7) {
       acc[clean] = (acc[clean] || 0) + 1;
@@ -212,7 +224,7 @@ const AdminRegistrants = () => {
   }, {});
 
   const checkIsDuplicate = (reg: Registrant) => {
-    const raw = reg.profiles?.phone || reg.guest_phone || '';
+    const raw = getPhone(reg);
     const clean = raw.replace(/\D/g, '');
     const phoneDup = clean.length >= 7 && (phoneCounts[clean] || 0) > 1;
     const userDup = Boolean(reg.user_id && (userIdCounts[reg.user_id] || 0) > 1);
@@ -223,11 +235,12 @@ const AdminRegistrants = () => {
   const getQuestionHeaders = () => {
     const headers: string[] = [];
     const seen = new Set<string>();
+    const excluded = new Set(['שם מלא', 'שם', 'טלפון', 'מספר טלפון', 'נייד']);
 
     if (Array.isArray(formConfig)) {
       formConfig.forEach(f => {
         const label = f?.label?.trim();
-        if (label && label !== 'שם מלא' && label !== 'טלפון' && !seen.has(label)) {
+        if (label && !excluded.has(label) && !seen.has(label)) {
           seen.add(label);
           headers.push(label);
         }
@@ -238,7 +251,7 @@ const AdminRegistrants = () => {
       if (r.answers && typeof r.answers === 'object') {
         Object.keys(r.answers).forEach(k => {
           const label = k.trim();
-          if (label && !seen.has(label)) {
+          if (label && !excluded.has(label) && !seen.has(label)) {
             seen.add(label);
             headers.push(label);
           }
@@ -356,6 +369,8 @@ const AdminRegistrants = () => {
   const attended = registrants.filter(r => r.attended === true).length;
   const absent = registrants.filter(r => r.attended === false).length;
   const unmarked = registrants.filter(r => r.attended === null).length;
+
+  const questionHeaders = getQuestionHeaders();
 
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '5rem' }}><Loader2 className="spinner" size={40} style={{ color: 'var(--primary)' }} /></div>;
 
@@ -484,159 +499,173 @@ const AdminRegistrants = () => {
         </div>
       ) : (
         <div className="registrants-table-container glass">
-          <div style={{ padding: '1rem 1.5rem', background: 'rgba(73,38,145,0.05)', borderBottom: '1px solid var(--border)', fontSize: '0.9rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div style={{ padding: '1rem 1.5rem', background: 'rgba(73,38,145,0.05)', borderBottom: '1px solid var(--border)', fontSize: '0.9rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
             <span>✅ סמן/י מי הגיע בפועל באמצעות כפתורי הנוכחות (היה / לא היה)</span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>סה"כ {registrants.length} שורות</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <span className="scroll-note">💡 גלילה לרוחב לצפייה בכל עמודות השאלות</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>סה"כ {registrants.length} נרשמים</span>
+            </div>
           </div>
-          <table className="registrants-table">
-            <thead>
-              <tr>
-                <th>שם מלא</th>
-                <th>סטטוס</th>
-                <th>פעולות</th>
-                <th>נוכחות</th>
-                <th>טלפון</th>
-                <th>הערה</th>
-                <th>תשובות לשאלות</th>
-                <th>הרשמה</th>
-              </tr>
-            </thead>
-            <tbody>
-              {registrants.map(reg => {
-                const isDup = checkIsDuplicate(reg);
-                return (
-                  <tr key={reg.id} style={{ background: reg.attended === false ? 'rgba(231,76,60,0.04)' : reg.attended === true ? 'rgba(46,204,113,0.04)' : undefined }}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                        <button
-                          style={{ background: 'none', border: 'none', cursor: reg.profiles?.id ? 'pointer' : 'default', color: reg.profiles?.id ? 'var(--primary)' : 'inherit', fontWeight: '700', padding: 0, textDecoration: reg.profiles?.id ? 'underline' : 'none', textAlign: 'right' }}
-                          onClick={() => reg.profiles?.id && navigate(`/admin/crm/${reg.profiles.id}`)}
-                        >
-                          {getName(reg)}
-                        </button>
-                        {isDup && (
-                          <span className="duplicate-tag" title="זוהתה הרשמה נוספת עם אותו טלפון או משתמש באירוע זה">
-                            <AlertTriangle size={11} /> כפיל
-                          </span>
+          
+          <div className="table-responsive-wrapper">
+            <table className="registrants-table">
+              <thead>
+                <tr>
+                  <th>שם מלא</th>
+                  <th>סטטוס</th>
+                  <th>פעולות</th>
+                  <th>נוכחות</th>
+                  <th>טלפון</th>
+                  <th>הערה</th>
+                  {questionHeaders.map(qh => (
+                    <th key={qh} className="question-col-header" title={qh}>
+                      {qh}
+                    </th>
+                  ))}
+                  <th>הרשמה</th>
+                </tr>
+              </thead>
+              <tbody>
+                {registrants.map(reg => {
+                  const isDup = checkIsDuplicate(reg);
+                  return (
+                    <tr key={reg.id} style={{ background: reg.attended === false ? 'rgba(231,76,60,0.04)' : reg.attended === true ? 'rgba(46,204,113,0.04)' : undefined }}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                          <button
+                            style={{ background: 'none', border: 'none', cursor: reg.profiles?.id ? 'pointer' : 'default', color: reg.profiles?.id ? 'var(--primary)' : 'inherit', fontWeight: '700', padding: 0, textDecoration: reg.profiles?.id ? 'underline' : 'none', textAlign: 'right', whiteSpace: 'nowrap' }}
+                            onClick={() => reg.profiles?.id && navigate(`/admin/crm/${reg.profiles.id}`)}
+                          >
+                            {getName(reg)}
+                          </button>
+                          {isDup && (
+                            <span className="duplicate-tag" title="זוהתה הרשמה נוספת עם אותו טלפון או משתמש באירוע זה">
+                              <AlertTriangle size={11} /> כפיל
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* סטטוס */}
+                      <td>
+                        <span className={`status-badge status-${reg.status}`}>
+                          {reg.status === 'pending' && <><Clock size={14} /> ממתין</>}
+                          {reg.status === 'approved' && <><CheckCircle size={14} /> מאושר</>}
+                          {reg.status === 'rejected' && <><XCircle size={14} /> נדחה</>}
+                          {reg.status === 'rsvp' && <><CheckCircle size={14} /> מגיע/ה</>}
+                        </span>
+                        {reg.status === 'pending' && (
+                          <div className="approval-actions" style={{ marginTop: '0.4rem' }}>
+                            <button className="icon-btn approve-btn" title="אשר" onClick={() => updateStatus(reg.id, 'approved')}><UserCheck size={16} /></button>
+                            <button className="icon-btn reject-btn" title="דחה" onClick={() => updateStatus(reg.id, 'rejected')}><XCircle size={16} /></button>
+                          </div>
                         )}
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* סטטוס */}
-                    <td>
-                      <span className={`status-badge status-${reg.status}`}>
-                        {reg.status === 'pending' && <><Clock size={14} /> ממתין</>}
-                        {reg.status === 'approved' && <><CheckCircle size={14} /> מאושר</>}
-                        {reg.status === 'rejected' && <><XCircle size={14} /> נדחה</>}
-                        {reg.status === 'rsvp' && <><CheckCircle size={14} /> מגיע/ה</>}
-                      </span>
-                      {reg.status === 'pending' && (
-                        <div className="approval-actions" style={{ marginTop: '0.4rem' }}>
-                          <button className="icon-btn approve-btn" title="אשר" onClick={() => updateStatus(reg.id, 'approved')}><UserCheck size={16} /></button>
-                          <button className="icon-btn reject-btn" title="דחה" onClick={() => updateStatus(reg.id, 'rejected')}><XCircle size={16} /></button>
+                      {/* פעולות */}
+                      <td className="actions-cell">
+                        {/* וואטסאפ */}
+                        <div className="whatsapp-dropdown-container">
+                          <button className="icon-btn wa-btn" title="וואטסאפ" onClick={() => setActiveWhatsappMenu(activeWhatsappMenu === reg.id ? null : reg.id)}>
+                            <MessageCircle size={16} />
+                          </button>
+                          {activeWhatsappMenu === reg.id && (
+                            <>
+                              <div
+                                style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 90 }}
+                                onClick={() => setActiveWhatsappMenu(null)}
+                              />
+                              <div className="whatsapp-dropdown menu-active" style={{ zIndex: 100 }}>
+                                <div className="dropdown-title">תבניות הודעה:</div>
+                                <a href={getWhatsappLink(getPhone(reg), 'approved', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item" onClick={() => setActiveWhatsappMenu(null)}>✅ אישור השתתפות</a>
+                                <a href={getWhatsappLink(getPhone(reg), 'verify', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item" onClick={() => setActiveWhatsappMenu(null)}>❓ בירור סטודנט/ית</a>
+                                <a href={getWhatsappLink(getPhone(reg), 'rejected', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item" onClick={() => setActiveWhatsappMenu(null)}>❌ הרשמה נסגרה</a>
+                              </div>
+                            </>
+                          )}
                         </div>
-                      )}
-                    </td>
 
-                    {/* פעולות */}
-                    <td className="actions-cell">
-                      {/* וואטסאפ */}
-                      <div className="whatsapp-dropdown-container">
-                        <button className="icon-btn wa-btn" title="וואטסאפ" onClick={() => setActiveWhatsappMenu(activeWhatsappMenu === reg.id ? null : reg.id)}>
-                          <MessageCircle size={16} />
+                        {/* מחיקת שורה */}
+                        <button 
+                          className="icon-btn delete-btn" 
+                          title="מחק הרשמה זו" 
+                          onClick={() => setDeleteConfirmTarget(reg)}
+                        >
+                          <Trash2 size={16} />
                         </button>
-                        {activeWhatsappMenu === reg.id && (
-                          <>
-                            <div
-                              style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 90 }}
-                              onClick={() => setActiveWhatsappMenu(null)}
-                            />
-                            <div className="whatsapp-dropdown menu-active" style={{ zIndex: 100 }}>
-                              <div className="dropdown-title">תבניות הודעה:</div>
-                              <a href={getWhatsappLink(getPhone(reg), 'approved', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item" onClick={() => setActiveWhatsappMenu(null)}>✅ אישור השתתפות</a>
-                              <a href={getWhatsappLink(getPhone(reg), 'verify', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item" onClick={() => setActiveWhatsappMenu(null)}>❓ בירור סטודנט/ית</a>
-                              <a href={getWhatsappLink(getPhone(reg), 'rejected', getName(reg))} target="_blank" rel="noreferrer" className="wa-dropdown-item" onClick={() => setActiveWhatsappMenu(null)}>❌ הרשמה נסגרה</a>
-                            </div>
-                          </>
+                      </td>
+
+                      {/* נוכחות */}
+                      <td>
+                        <div style={{ display: 'flex', gap: '0.2rem' }}>
+                          <button
+                            title="היה"
+                            onClick={() => markAttendance(reg.id, reg.attended === true ? null : true)}
+                            style={{ width: '24px', height: '24px', borderRadius: '50%', border: '2px solid', borderColor: reg.attended === true ? '#2ecc71' : '#ddd', background: reg.attended === true ? '#2ecc71' : 'white', color: reg.attended === true ? 'white' : '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', padding: 0 }}
+                          >
+                            <Check size={12} />
+                          </button>
+                          <button
+                            title="לא היה"
+                            onClick={() => markAttendance(reg.id, reg.attended === false ? null : false)}
+                            style={{ width: '24px', height: '24px', borderRadius: '50%', border: '2px solid', borderColor: reg.attended === false ? '#e74c3c' : '#ddd', background: reg.attended === false ? '#e74c3c' : 'white', color: reg.attended === false ? 'white' : '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', padding: 0 }}
+                          >
+                            <XIcon size={12} />
+                          </button>
+                        </div>
+                      </td>
+
+                      {/* טלפון */}
+                      <td dir="ltr" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>{getPhone(reg)}</td>
+
+                      {/* הערה */}
+                      <td>
+                        {editingNote === reg.id ? (
+                          <div style={{ display: 'flex', gap: '0.3rem' }}>
+                            <input autoFocus type="text" value={noteText} onChange={e => setNoteText(e.target.value)} onKeyDown={e => e.key === 'Enter' && saveNote(reg.id)} style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem', border: '1px solid var(--primary)', borderRadius: '6px', width: '120px' }} />
+                            <button onClick={() => saveNote(reg.id)} style={{ background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '6px', padding: '0.2rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}>✓</button>
+                            <button onClick={() => setEditingNote(null)} style={{ background: '#eee', border: 'none', borderRadius: '6px', padding: '0.2rem 0.4rem', cursor: 'pointer', fontSize: '0.75rem' }}>✕</button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => { setEditingNote(reg.id); setNoteText(reg.admin_note || ''); }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: reg.admin_note ? 'var(--primary)' : '#bbb', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                            title={reg.admin_note || 'הוסף הערה'}
+                          >
+                            <StickyNote size={14} />
+                            <span style={{ maxWidth: '90px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{reg.admin_note || 'הערה'}</span>
+                          </button>
                         )}
-                      </div>
+                      </td>
 
-                      {/* מחיקת שורה */}
-                      <button 
-                        className="icon-btn delete-btn" 
-                        title="מחק הרשמה זו" 
-                        onClick={() => setDeleteConfirmTarget(reg)}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
+                      {/* עמודות דינמיות - עמודה נפרדת לכל שאלה */}
+                      {questionHeaders.map(qh => {
+                        const val = reg.answers?.[qh];
+                        const hasVal = val !== undefined && val !== null && String(val).trim() !== '';
+                        const strVal = String(val ?? '');
+                        const isYes = strVal === 'כן' || strVal === 'true';
+                        const isNo = strVal === 'לא' || strVal === 'false';
+                        return (
+                          <td key={qh} className="question-col-cell">
+                            {hasVal ? (
+                              <span className={`answer-cell-badge ${isYes ? 'badge-yes' : isNo ? 'badge-no' : ''}`}>
+                                {strVal}
+                              </span>
+                            ) : (
+                              <span className="answer-cell-empty">—</span>
+                            )}
+                          </td>
+                        );
+                      })}
 
-                    {/* נוכחות */}
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.2rem' }}>
-                        <button
-                          title="היה"
-                          onClick={() => markAttendance(reg.id, reg.attended === true ? null : true)}
-                          style={{ width: '24px', height: '24px', borderRadius: '50%', border: '2px solid', borderColor: reg.attended === true ? '#2ecc71' : '#ddd', background: reg.attended === true ? '#2ecc71' : 'white', color: reg.attended === true ? 'white' : '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', padding: 0 }}
-                        >
-                          <Check size={12} />
-                        </button>
-                        <button
-                          title="לא היה"
-                          onClick={() => markAttendance(reg.id, reg.attended === false ? null : false)}
-                          style={{ width: '24px', height: '24px', borderRadius: '50%', border: '2px solid', borderColor: reg.attended === false ? '#e74c3c' : '#ddd', background: reg.attended === false ? '#e74c3c' : 'white', color: reg.attended === false ? 'white' : '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', padding: 0 }}
-                        >
-                          <XIcon size={12} />
-                        </button>
-                      </div>
-                    </td>
-
-                    {/* טלפון */}
-                    <td dir="ltr" style={{ textAlign: 'right' }}>{getPhone(reg)}</td>
-
-                    {/* הערה */}
-                    <td>
-                      {editingNote === reg.id ? (
-                        <div style={{ display: 'flex', gap: '0.3rem' }}>
-                          <input autoFocus type="text" value={noteText} onChange={e => setNoteText(e.target.value)} onKeyDown={e => e.key === 'Enter' && saveNote(reg.id)} style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem', border: '1px solid var(--primary)', borderRadius: '6px', width: '120px' }} />
-                          <button onClick={() => saveNote(reg.id)} style={{ background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '6px', padding: '0.2rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}>✓</button>
-                          <button onClick={() => setEditingNote(null)} style={{ background: '#eee', border: 'none', borderRadius: '6px', padding: '0.2rem 0.4rem', cursor: 'pointer', fontSize: '0.75rem' }}>✕</button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => { setEditingNote(reg.id); setNoteText(reg.admin_note || ''); }}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: reg.admin_note ? 'var(--primary)' : '#bbb', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                          title={reg.admin_note || 'הוסף הערה'}
-                        >
-                          <StickyNote size={14} />
-                          <span style={{ maxWidth: '90px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{reg.admin_note || 'הערה'}</span>
-                        </button>
-                      )}
-                    </td>
-
-                    {/* תשובות לשאלות - כותרת שאלה מפורשת לצד התשובה */}
-                    <td>
-                      {reg.answers && Object.entries(reg.answers).length > 0 ? (
-                        <div className="answers-cell-list">
-                          {Object.entries(reg.answers).map(([key, val]) => (
-                            <div key={key} className="answer-item-pill">
-                              <span className="answer-item-q">{key}:</span>
-                              <span className="answer-item-v">{String(val)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>—</span>
-                      )}
-                    </td>
-
-                    {/* הרשמה */}
-                    <td>{formatDate(reg.created_at)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      {/* הרשמה */}
+                      <td style={{ whiteSpace: 'nowrap' }}>{formatDate(reg.created_at)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

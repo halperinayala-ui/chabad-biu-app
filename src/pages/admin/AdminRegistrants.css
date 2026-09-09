@@ -40,10 +40,16 @@
 
 .registrants-table-container {
   border-radius: var(--radius-lg);
-  overflow: visible; /* to allow dropdowns to show */
   padding: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.5);
   min-height: 400px;
+}
+
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 0.5rem;
 }
 
 .registrants-table {
@@ -53,14 +59,16 @@
 
 .registrants-table th {
   text-align: right;
-  padding: 1rem;
+  padding: 0.85rem 0.9rem;
   color: var(--text-secondary);
   border-bottom: 2px solid var(--border);
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 0.88rem;
+  white-space: nowrap;
 }
 
 .registrants-table td {
-  padding: 1rem;
+  padding: 0.75rem 0.9rem;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
 }
@@ -212,35 +220,69 @@
   color: white;
 }
 
-/* Answers in table */
-.answers-cell-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  max-width: 320px;
+/* Question Columns & Cells */
+.question-col-header {
+  min-width: 140px;
+  max-width: 240px;
+  white-space: normal !important;
+  color: var(--primary) !important;
+  font-weight: 700 !important;
+  background: rgba(73, 38, 145, 0.03);
+  vertical-align: bottom;
+  line-height: 1.35;
+  font-size: 0.85rem !important;
+  padding: 0.85rem 1rem !important;
 }
 
-.answer-item-pill {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.35rem;
-  background: rgba(73, 38, 145, 0.07);
-  padding: 0.25rem 0.6rem;
+.question-col-cell {
+  min-width: 140px;
+  max-width: 260px;
+  white-space: normal;
+  line-height: 1.35;
+  font-size: 0.88rem;
+  background: rgba(73, 38, 145, 0.015);
+  padding: 0.65rem 1rem !important;
+}
+
+.answer-cell-badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
   border-radius: 8px;
-  font-size: 0.82rem;
-  border: 1px solid rgba(73, 38, 145, 0.12);
+  font-size: 0.85rem;
+  background: rgba(73, 38, 145, 0.07);
+  color: var(--text-primary);
+  word-break: break-word;
   line-height: 1.3;
 }
 
-.answer-item-q {
+.answer-cell-badge.badge-yes {
+  background: rgba(46, 204, 113, 0.15);
+  color: #27ae60;
   font-weight: 700;
-  color: var(--primary);
-  white-space: nowrap;
+  border: 1px solid rgba(46, 204, 113, 0.3);
 }
 
-.answer-item-v {
-  color: var(--text-primary);
-  word-break: break-word;
+.answer-cell-badge.badge-no {
+  background: rgba(231, 76, 60, 0.12);
+  color: #c0392b;
+  font-weight: 700;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.answer-cell-empty {
+  color: #bbb;
+  font-size: 1rem;
+}
+
+.scroll-note {
+  font-size: 0.78rem;
+  color: var(--primary);
+  background: rgba(73, 38, 145, 0.08);
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
 }
 
 /* Duplicate detection tag */
