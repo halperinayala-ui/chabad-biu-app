@@ -38,6 +38,20 @@ const Kaparot = () => {
   const [isDetailsSubmitted, setIsDetailsSubmitted] = useState(false);
   const [isSubmittingDetails, setIsSubmittingDetails] = useState(false);
 
+  // Kaparot Amount Selection (determined in advance before rotation)
+  const [selectedAmount, setSelectedAmount] = useState<number>(50);
+  const [customAmount, setCustomAmount] = useState<string>('');
+  const [isCustom, setIsCustom] = useState<boolean>(false);
+
+  const effectiveAmount = isCustom ? (Number(customAmount) || 0) : selectedAmount;
+
+  const scrollToAmountSection = () => {
+    const el = document.getElementById('amount-selection-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   useEffect(() => {
     document.title = 'פדיון כפרות - חב״ד בקמפוס בר אילן';
     window.scrollTo(0, 0);
@@ -128,18 +142,22 @@ const Kaparot = () => {
       return;
     }
 
+    if (effectiveAmount <= 0) {
+      toast.error('נא לבחור או להזין סכום לפדיון הכפרות');
+      return;
+    }
+
     setIsSubmittingDetails(true);
     try {
       const genderVal: 'male' | 'female' = recipient === 'female' ? 'female' : 'male';
       const lastNameFormatted = `${trimmedLast} [פדיון כפרות]`;
-      const phoneNote = profile?.phone ? ` | טלפון: ${profile.phone}` : '';
 
       await blessingService.createRequest({
         gender: genderVal,
         full_name: trimmedFirst,
         last_name: lastNameFormatted,
         mother_name: trimmedMother,
-        good_resolution: '',
+        good_resolution: `${effectiveAmount} ₪`,
         blessing_request: '',
       });
 
@@ -209,13 +227,84 @@ const Kaparot = () => {
         </p>
       </div>
 
-      {/* Prayer & Ceremony Card */}
+      {/* Step 1: Set Kaparot Amount in Advance */}
+      <div id="amount-selection-section" className="kaparot-amount-selection-box">
+        <div className="amount-section-header">
+          <div className="step-badge">שלב 1</div>
+          <div className="header-text">
+            <h3>קביעת סכום פדיון הכפרות</h3>
+            <p>
+              לפני תחילת הכפרות, קובעים מראש את סכום הכסף שיינתן לצדקה (כ-36–50 ₪ לנפש כערך תרנגול, או כפי נדבת לבכם):
+            </p>
+          </div>
+        </div>
+
+        <div className="amount-preset-buttons">
+          {[36, 50, 100, 180].map((amt) => (
+            <button
+              key={amt}
+              type="button"
+              className={`amount-pill-btn ${!isCustom && selectedAmount === amt ? 'selected' : ''}`}
+              onClick={() => {
+                setSelectedAmount(amt);
+                setIsCustom(false);
+              }}
+            >
+              <span className="amt-value">{amt} ₪</span>
+              <span className="amt-label">
+                {amt === 36 ? 'בסיסי (חי פעמיים)' : amt === 50 ? 'מהודר' : amt === 100 ? 'תרומה מורחבת' : 'חי כפול 10'}
+              </span>
+            </button>
+          ))}
+          <button
+            type="button"
+            className={`amount-pill-btn ${isCustom ? 'selected' : ''}`}
+            onClick={() => setIsCustom(true)}
+          >
+            <span className="amt-value">סכום אחר</span>
+            <span className="amt-label">הזנה חופשית</span>
+          </button>
+        </div>
+
+        {isCustom && (
+          <div className="custom-amount-input-wrap">
+            <label>הזינו סכום לתרומה (בש״ח):</label>
+            <div className="input-with-currency">
+              <input
+                type="number"
+                min="1"
+                placeholder="למשל: 72"
+                value={customAmount}
+                onChange={(e) => {
+                  setCustomAmount(e.target.value);
+                  setSelectedAmount(Number(e.target.value) || 0);
+                }}
+                autoFocus
+              />
+              <span>₪</span>
+            </div>
+          </div>
+        )}
+
+        <div className="kaparot-summary-note">
+          <div className="note-icon">💡</div>
+          <div className="note-text">
+            <strong>איך זה עובד?</strong>
+            <span>
+              לוקחים שטר או סכום כסף ביד (או במעטפה / שקית), מסובבים מעל הראש ועושים את הכפרות. לאחר מכן תורמים באשראי את הסכום שקבעתם – והכסף שבידכם נפדה לצדקה.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Step 2: Prayer & Ceremony Card */}
       <div className="kaparot-card">
-        <div className="kaparot-card-header">
+        <div className="kaparot-card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div className="step-badge">שלב 2</div>
           <div className="kaparot-icon-badge">
             <Coins size={20} />
           </div>
-          <h2 className="kaparot-card-title">סדר התפילה והסיבוב</h2>
+          <h2 className="kaparot-card-title" style={{ margin: 0 }}>סדר התפילה והסיבוב מעל הראש</h2>
         </div>
 
         {/* Recipient Selector */}
@@ -268,7 +357,7 @@ const Kaparot = () => {
             <span>הנחיית הסיבוב:</span>
           </div>
           <p className="rotation-instruction-desc">
-            אוחזים בכסף (שטר או מטבעות), מסובבים <strong>3 פעמים</strong> מעל הראש ואומרים:
+            אוחזים בסכום הכסף שקבעתם (שטר או מטבעות ביד, בשקית או במעטפה), מסובבים <strong>3 פעמים</strong> מעל הראש ואומרים:
           </p>
 
           <div className="rotation-formula-box">
@@ -311,18 +400,30 @@ const Kaparot = () => {
         </div>
       </div>
 
-      {/* Donation Card - Embedded In-App Checkout */}
+      {/* Step 3: Donation Card - Embedded In-App Checkout */}
       <div className="donation-card">
-        <div className="donation-badge">
-          <Heart size={14} />
-          <span>השלמת המצווה</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.85rem' }}>
+          <div className="step-badge">שלב 3</div>
+          <div className="donation-badge" style={{ margin: 0 }}>
+            <Heart size={14} />
+            <span>השלמת המצווה</span>
+          </div>
         </div>
-        <h2 className="donation-title">מתן דמי הכפרות לצדקה</h2>
+        <h2 className="donation-title">פדיון הכסף לצדקה באשראי</h2>
         <p className="donation-desc">
-          כדי להשלים את פדיון הכפרות, מעבירים את דמי הכפרות לצדקה ישירות לבית חב״ד.
-          <br />
-          <strong>מקובל לתת כערך תרנגול (כ-36–50 ₪ לנפש) או כל סכום כפי נדבת לבכם.</strong>
+          כעת תורמים באשראי את סכום הכפרות שקבעתם – ובכך נפדה הכסף שסובבתם על הראש ישירות לצדקה!
         </p>
+
+        {/* Selected Amount Recap Banner */}
+        <div className="selected-amount-recap-banner">
+          <div>
+            <span>סכום הפדיון שקבעתם: </span>
+            <strong>{effectiveAmount} ₪</strong>
+          </div>
+          <button type="button" onClick={scrollToAmountSection} className="recap-edit-btn">
+            שינוי סכום
+          </button>
+        </div>
 
         {!isDetailsSubmitted ? (
           <form onSubmit={handleDetailsSubmit} className="kaparot-details-box">
@@ -378,7 +479,7 @@ const Kaparot = () => {
                 <span>רושם את הפרטים...</span>
               ) : (
                 <>
-                  <span>שמירה ומעבר לתרומת דמי הכפרות</span>
+                  <span>שמירה ומעבר לפדיון {effectiveAmount > 0 ? `${effectiveAmount} ₪` : 'הכפרות'} באשראי</span>
                   <ChevronLeft size={18} />
                 </>
               )}
@@ -390,7 +491,7 @@ const Kaparot = () => {
               <div className="confirmed-info">
                 <Check size={18} className="confirmed-check-icon" strokeWidth={3} />
                 <span>
-                  נרשם לפדיון כפרות: <strong>{firstName} {lastName}</strong> ({recipient === 'female' ? 'בת' : 'בן'} {motherName})
+                  נרשם לפדיון כפרות: <strong>{firstName} {lastName}</strong> ({recipient === 'female' ? 'בת' : 'בן'} {motherName}) – <strong>{effectiveAmount} ₪</strong>
                 </span>
               </div>
               <button
@@ -403,7 +504,7 @@ const Kaparot = () => {
             </div>
 
             <p style={{ textAlign: 'center', fontSize: '0.92rem', color: '#475569', margin: '0.5rem 0' }}>
-              כעת השלימו את התרומה בטופס המאובטח שלפניכם:
+              כעת השלימו את תרומת הפדיון על סך <strong>{effectiveAmount} ₪</strong> בטופס המאובטח שלפניכם:
             </p>
 
             {/* Embedded Secure Payment Frame */}

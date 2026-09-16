@@ -170,13 +170,14 @@ const AdminSpecialForms = ({ defaultTab }: AdminSpecialFormsProps) => {
 
     if (activeTab === 'kaparot') {
       fileName = `kaparot_names_${new Date().toISOString().slice(0, 10)}.csv`;
-      headers = ['מספר', 'שם מלא לפדיון', 'שם פרטי', 'שם משפחה', 'שם האם', 'מין', 'תאריך ושעה'];
+      headers = ['מספר', 'שם מלא לפדיון', 'שם פרטי', 'שם משפחה', 'שם האם', 'סכום פדיון', 'מין', 'תאריך ושעה'];
       rows = filteredItems.map((req, idx) => [
         idx + 1,
         `"${formatKaparotSentence(req).replace(/"/g, '""')}"`,
         `"${req.full_name.replace(/"/g, '""')}"`,
         `"${(req.last_name || '').replace(/\[פדיון כפרות\]/g, '').trim().replace(/"/g, '""')}"`,
         `"${req.mother_name.replace(/"/g, '""')}"`,
+        `"${req.good_resolution || ''}"`,
         req.gender === 'male' ? 'זכר' : 'נקבה',
         new Date(req.created_at).toLocaleString('he-IL')
       ]);
@@ -584,6 +585,19 @@ const AdminSpecialForms = ({ defaultTab }: AdminSpecialFormsProps) => {
                         }}>
                           {req.gender === 'male' ? 'זכר' : 'נקבה'}
                         </span>
+                        {req.good_resolution && (
+                          <span style={{
+                            background: '#fef3c7',
+                            color: '#b45309',
+                            fontSize: '0.78rem',
+                            fontWeight: 800,
+                            padding: '0.15rem 0.6rem',
+                            borderRadius: '999px',
+                            border: '1px solid rgba(217, 119, 6, 0.25)'
+                          }}>
+                            🪙 {req.good_resolution}
+                          </span>
+                        )}
                       </div>
 
                       <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>

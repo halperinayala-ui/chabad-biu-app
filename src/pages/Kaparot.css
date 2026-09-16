@@ -824,3 +824,206 @@
   color: #064e3b;
 }
 
+/* Steps Badges */
+.step-badge {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.25);
+}
+
+/* Amount Selection Card */
+.kaparot-amount-selection-box {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 1.5rem;
+  margin-bottom: 1.35rem;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+  box-shadow: 0 4px 18px rgba(73, 38, 145, 0.06);
+}
+
+.amount-section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.amount-section-header .header-text h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--primary, #492691);
+  margin: 0 0 0.25rem;
+}
+
+.amount-section-header .header-text p {
+  font-size: 0.92rem;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.amount-preset-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.amount-pill-btn {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 0.75rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.amount-pill-btn:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+.amount-pill-btn.selected {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-color: #f59e0b;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.22);
+}
+
+.amount-pill-btn .amt-value {
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: #1e1b4b;
+}
+
+.amount-pill-btn.selected .amt-value {
+  color: #b45309;
+}
+
+.amount-pill-btn .amt-label {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+  font-weight: 600;
+}
+
+.custom-amount-input-wrap {
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.custom-amount-input-wrap label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.input-with-currency {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  max-width: 140px;
+}
+
+.input-with-currency input {
+  width: 100%;
+  padding: 0.5rem 1.75rem 0.5rem 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  outline: none;
+  text-align: center;
+}
+
+.input-with-currency span {
+  position: absolute;
+  right: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #64748b;
+  pointer-events: none;
+}
+
+/* Concise Summary Note */
+.kaparot-summary-note {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1.5px solid #a7f3d0;
+  border-radius: 16px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.kaparot-summary-note .note-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.kaparot-summary-note .note-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #065f46;
+}
+
+.kaparot-summary-note .note-text strong {
+  font-size: 0.92rem;
+  color: #047857;
+}
+
+/* Recap in Donation Card */
+.selected-amount-recap-banner {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  color: #334155;
+}
+
+.selected-amount-recap-banner strong {
+  color: var(--primary, #492691);
+  font-size: 1.15rem;
+}
+
+.recap-edit-btn {
+  background: none;
+  border: none;
+  color: #6366f1;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+
