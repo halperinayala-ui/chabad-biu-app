@@ -70,7 +70,7 @@ const AdminDashboard = () => {
   const displayed = showArchived ? archivedEvents : activeEvents;
 
   const cards = [
-    { icon: <Scroll size={28} />, label: 'ניהול פ״נ ובקשות ברכה 📜', desc: 'צפייה, הדפסה וייצוא של שמות לציון הרבי', color: '#d35400', action: () => navigate('/admin/blessings') },
+    { icon: <Scroll size={28} />, label: 'פ״נ, ברכות ופדיון כפרות 📜', desc: 'צפייה בשמות לפדיון כפרות ולציון הרבי, הדפסה וייצוא', color: '#d35400', action: () => navigate('/admin/blessings') },
     { icon: <Plus size={28} />, label: 'אירוע חדש', desc: 'הקמת אירוע חדש עם טופס הרשמה', color: '#492691', action: () => navigate('/admin/events/new') },
     { icon: <CalendarCheck size={28} />, label: 'לוח שנה עברי', desc: 'תכנון שנתי, אירועים מתוכננים וחגים', color: '#7f58c2', action: () => navigate('/admin/calendar') },
     { icon: <Users size={28} />, label: 'CRM סטודנטים', desc: 'צפייה בפרופילים, היסטוריית השתתפות', color: '#e91e8c', action: () => navigate('/admin/crm') },
