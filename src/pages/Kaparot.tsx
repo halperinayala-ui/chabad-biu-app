@@ -268,7 +268,7 @@ const Kaparot = () => {
             <span>הנחיית הסיבוב:</span>
           </div>
           <p className="rotation-instruction-desc">
-            אוחזים בכסף (או בכרטיס האשראי / הטלפון הנייד שבו תורמים), מסובבים <strong>3 פעמים</strong> מעל הראש ואומרים את הפסוק הבא:
+            אוחזים בכסף (שטר או מטבעות), מסובבים <strong>3 פעמים</strong> מעל הראש ואומרים:
           </p>
 
           <div className="rotation-formula-box">
