@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { blessingService, type BlessingRequestItem } from '../../utils/blessingService';
-import { Printer, Copy, Download, Plus, Search, Trash2, Users, Scroll, ChevronRight, Check, Edit3, FileText } from 'lucide-react';
+import { Printer, Copy, Download, Plus, Search, Trash2, Users, Scroll, ChevronRight, Check, Edit3, FileText, Coins } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { formatHebrewDate } from '../../utils/dateUtils';
@@ -13,6 +13,12 @@ const AdminBlessingRequests = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'kaparot' | 'pan'>(() => {
+    if (typeof window !== 'undefined' && (window.location.search.includes('kaparot') || window.location.search.includes('filter=kaparot'))) {
+      return 'kaparot';
+    }
+    return 'all';
+  });
   const [copied, setCopied] = useState(false);
 
   // Selection & Batch Delete state
@@ -46,7 +52,15 @@ const AdminBlessingRequests = () => {
     }
   };
 
+  const isKaparotItem = (req: BlessingRequestItem) => {
+    return (req.last_name === '[פדיון כפרות]' || req.formatted_text?.includes('פדיון כפרות') || req.good_resolution?.includes('דמי כפרות'));
+  };
+
   const filteredRequests = requests.filter(req => {
+    const isKaparot = isKaparotItem(req);
+    if (typeFilter === 'kaparot' && !isKaparot) return false;
+    if (typeFilter === 'pan' && isKaparot) return false;
+
     const matchesGender = genderFilter === 'all' || req.gender === genderFilter;
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch =
@@ -63,6 +77,7 @@ const AdminBlessingRequests = () => {
 
   const maleCount = requests.filter(r => r.gender === 'male').length;
   const femaleCount = requests.filter(r => r.gender === 'female').length;
+  const kaparotCount = requests.filter(r => isKaparotItem(r)).length;
 
   const handlePrint = () => {
     window.print();
@@ -339,14 +354,24 @@ const AdminBlessingRequests = () => {
       </div>
 
       {/* KPI Stats */}
-      <div className="stats-grid">
+      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
         <div className="stat-card">
           <div className="stat-icon" style={{ background: '#ebf8ff', color: '#3182ce' }}>
             <Scroll size={24} />
           </div>
           <div className="stat-info">
             <h3>{requests.length}</h3>
-            <span>סה״כ בקשות ברכה</span>
+            <span>סה״כ בקשות</span>
+          </div>
+        </div>
+
+        <div className="stat-card" style={{ border: '1.5px solid rgba(245, 158, 11, 0.35)' }}>
+          <div className="stat-icon" style={{ background: '#fef3c7', color: '#d97706' }}>
+            <Coins size={24} />
+          </div>
+          <div className="stat-info">
+            <h3>{kaparotCount}</h3>
+            <span>פדיון כפרות 🪙</span>
           </div>
         </div>
 
@@ -385,10 +410,23 @@ const AdminBlessingRequests = () => {
 
         <div className="filter-pills">
           <button
-            className={`filter-pill ${genderFilter === 'all' ? 'active' : ''}`}
-            onClick={() => setGenderFilter('all')}
+            className={`filter-pill ${typeFilter === 'all' && genderFilter === 'all' ? 'active' : ''}`}
+            onClick={() => { setTypeFilter('all'); setGenderFilter('all'); }}
           >
             הכל ({requests.length})
+          </button>
+          <button
+            className={`filter-pill ${typeFilter === 'kaparot' ? 'active' : ''}`}
+            style={typeFilter === 'kaparot' ? { background: '#d97706', borderColor: '#b45309', color: '#ffffff' } : {}}
+            onClick={() => { setTypeFilter('kaparot'); setGenderFilter('all'); }}
+          >
+            🪙 פדיון כפרות ({kaparotCount})
+          </button>
+          <button
+            className={`filter-pill ${typeFilter === 'pan' ? 'active' : ''}`}
+            onClick={() => { setTypeFilter('pan'); setGenderFilter('all'); }}
+          >
+            📜 פ״נ רגיל ({requests.length - kaparotCount})
           </button>
           <button
             className={`filter-pill ${genderFilter === 'male' ? 'active' : ''}`}
@@ -440,6 +478,25 @@ const AdminBlessingRequests = () => {
               </div>
               <div className="item-index">{idx + 1}</div>
               <div className="item-body">
+                {isKaparotItem(req) && (
+                  <div style={{ marginBottom: '0.35rem' }}>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.3rem',
+                      background: '#fef3c7',
+                      color: '#b45309',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      padding: '0.2rem 0.65rem',
+                      borderRadius: '999px',
+                      border: '1px solid rgba(217, 119, 6, 0.25)'
+                    }}>
+                      <Coins size={13} />
+                      <span>פדיון כפרות ותרומה</span>
+                    </span>
+                  </div>
+                )}
                 <p className="item-text">
                   {req.formatted_text}
                 </p>
