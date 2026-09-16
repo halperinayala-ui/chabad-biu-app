@@ -156,28 +156,6 @@ const AdminBlessingRequests = () => {
     }
   };
 
-  const handleDeleteFirst16 = async () => {
-    if (requests.length === 0) {
-      toast.error('אין שמות ברשימה');
-      return;
-    }
-
-    const countToDelete = Math.min(16, requests.length);
-    const targetItems = requests.slice(0, countToDelete);
-    const idsToDelete = targetItems.map(item => item.id);
-
-    if (!window.confirm(`האם למחוק את ${idsToDelete.length} השמות הראשונים שכבר הוכנסו לרבי?`)) return;
-
-    try {
-      await blessingService.deleteBatchRequests(idsToDelete);
-      setRequests(prev => prev.filter(r => !idsToDelete.includes(r.id)));
-      setSelectedIds(prev => prev.filter(id => !idsToDelete.includes(id)));
-      toast.success(`${idsToDelete.length} השמות הראשונים נמחקו בהצלחה!`);
-    } catch (e) {
-      toast.error('שגיאה במחיקת השמות');
-    }
-  };
-
   const handleDeleteSelected = async () => {
     if (selectedIds.length === 0) return;
     if (!window.confirm(`האם למחוק את ${selectedIds.length} השמות המסומנים?`)) return;
@@ -324,16 +302,6 @@ const AdminBlessingRequests = () => {
           <button className="btn-copy no-print" onClick={handleExportCSV}>
             <Download size={18} />
             <span>ייצוא CSV</span>
-          </button>
-
-          <button 
-            className="btn-copy no-print" 
-            style={{ background: '#fef2f2', color: '#dc2626', borderColor: '#fca5a5', fontWeight: 700 }}
-            onClick={handleDeleteFirst16}
-            title="מחיקת 16 השמות הראשונים שכבר הוכנסו לרבי"
-          >
-            <Trash2 size={18} />
-            <span>מחיקת 16 הראשונים</span>
           </button>
 
           {selectedIds.length > 0 && (

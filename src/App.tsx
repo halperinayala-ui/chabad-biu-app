@@ -16,6 +16,7 @@ import AdminMediaManager from './pages/admin/AdminMediaManager';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import AdminCalendar from './pages/admin/AdminCalendar';
 import AdminBlessingRequests from './pages/admin/AdminBlessingRequests';
+import AdminSpecialForms from './pages/admin/AdminSpecialForms';
 import BlessingRequest from './pages/BlessingRequest';
 import Auth from './pages/Auth';
 import ProfileSettings from './pages/ProfileSettings';
@@ -118,11 +119,18 @@ function App() {
             <Route path="/admin/crm/:studentId" element={
               <ProtectedRoute requireAdmin><AdminStudentProfile /></ProtectedRoute>
             } />
+            {/* Special Forms Management (פדיון כפרות, פ"נ וטפסים מיוחדים) */}
+            <Route path="/admin/special-forms" element={
+              <ProtectedRoute requireAdmin><AdminSpecialForms /></ProtectedRoute>
+            } />
+            <Route path="/admin/kaparot" element={
+              <ProtectedRoute requireAdmin><AdminSpecialForms defaultTab="kaparot" /></ProtectedRoute>
+            } />
             <Route path="/admin/blessings" element={
-              <ProtectedRoute requireAdmin><AdminBlessingRequests /></ProtectedRoute>
+              <ProtectedRoute requireAdmin><AdminSpecialForms defaultTab="pan" /></ProtectedRoute>
             } />
             <Route path="/admin/pan" element={
-              <ProtectedRoute requireAdmin><AdminBlessingRequests /></ProtectedRoute>
+              <ProtectedRoute requireAdmin><AdminSpecialForms defaultTab="pan" /></ProtectedRoute>
             } />
           </Routes>
         </main>

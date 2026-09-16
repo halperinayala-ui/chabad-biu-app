@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Plus, Users, Settings, BarChart2, Archive, CalendarDays, CalendarCheck, ChevronLeft, Edit, Megaphone, Scroll } from 'lucide-react';
+import { Plus, Users, Settings, BarChart2, Archive, CalendarDays, CalendarCheck, ChevronLeft, Edit, Megaphone, Scroll, ClipboardList } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatHebrewDate } from '../../utils/dateUtils';
 import './AdminDashboard.css';
@@ -70,7 +70,7 @@ const AdminDashboard = () => {
   const displayed = showArchived ? archivedEvents : activeEvents;
 
   const cards = [
-    { icon: <Scroll size={28} />, label: 'פ״נ, ברכות ופדיון כפרות 📜', desc: 'צפייה בשמות לפדיון כפרות ולציון הרבי, הדפסה וייצוא', color: '#d35400', action: () => navigate('/admin/blessings') },
+    { icon: <ClipboardList size={28} />, label: 'מרכז טפסים מיוחדים 📋', desc: 'פדיון כפרות, פ״נ לציון הרבי וטפסים מיוחדים', color: '#d35400', action: () => navigate('/admin/special-forms') },
     { icon: <Plus size={28} />, label: 'אירוע חדש', desc: 'הקמת אירוע חדש עם טופס הרשמה', color: '#492691', action: () => navigate('/admin/events/new') },
     { icon: <CalendarCheck size={28} />, label: 'לוח שנה עברי', desc: 'תכנון שנתי, אירועים מתוכננים וחגים', color: '#7f58c2', action: () => navigate('/admin/calendar') },
     { icon: <Users size={28} />, label: 'CRM סטודנטים', desc: 'צפייה בפרופילים, היסטוריית השתתפות', color: '#e91e8c', action: () => navigate('/admin/crm') },

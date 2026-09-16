@@ -322,3 +322,181 @@
 .print-only-header {
   display: none;
 }
+
+/* Special Forms Tabs Navigation */
+.special-forms-tabs-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+  margin-bottom: 1.75rem;
+}
+
+@media (max-width: 768px) {
+  .special-forms-tabs-container {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+}
+
+.special-forms-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 1rem 1.15rem;
+  cursor: pointer;
+  text-align: right;
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.special-forms-tab-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.special-forms-tab-btn.active-kaparot {
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.18);
+}
+
+.special-forms-tab-btn.active-pan {
+  border-color: #492691;
+  background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 100%);
+  box-shadow: 0 6px 20px rgba(73, 38, 145, 0.18);
+}
+
+.special-forms-tab-btn.active-future {
+  border-color: #059669;
+  background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%);
+  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.15);
+}
+
+.tab-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tab-icon-box.kaparot-icon {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.tab-icon-box.pan-icon {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.tab-icon-box.future-icon {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.tab-text-box {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.tab-text-box strong {
+  font-size: 1rem;
+  color: #1e293b;
+  font-weight: 800;
+}
+
+.tab-text-box span {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+
+.tab-badge-pill {
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.kaparot-pill {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.pan-pill {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.future-pill {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* Kaparot item row */
+.kaparot-row {
+  padding: 1rem 1.25rem !important;
+}
+
+/* Future Holiday Cards */
+.future-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.future-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+}
+
+.future-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.future-card h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1e1b4b;
+  margin: 0 0 0.5rem;
+}
+
+.future-card p {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #64748b;
+  margin: 0 0 1.25rem;
+  flex: 1;
+}
+
+.future-badge {
+  display: inline-block;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+}
+

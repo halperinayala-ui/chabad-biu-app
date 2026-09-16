@@ -14,14 +14,49 @@ export interface BlessingRequestItem {
 
 const LOCAL_STORAGE_KEY = 'chabad_blessing_requests_v1';
 
+export function isKaparotRequest(item: {
+  last_name?: string;
+  good_resolution?: string;
+  blessing_request?: string;
+  formatted_text?: string;
+}): boolean {
+  return Boolean(
+    (item.last_name && item.last_name.includes('פדיון כפרות')) ||
+    (item.formatted_text && item.formatted_text.includes('פדיון כפרות')) ||
+    (item.good_resolution && item.good_resolution.includes('דמי כפרות')) ||
+    (item.blessing_request && item.blessing_request.includes('פדיון כפרות'))
+  );
+}
+
+export function formatKaparotSentence(item: {
+  gender: 'male' | 'female';
+  full_name: string;
+  last_name?: string;
+  mother_name: string;
+}): string {
+  const isMale = item.gender === 'male';
+  const firstNameStr = item.full_name.trim();
+  const motherNameStr = item.mother_name.trim();
+  const cleanLastName = item.last_name ? item.last_name.replace(/\[פדיון כפרות\]/g, '').trim() : '';
+
+  return cleanLastName
+    ? `${firstNameStr} ${isMale ? 'בן' : 'בת'} ${motherNameStr} (${cleanLastName})`
+    : `${firstNameStr} ${isMale ? 'בן' : 'בת'} ${motherNameStr}`;
+}
+
 export function formatBlessingSentence(item: {
   gender: 'male' | 'female';
   full_name: string;
   last_name?: string;
   mother_name: string;
-  good_resolution: string;
-  blessing_request: string;
+  good_resolution?: string;
+  blessing_request?: string;
+  formatted_text?: string;
 }): string {
+  if (isKaparotRequest(item)) {
+    return formatKaparotSentence(item);
+  }
+
   const isMale = item.gender === 'male';
   const firstNameStr = item.full_name.trim();
   const motherNameStr = item.mother_name.trim();
@@ -31,7 +66,7 @@ export function formatBlessingSentence(item: {
     ? `${firstNameStr} ${isMale ? 'בן' : 'בת'} ${motherNameStr} ${lastNameStr}`
     : `${firstNameStr} ${isMale ? 'בן' : 'בת'} ${motherNameStr}`;
 
-  const resText = item.good_resolution.trim();
+  const resText = (item.good_resolution || '').trim();
   let resolutionPart = '';
   if (resText) {
     const prefix = isMale ? 'מקבל על עצמי להתחזק' : 'מקבלת על עצמי להתחזק';
@@ -39,7 +74,7 @@ export function formatBlessingSentence(item: {
     resolutionPart = ` ${prefix} ${formattedRes}`;
   }
 
-  const blessingText = item.blessing_request.trim();
+  const blessingText = (item.blessing_request || '').trim();
   let blessingPart = '';
   if (blessingText) {
     const hasRes = Boolean(resText);
@@ -67,7 +102,7 @@ export const blessingService = {
       if (!error && data) {
         supabaseItems = data.map((d: any) => ({
           ...d,
-          formatted_text: d.formatted_text || formatBlessingSentence(d)
+          formatted_text: isKaparotRequest(d) ? formatKaparotSentence(d) : (d.formatted_text || formatBlessingSentence(d))
         }));
       }
     } catch (e) {
@@ -81,7 +116,9 @@ export const blessingService = {
     // Merge unique by ID
     const mergedMap = new Map<string, BlessingRequestItem>();
     [...supabaseItems, ...localItems].forEach(item => {
-      if (!item.formatted_text) {
+      if (isKaparotRequest(item)) {
+        item.formatted_text = formatKaparotSentence(item);
+      } else if (!item.formatted_text) {
         item.formatted_text = formatBlessingSentence(item);
       }
       mergedMap.set(item.id, item);

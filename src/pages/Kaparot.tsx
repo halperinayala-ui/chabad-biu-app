@@ -139,8 +139,8 @@ const Kaparot = () => {
         full_name: trimmedFirst,
         last_name: lastNameFormatted,
         mother_name: trimmedMother,
-        good_resolution: `דמי כפרות תשפ״ה${phoneNote}`,
-        blessing_request: `פדיון כפרות לשנה טובה ומבורכת וגמר חתימה טובה`,
+        good_resolution: '',
+        blessing_request: '',
       });
 
       sessionStorage.setItem('kaparot_submitted_v1', 'true');
