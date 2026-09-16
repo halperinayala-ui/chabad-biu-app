@@ -230,7 +230,7 @@ const Home = () => {
                       flexShrink: 0,
                     }}
                   >
-                    <span>כניסה לסדר</span>
+                    <span>לפדיון הכפרות</span>
                     <ChevronLeft size={16} />
                   </div>
                 </div>

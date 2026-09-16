@@ -9,15 +9,10 @@ import {
   Heart, 
   Check, 
   ExternalLink, 
-  Copy, 
   Info, 
-  Sparkles, 
-  X,
-  FileText,
-  Scroll
+  Sparkles 
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { blessingService } from '../utils/blessingService';
 import toast from 'react-hot-toast';
 import './Kaparot.css';
 
@@ -32,31 +27,17 @@ const Kaparot = () => {
 
   const [recipient, setRecipient] = useState<RecipientType>('male');
   const [completedRounds, setCompletedRounds] = useState<number[]>([]);
-  const [showFlyerModal, setShowFlyerModal] = useState(false);
   const [iframeLoading, setIframeLoading] = useState(true);
-
-  // Confirmation & Blessing registration states
-  const [donorName, setDonorName] = useState('');
-  const [donorPhone, setDonorPhone] = useState('');
-  const [motherName, setMotherName] = useState('');
-  const [donationAmount, setDonationAmount] = useState('');
-  const [extraBlessing, setExtraBlessing] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     document.title = 'פדיון כפרות - חב״ד בקמפוס בר אילן';
     window.scrollTo(0, 0);
 
-    // Auto-fill from profile if logged in
-    if (profile) {
-      if (profile.full_name && !donorName) setDonorName(profile.full_name);
-      if (profile.phone && !donorPhone) setDonorPhone(profile.phone);
-      if (profile.gender === 'f') {
-        setRecipient('female');
-      } else if (profile.gender === 'm') {
-        setRecipient('male');
-      }
+    // Auto-detect gender if student is logged in
+    if (profile?.gender === 'f') {
+      setRecipient('female');
+    } else if (profile?.gender === 'm') {
+      setRecipient('male');
     }
   }, [profile]);
 
@@ -73,14 +54,14 @@ const Kaparot = () => {
   };
 
   const handleShare = async () => {
-    const shareUrl = window.location.href;
+    const shareUrl = 'https://chabad-biu-app.vercel.app/kaparot';
     const shareText = 'מקיימים את מנהג פדיון כפרות בקלות ישירות דרך האפליקציה של חב״ד בקמפוס בר אילן:';
     
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'פדיון כפרות - חב״ד בקמפוס בר אילן',
-          text: `${shareText}\n${shareUrl}`,
+          text: shareText,
           url: shareUrl,
         });
         return;
@@ -94,51 +75,6 @@ const Kaparot = () => {
       toast.success('הקישור הועתק! ניתן לשלוח לחברים בוואטסאפ');
     } catch {
       toast.error('לא ניתן היה להעתיק את הקישור');
-    }
-  };
-
-  const handleConfirmKaparot = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!donorName.trim()) {
-      toast.error('נא למלא שם מלא');
-      return;
-    }
-    if (!donorPhone.trim()) {
-      toast.error('נא למלא מספר טלפון');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const goodResParts = [];
-      if (donationAmount.trim()) {
-        goodResParts.push(`דמי כפרות: ${donationAmount.trim()}`);
-      } else {
-        goodResParts.push('דמי כפרות נמסרו לצדקה');
-      }
-      goodResParts.push(`טלפון: ${donorPhone.trim()}`);
-
-      const blessingTextParts = ['פדיון כפרות לשנה טובה ומבורכת, גמר חתימה טובה'];
-      if (extraBlessing.trim()) {
-        blessingTextParts.push(extraBlessing.trim());
-      }
-
-      await blessingService.createRequest({
-        gender: recipient === 'female' ? 'female' : 'male',
-        full_name: donorName.trim(),
-        last_name: '[פדיון כפרות]',
-        mother_name: motherName.trim() || 'עצמי',
-        good_resolution: goodResParts.join(' | '),
-        blessing_request: blessingTextParts.join(' | '),
-      });
-
-      setShowSuccessModal(true);
-      toast.success('פדיון הכפרות והשמות נקלטו בהצלחה!');
-    } catch (err: any) {
-      console.error(err);
-      toast.error('שגיאה בשמירת הנתונים. אנא נסו שוב.');
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -182,20 +118,13 @@ const Kaparot = () => {
         </button>
       </div>
 
-      {/* Hero Header with banner image */}
+      {/* Hero Banner image (Clean without covering texts) */}
       <div className="kaparot-hero-banner-container">
         <img 
           src="/kaparot-banner.jpeg" 
           alt="סדר פדיון כפרות - חב״ד בקמפוס בר אילן" 
           className="kaparot-hero-banner-image" 
         />
-        <div className="kaparot-hero-banner-overlay">
-          <div className="kaparot-badge">
-            <Sparkles size={14} />
-            <span>עשרת ימי תשובה • ערב יום הכיפורים</span>
-          </div>
-          <p className="kaparot-subtitle">חב״ד בקמפוס אוניברסיטת בר אילן</p>
-        </div>
       </div>
 
       {/* Intro Card */}
@@ -213,27 +142,6 @@ const Kaparot = () => {
           נהוג לקיים את המנהג בתרנגול ולתת את ערך התרנגול לצדקה. מי שאינו משיג תרנגול עושה זאת ישירות <strong>בכסף שתורמים לצדקה</strong>. 
           מנהג זה הינו סגולה מיוחדת לשנה טובה ומוצלחת בגשמיות וברוחניות, בבריאות ובפרנסה.
         </p>
-
-        <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-          <button
-            onClick={() => setShowFlyerModal(true)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--primary, #492691)',
-              fontSize: '0.86rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              textDecoration: 'underline'
-            }}
-          >
-            <FileText size={15} />
-            <span>לצפייה במודעת פדיון הכפרות המקורית</span>
-          </button>
-        </div>
       </div>
 
       {/* Prayer & Ceremony Card */}
@@ -338,7 +246,7 @@ const Kaparot = () => {
         </div>
       </div>
 
-      {/* Donation Card */}
+      {/* Donation Card - Embedded In-App Checkout */}
       <div className="donation-card">
         <div className="donation-badge">
           <Heart size={14} />
@@ -346,11 +254,11 @@ const Kaparot = () => {
         </div>
         <h2 className="donation-title">מתן דמי הכפרות לצדקה</h2>
         <p className="donation-desc">
-          כדי להשלים את פדיון הכפרות, מעבירים את דמי הכפרות לצדקה.
+          כדי להשלים את פדיון הכפרות, מעבירים את דמי הכפרות לצדקה ישירות לבית חב״ד.
           <br />
           <strong>מקובל לתת כערך תרנגול (כ-36–50 ₪ לנפש) או כל סכום כפי נדבת לבכם.</strong>
           <br />
-          כל התרומות מוקדשות ישירות לפעילות בית חב״ד עם הסטודנטים באוניברסיטת בר אילן.
+          התרומה מתבצעת ישירות ובאופן מאובטח בטופס שלמטה:
         </p>
 
         {/* Embedded Secure Payment Frame */}
@@ -387,101 +295,13 @@ const Kaparot = () => {
         </div>
       </div>
 
-      {/* Donor Information & Blessing Names Registration Card */}
-      <div className="kaparot-card" style={{ border: '2px solid rgba(245, 158, 11, 0.4)' }}>
-        <div className="kaparot-card-header">
-          <div className="kaparot-icon-badge" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#d97706' }}>
-            <Scroll size={20} />
-          </div>
-          <h2 className="kaparot-card-title">רישום שמות לברכה ואישור פדיון כפרות</h2>
-        </div>
-        <p className="kaparot-intro-text" style={{ marginBottom: '1.25rem' }}>
-          לאחר ביצוע התרומה, מלאו את הפרטים שלמטה כדי שהשמות שלכם ושל יקיריכם יועברו ישירות לברכה אצל הרב ישראל ואילה הלפרין לקראת יום הכיפורים:
-        </p>
-
-        <form onSubmit={handleConfirmKaparot} className="kaparot-confirm-form">
-          <div className="kaparot-form-group">
-            <label className="kaparot-label">שם מלא של התורם/ת: *</label>
-            <input
-              type="text"
-              required
-              className="kaparot-input"
-              value={donorName}
-              onChange={(e) => setDonorName(e.target.value)}
-              placeholder="לדוגמה: ישראל ישראלי"
-            />
-          </div>
-
-          <div className="kaparot-form-group">
-            <label className="kaparot-label">טלפון ליצירת קשר ועדכונים: *</label>
-            <input
-              type="tel"
-              required
-              className="kaparot-input"
-              value={donorPhone}
-              onChange={(e) => setDonorPhone(e.target.value)}
-              placeholder="050-0000000"
-            />
-          </div>
-
-          <div className="kaparot-form-group">
-            <label className="kaparot-label">שם האמא (לברכה): *</label>
-            <input
-              type="text"
-              required
-              className="kaparot-input"
-              value={motherName}
-              onChange={(e) => setMotherName(e.target.value)}
-              placeholder="לדוגמה: שרה"
-            />
-          </div>
-
-          <div className="kaparot-form-group">
-            <label className="kaparot-label">סכום שנתרם (אופציונלי):</label>
-            <input
-              type="text"
-              className="kaparot-input"
-              value={donationAmount}
-              onChange={(e) => setDonationAmount(e.target.value)}
-              placeholder="לדוגמה: 50 ₪"
-            />
-          </div>
-
-          <div className="kaparot-form-group">
-            <label className="kaparot-label">שמות נוספים לברכה או בקשות מיוחדות (אופציונלי):</label>
-            <textarea
-              className="kaparot-textarea"
-              rows={2}
-              value={extraBlessing}
-              onChange={(e) => setExtraBlessing(e.target.value)}
-              placeholder="לדוגמה: דוד בן רבקה לרפואה שלמה, הצלחה בלימודים..."
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="kaparot-submit-blessing-btn"
-          >
-            {submitting ? (
-              <span>שומר ומעביר לברכה...</span>
-            ) : (
-              <>
-                <Sparkles size={18} />
-                <span>אישור סיום פדיון כפרות ושליחת השמות לברכה</span>
-              </>
-            )}
-          </button>
-        </form>
-      </div>
-
       {/* Bottom Wishes & Community Share */}
       <div className="kaparot-footer-wishes">
         <h3 className="wishes-title">גמר חתימה טובה ושנה טובה ומתוקה! 🍯🍎</h3>
         <p className="wishes-sub">
           בברכת שנת ברכה והצלחה בלימודים ובחיים,
           <br />
-          הרב ישראל ואילה הלפרין וצוות חב״ד בקמפוס בר אילן 💜
+          הרב אפרים ואילה פיקארסקי
         </p>
 
         <button 
@@ -492,73 +312,6 @@ const Kaparot = () => {
           <span>שתפו חברים לקיום המצווה</span>
         </button>
       </div>
-
-      {/* Original Flyer Modal */}
-      {showFlyerModal && (
-        <div className="flyer-modal-overlay" onClick={() => setShowFlyerModal(false)}>
-          <div className="flyer-modal-content" onClick={(e) => e.stopPropagation()}>
-            <button 
-              className="flyer-modal-close" 
-              onClick={() => setShowFlyerModal(false)}
-              aria-label="סגור"
-            >
-              <X size={20} />
-            </button>
-            <img 
-              src="/kaparot-flyer.jpg" 
-              alt="מודעת פדיון כפרות חב״ד בקמפוס" 
-              className="flyer-modal-img" 
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Success / Gmar Chatima Tova Modal */}
-      {showSuccessModal && (
-        <div className="flyer-modal-overlay" onClick={() => setShowSuccessModal(false)}>
-          <div 
-            className="kaparot-success-modal-content" 
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="success-festive-icon">
-              🍯🍎
-            </div>
-
-            <h2 className="success-modal-title">
-              גמר חתימה טובה ושנה טובה ומתוקה!
-            </h2>
-
-            <div className="success-modal-badge">
-              <Sparkles size={14} />
-              <span>פדיון הכפרות והשמות נקלטו בהצלחה</span>
-            </div>
-
-            <p className="success-modal-desc">
-              יישר כוחכם! זכות מצוות פדיון הכפרות והצדקה תעמוד לכם לשנה טובה ומבורכת, 
-              כתיבה וחתימה טובה בספר החיים, בריאות איתנה, פרנסה טובה, שמחה, 
-              ושפע הצלחה בלימודים ובכל מעשי ידיכם!
-              <br /><br />
-              השמות הועברו ישירות לברכה אצל הרב ישראל ואילה הלפרין לקראת יום הכיפורים. 🙏
-            </p>
-
-            <div className="success-modal-actions">
-              <button
-                onClick={() => navigate('/')}
-                className="modal-btn-primary"
-              >
-                חזרה לעמוד הבית 💜
-              </button>
-              <button
-                onClick={handleShare}
-                className="modal-btn-secondary"
-              >
-                <Share2 size={16} />
-                <span>שתפו חברים לקיום המצווה</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </motion.div>
   );
 };
