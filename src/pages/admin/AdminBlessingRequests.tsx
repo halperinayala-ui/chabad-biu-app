@@ -53,7 +53,12 @@ const AdminBlessingRequests = () => {
   };
 
   const isKaparotItem = (req: BlessingRequestItem) => {
-    return (req.last_name === '[פדיון כפרות]' || req.formatted_text?.includes('פדיון כפרות') || req.good_resolution?.includes('דמי כפרות'));
+    return (
+      (req.last_name && req.last_name.includes('פדיון כפרות')) ||
+      (req.formatted_text && req.formatted_text.includes('פדיון כפרות')) ||
+      (req.good_resolution && req.good_resolution.includes('דמי כפרות')) ||
+      (req.blessing_request && req.blessing_request.includes('פדיון כפרות'))
+    );
   };
 
   const filteredRequests = requests.filter(req => {

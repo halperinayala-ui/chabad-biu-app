@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   ChevronRight, 
+  ChevronLeft,
   Share2, 
   RotateCw, 
   Coins, 
@@ -13,6 +14,7 @@ import {
   Sparkles 
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { blessingService } from '../utils/blessingService';
 import toast from 'react-hot-toast';
 import './Kaparot.css';
 
@@ -29,6 +31,13 @@ const Kaparot = () => {
   const [completedRounds, setCompletedRounds] = useState<number[]>([]);
   const [iframeLoading, setIframeLoading] = useState(true);
 
+  // User details for Kaparot registry before donation
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [motherName, setMotherName] = useState('');
+  const [isDetailsSubmitted, setIsDetailsSubmitted] = useState(false);
+  const [isSubmittingDetails, setIsSubmittingDetails] = useState(false);
+
   useEffect(() => {
     document.title = 'פדיון כפרות - חב״ד בקמפוס בר אילן';
     window.scrollTo(0, 0);
@@ -38,6 +47,23 @@ const Kaparot = () => {
       setRecipient('female');
     } else if (profile?.gender === 'm') {
       setRecipient('male');
+    }
+
+    // Auto-fill student first and last name if available in profile
+    if (profile?.full_name) {
+      const parts = profile.full_name.trim().split(' ');
+      if (parts.length > 0) {
+        setFirstName(parts[0]);
+        if (parts.length > 1) {
+          setLastName(parts.slice(1).join(' '));
+        }
+      }
+    }
+
+    // Check if details were already entered in this session
+    const saved = sessionStorage.getItem('kaparot_submitted_v1');
+    if (saved === 'true') {
+      setIsDetailsSubmitted(true);
     }
   }, [profile]);
 
@@ -87,6 +113,45 @@ const Kaparot = () => {
       case 'male':
       default:
         return 'זֶה חֲלִיפָתִי, זֶה תְּמוּרָתִי, זֶה כַּפָּרָתִי. זֶה הַכֶּסֶף יֵלֵךְ לִצְדָקָה, וַאֲנִי אֵלֵךְ לְחַיִּים טוֹבִים אֲרֻכִּים וּלְשָׁלוֹם:';
+    }
+  };
+
+  const handleDetailsSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    const trimmedFirst = firstName.trim();
+    const trimmedLast = lastName.trim();
+    const trimmedMother = motherName.trim();
+
+    if (!trimmedFirst || !trimmedLast || !trimmedMother) {
+      toast.error('נא למלא שם פרטי, שם משפחה ושם האם להשלמת הפדיון');
+      return;
+    }
+
+    setIsSubmittingDetails(true);
+    try {
+      const genderVal: 'male' | 'female' = recipient === 'female' ? 'female' : 'male';
+      const lastNameFormatted = `${trimmedLast} [פדיון כפרות]`;
+      const phoneNote = profile?.phone ? ` | טלפון: ${profile.phone}` : '';
+
+      await blessingService.createRequest({
+        gender: genderVal,
+        full_name: trimmedFirst,
+        last_name: lastNameFormatted,
+        mother_name: trimmedMother,
+        good_resolution: `דמי כפרות תשפ״ה${phoneNote}`,
+        blessing_request: `פדיון כפרות לשנה טובה ומבורכת וגמר חתימה טובה`,
+      });
+
+      sessionStorage.setItem('kaparot_submitted_v1', 'true');
+      setIsDetailsSubmitted(true);
+      toast.success('פרטיך נקלטו בהצלחה לפדיון כפרות! כעת ניתן לבצע את התרומה ✨');
+    } catch (err) {
+      console.error('Error saving kaparot entry:', err);
+      toast.error('חלה שגיאה בשמירת הפרטים, אך ניתן להמשיך לתרומה');
+      setIsDetailsSubmitted(true);
+    } finally {
+      setIsSubmittingDetails(false);
     }
   };
 
@@ -257,37 +322,119 @@ const Kaparot = () => {
           כדי להשלים את פדיון הכפרות, מעבירים את דמי הכפרות לצדקה ישירות לבית חב״ד.
           <br />
           <strong>מקובל לתת כערך תרנגול (כ-36–50 ₪ לנפש) או כל סכום כפי נדבת לבכם.</strong>
-          <br />
-          התרומה מתבצעת ישירות ובאופן מאובטח בטופס שלמטה:
         </p>
 
-        {/* Embedded Secure Payment Frame */}
-        <div className="donation-iframe-container">
-          {iframeLoading && (
-            <div style={{ padding: '3rem 1rem', textAlign: 'center', color: 'var(--primary, #492691)' }}>
-              <div style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '0.5rem' }}>טוען טופס תרומה מאובטח...</div>
-              <div style={{ fontSize: '0.85rem', color: '#64748b' }}>רגע אחד, מתחברים למערכת הסליקה</div>
+        {!isDetailsSubmitted ? (
+          <form onSubmit={handleDetailsSubmit} className="kaparot-details-box">
+            <div className="kaparot-details-header">
+              <Sparkles size={16} />
+              <span>רישום פרטים לפדיון כפרות</span>
             </div>
-          )}
-          <iframe
-            src={YAAD_PAY_IFRAME_URL}
-            title="טופס תרומה מאובטח יעד שריג"
-            className="donation-iframe"
-            onLoad={() => setIframeLoading(false)}
-          />
-        </div>
+            <p className="kaparot-details-hint">
+              רשמו את שמכם ושם האם, ולחצו למטה למעבר ישיר לטופס התרומה המאובטח:
+            </p>
 
-        <div style={{ textAlign: 'center', margin: '0.5rem 0 0.85rem' }}>
-          <a
-            href={DONATION_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="donation-fallback-btn"
-          >
-            <span>אם הטופס לא נטען אצלכם – לחצו כאן לתשלום בחלון נפרד</span>
-            <ExternalLink size={14} />
-          </a>
-        </div>
+            <div className="kaparot-inputs-grid">
+              <div className="kaparot-input-field">
+                <label>שם פרטי *</label>
+                <input
+                  type="text"
+                  placeholder="למשל: דניאל"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="kaparot-input-field">
+                <label>שם משפחה *</label>
+                <input
+                  type="text"
+                  placeholder="למשל: לוי"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="kaparot-input-field full-width">
+                <label>שם האם * (לפדיון כפרות ולברכה)</label>
+                <input
+                  type="text"
+                  placeholder="למשל: שרה"
+                  value={motherName}
+                  onChange={(e) => setMotherName(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmittingDetails}
+              className="kaparot-submit-to-pay-btn"
+            >
+              {isSubmittingDetails ? (
+                <span>רושם את הפרטים...</span>
+              ) : (
+                <>
+                  <span>שמירה ומעבר לתרומת דמי הכפרות</span>
+                  <ChevronLeft size={18} />
+                </>
+              )}
+            </button>
+          </form>
+        ) : (
+          <div className="kaparot-confirmed-section">
+            <div className="kaparot-confirmed-banner">
+              <div className="confirmed-info">
+                <Check size={18} className="confirmed-check-icon" strokeWidth={3} />
+                <span>
+                  נרשם לפדיון כפרות: <strong>{firstName} {lastName}</strong> ({recipient === 'female' ? 'בת' : 'בן'} {motherName})
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsDetailsSubmitted(false)}
+                className="confirmed-edit-btn"
+              >
+                עריכת פרטים
+              </button>
+            </div>
+
+            <p style={{ textAlign: 'center', fontSize: '0.92rem', color: '#475569', margin: '0.5rem 0' }}>
+              כעת השלימו את התרומה בטופס המאובטח שלפניכם:
+            </p>
+
+            {/* Embedded Secure Payment Frame */}
+            <div className="donation-iframe-container">
+              {iframeLoading && (
+                <div style={{ padding: '3rem 1rem', textAlign: 'center', color: 'var(--primary, #492691)' }}>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '0.5rem' }}>טוען טופס תרומה מאובטח...</div>
+                  <div style={{ fontSize: '0.85rem', color: '#64748b' }}>רגע אחד, מתחברים למערכת הסליקה</div>
+                </div>
+              )}
+              <iframe
+                src={YAAD_PAY_IFRAME_URL}
+                title="טופס תרומה מאובטח יעד שריג"
+                className="donation-iframe"
+                onLoad={() => setIframeLoading(false)}
+              />
+            </div>
+
+            <div style={{ textAlign: 'center', margin: '0.5rem 0 0.85rem' }}>
+              <a
+                href={DONATION_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="donation-fallback-btn"
+              >
+                <span>אם הטופס לא נטען אצלכם – לחצו כאן לתשלום בחלון נפרד</span>
+                <ExternalLink size={14} />
+              </a>
+            </div>
+          </div>
+        )}
 
         <div className="donation-note">
           <Coins size={14} />

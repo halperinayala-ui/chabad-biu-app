@@ -185,43 +185,30 @@ const Home = () => {
                     justifyContent: 'space-between',
                   }}
                 >
-                  <div>
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.3rem',
-                        background: 'rgba(245, 158, 11, 0.95)',
-                        color: '#ffffff',
-                        padding: '0.18rem 0.6rem',
-                        borderRadius: '999px',
-                        fontSize: '0.74rem',
-                        fontWeight: 700,
-                        marginBottom: '0.3rem',
-                      }}
-                    >
-                      <Sparkles size={11} />
-                      <span>עשרת ימי תשובה</span>
-                    </span>
-                    <h3
-                      style={{
-                        fontSize: '1.2rem',
-                        fontWeight: 900,
-                        color: '#ffffff',
-                        margin: 0,
-                        textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                      }}
-                    >
-                      סדר פדיון כפרות באפליקציה
-                    </h3>
-                  </div>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.3rem',
+                      background: 'rgba(245, 158, 11, 0.95)',
+                      color: '#ffffff',
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '999px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                    }}
+                  >
+                    <Sparkles size={12} />
+                    <span>עשרת ימי תשובה</span>
+                  </span>
+
                   <div
                     style={{
                       background: 'white',
                       color: 'var(--primary, #492691)',
                       borderRadius: '999px',
-                      padding: '0.45rem 0.9rem',
-                      fontSize: '0.85rem',
+                      padding: '0.45rem 1rem',
+                      fontSize: '0.88rem',
                       fontWeight: 800,
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -230,7 +217,7 @@ const Home = () => {
                       flexShrink: 0,
                     }}
                   >
-                    <span>לפדיון הכפרות</span>
+                    <span>לפדיון כפרות</span>
                     <ChevronLeft size={16} />
                   </div>
                 </div>
