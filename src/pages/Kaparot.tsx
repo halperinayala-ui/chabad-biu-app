@@ -252,7 +252,7 @@ const Kaparot = () => {
             >
               <span className="amt-value">{amt} ₪</span>
               <span className="amt-label">
-                {amt === 36 ? 'בסיסי (חי פעמיים)' : amt === 50 ? 'מהודר' : amt === 100 ? 'תרומה מורחבת' : 'חי כפול 10'}
+                {amt === 36 ? "בסיסי (פעמיים 'חי')" : amt === 50 ? 'מהודר' : amt === 100 ? 'תרומה מורחבת' : "עשר פעמים 'חי'"}
               </span>
             </button>
           ))}
