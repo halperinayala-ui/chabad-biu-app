@@ -143,101 +143,97 @@ const Home = () => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45 }}
-            style={{ marginBottom: '1.5rem' }}
+            style={{ marginBottom: '1.75rem' }}
           >
             <Link
               to="/kaparot"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '1rem',
-                background: 'linear-gradient(135deg, #2e1065 0%, #492691 60%, #683bb5 100%)',
-                borderRadius: '20px',
-                padding: '1.15rem 1.25rem',
-                color: 'white',
-                textDecoration: 'none',
-                boxShadow: '0 8px 25px rgba(73, 38, 145, 0.28)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                position: 'relative',
+                display: 'block',
+                borderRadius: '22px',
                 overflow: 'hidden',
+                textDecoration: 'none',
+                boxShadow: '0 10px 28px rgba(73, 38, 145, 0.28)',
+                border: '1.5px solid rgba(245, 158, 11, 0.3)',
+                background: '#2e1065',
+                position: 'relative',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
               onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
             >
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '-25px',
-                  left: '-25px',
-                  width: '110px',
-                  height: '110px',
-                  borderRadius: '50%',
-                  background: 'radial-gradient(circle, rgba(245, 158, 11, 0.35) 0%, transparent 70%)',
-                  pointerEvents: 'none',
-                }}
-              />
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', zIndex: 1 }}>
+              <div style={{ position: 'relative', width: '100%', height: '140px', overflow: 'hidden' }}>
+                <img
+                  src="/kaparot-banner.jpeg"
+                  alt="פדיון כפרות חב״ד בקמפוס בר אילן"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
                 <div
                   style={{
-                    width: '46px',
-                    height: '46px',
-                    borderRadius: '14px',
-                    background: 'rgba(255, 255, 255, 0.18)',
-                    backdropFilter: 'blur(8px)',
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(to top, rgba(20, 5, 45, 0.92) 0%, rgba(20, 5, 45, 0.35) 60%, rgba(0, 0, 0, 0.05) 100%)',
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: '0.85rem',
+                    right: '1rem',
+                    left: '1rem',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.45rem',
-                    flexShrink: 0,
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    justifyContent: 'space-between',
                   }}
                 >
-                  🪙
-                </div>
-                <div>
+                  <div>
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                        background: 'rgba(245, 158, 11, 0.95)',
+                        color: '#ffffff',
+                        padding: '0.18rem 0.6rem',
+                        borderRadius: '999px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        marginBottom: '0.3rem',
+                      }}
+                    >
+                      <Sparkles size={11} />
+                      <span>עשרת ימי תשובה</span>
+                    </span>
+                    <h3
+                      style={{
+                        fontSize: '1.2rem',
+                        fontWeight: 900,
+                        color: '#ffffff',
+                        margin: 0,
+                        textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                      }}
+                    >
+                      סדר פדיון כפרות באפליקציה
+                    </h3>
+                  </div>
                   <div
                     style={{
+                      background: 'white',
+                      color: 'var(--primary, #492691)',
+                      borderRadius: '999px',
+                      padding: '0.45rem 0.9rem',
+                      fontSize: '0.85rem',
+                      fontWeight: 800,
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '0.3rem',
-                      background: 'rgba(245, 158, 11, 0.25)',
-                      color: '#fef08a',
-                      padding: '0.15rem 0.55rem',
-                      borderRadius: '999px',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      marginBottom: '0.25rem',
+                      boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
+                      flexShrink: 0,
                     }}
                   >
-                    <Sparkles size={11} />
-                    <span>עשרת ימי תשובה</span>
+                    <span>כניסה לסדר</span>
+                    <ChevronLeft size={16} />
                   </div>
-                  <h3 style={{ fontSize: '1.12rem', fontWeight: 800, margin: 0, lineHeight: 1.25 }}>
-                    סדר פדיון כפרות באפליקציה
-                  </h3>
-                  <p style={{ fontSize: '0.82rem', opacity: 0.9, margin: '0.2rem 0 0', fontWeight: 400 }}>
-                    נוסח התפילה המלא ומתן דמי הכפרות לצדקה
-                  </p>
                 </div>
-              </div>
-
-              <div
-                style={{
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '50%',
-                  background: 'rgba(255, 255, 255, 0.15)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  zIndex: 1,
-                }}
-              >
-                <ChevronLeft size={18} />
               </div>
             </Link>
           </motion.div>

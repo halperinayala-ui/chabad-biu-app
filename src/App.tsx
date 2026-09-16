@@ -80,6 +80,7 @@ function App() {
             {/* Public Kaparot Routes (פדיון כפרות) */}
             <Route path="/kaparot" element={<Kaparot />} />
             <Route path="/kapparot" element={<Kaparot />} />
+            <Route path="/kaparot-view" element={<Kaparot />} />
             
             {/* Protected User Routes */}
             <Route path="/profile" element={

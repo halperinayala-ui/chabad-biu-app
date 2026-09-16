@@ -22,6 +22,7 @@ import './Kaparot.css';
 type RecipientType = 'male' | 'female' | 'family';
 
 const DONATION_URL = 'https://katzr.net/b65d26';
+const YAAD_PAY_IFRAME_URL = 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay3ds.pl?Coin=1&FixTash=False&Info=%E1%E9%FA+%E7%E1%26%2334%3B%E3+%E4%F8%E1+%E0%F4%F8%E9%ED+%F4%E9%F7%E0%F8%F1%F7%E9+&Masof=4500743028&MoreData=True&PageLang=HEB&Postpone=False&SendHesh=True&ShowEngTashText=True&Tash=1&UTF8out=True&action=pay&freq=1&sendemail=True&tmp=11&signature=6ed12ed6e498b03ce22190031066363808882b24cea4ba99b69baedbe691a847';
 
 const Kaparot = () => {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const Kaparot = () => {
   const [recipient, setRecipient] = useState<RecipientType>('male');
   const [completedRounds, setCompletedRounds] = useState<number[]>([]);
   const [showFlyerModal, setShowFlyerModal] = useState(false);
+  const [iframeLoading, setIframeLoading] = useState(true);
 
   useEffect(() => {
     document.title = 'פדיון כפרות - חב״ד בקמפוס בר אילן';
@@ -120,15 +122,20 @@ const Kaparot = () => {
         </button>
       </div>
 
-      {/* Hero Header */}
-      <div className="kaparot-hero">
-        <div className="kaparot-hero-glow" />
-        <div className="kaparot-badge">
-          <Sparkles size={14} />
-          <span>עשרת ימי תשובה • ערב יום הכיפורים</span>
+      {/* Hero Header with banner image */}
+      <div className="kaparot-hero-banner-container">
+        <img 
+          src="/kaparot-banner.jpeg" 
+          alt="סדר פדיון כפרות - חב״ד בקמפוס בר אילן" 
+          className="kaparot-hero-banner-image" 
+        />
+        <div className="kaparot-hero-banner-overlay">
+          <div className="kaparot-badge">
+            <Sparkles size={14} />
+            <span>עשרת ימי תשובה • ערב יום הכיפורים</span>
+          </div>
+          <p className="kaparot-subtitle">חב״ד בקמפוס אוניברסיטת בר אילן</p>
         </div>
-        <h1 className="kaparot-title">סדר פדיון כפרות</h1>
-        <p className="kaparot-subtitle">חב״ד בקמפוס אוניברסיטת בר אילן</p>
       </div>
 
       {/* Intro Card */}
@@ -286,15 +293,33 @@ const Kaparot = () => {
           כל התרומות מוקדשות ישירות לפעילות בית חב״ד עם הסטודנטים באוניברסיטת בר אילן.
         </p>
 
-        <a 
-          href={DONATION_URL} 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="donation-cta-btn"
-        >
-          <span>לתרומה מאובטחת של דמי הכפרות</span>
-          <ExternalLink size={19} />
-        </a>
+        {/* Embedded Secure Payment Frame */}
+        <div className="donation-iframe-container">
+          {iframeLoading && (
+            <div style={{ padding: '3rem 1rem', textAlign: 'center', color: 'var(--primary, #492691)' }}>
+              <div style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '0.5rem' }}>טוען טופס תרומה מאובטח...</div>
+              <div style={{ fontSize: '0.85rem', color: '#64748b' }}>רגע אחד, מתחברים למערכת הסליקה</div>
+            </div>
+          )}
+          <iframe
+            src={YAAD_PAY_IFRAME_URL}
+            title="טופס תרומה מאובטח יעד שריג"
+            className="donation-iframe"
+            onLoad={() => setIframeLoading(false)}
+          />
+        </div>
+
+        <div style={{ textAlign: 'center', margin: '0.5rem 0 0.85rem' }}>
+          <a
+            href={DONATION_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="donation-fallback-btn"
+          >
+            <span>אם הטופס לא נטען אצלכם – לחצו כאן לתשלום בחלון נפרד</span>
+            <ExternalLink size={14} />
+          </a>
+        </div>
 
         <div className="donation-note">
           <Coins size={14} />

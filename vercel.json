@@ -5,6 +5,14 @@
   }],
   "rewrites": [
     {
+      "source": "/kaparot",
+      "destination": "/api/og-kaparot"
+    },
+    {
+      "source": "/kapparot",
+      "destination": "/api/og-kaparot"
+    },
+    {
       "source": "/events/:id",
       "destination": "/api/og-event?id=:id"
     },
