@@ -1,0 +1,450 @@
+.kaparot-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem 3rem;
+  direction: rtl;
+}
+
+.kaparot-nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.kaparot-back-btn,
+.kaparot-share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+  color: var(--text-primary, #1e293b);
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.kaparot-back-btn:hover,
+.kaparot-share-btn:hover {
+  background: rgba(73, 38, 145, 0.06);
+  border-color: var(--primary, #492691);
+  color: var(--primary, #492691);
+}
+
+/* Header Banner Card */
+.kaparot-hero {
+  background: linear-gradient(135deg, #3d1e7b 0%, #492691 60%, #683bb5 100%);
+  border-radius: 24px;
+  padding: 2rem 1.5rem 1.75rem;
+  color: #ffffff;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 14px 36px rgba(73, 38, 145, 0.28);
+  margin-bottom: 1.5rem;
+}
+
+.kaparot-hero-glow {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(243, 156, 18, 0.35) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.kaparot-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 0.85rem;
+  color: #fed7aa;
+}
+
+.kaparot-title {
+  font-size: 2.1rem;
+  font-weight: 900;
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+}
+
+.kaparot-subtitle {
+  font-size: 1.05rem;
+  opacity: 0.9;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Base Card Style */
+.kaparot-card {
+  background: var(--surface, #ffffff);
+  border-radius: 22px;
+  padding: 1.5rem;
+  margin-bottom: 1.35rem;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+  box-shadow: 0 4px 18px rgba(73, 38, 145, 0.06);
+  position: relative;
+}
+
+.kaparot-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.kaparot-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(73, 38, 145, 0.12), rgba(73, 38, 145, 0.04));
+  color: var(--primary, #492691);
+}
+
+.kaparot-card-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary, #1e293b);
+  margin: 0;
+}
+
+.kaparot-intro-text {
+  font-size: 0.96rem;
+  line-height: 1.65;
+  color: var(--text-secondary, #475569);
+  margin: 0;
+}
+
+/* Recipient Toggle */
+.recipient-selector {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 0.35rem;
+  border-radius: 16px;
+  margin-bottom: 1.25rem;
+}
+
+.recipient-tab {
+  flex: 1;
+  padding: 0.65rem 0.5rem;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  text-align: center;
+}
+
+.recipient-tab.active {
+  background: #ffffff;
+  color: var(--primary, #492691);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  font-weight: 700;
+}
+
+/* Prayer Text Box */
+.prayer-box {
+  background: #faf7ff;
+  border: 1px solid rgba(73, 38, 145, 0.16);
+  border-radius: 18px;
+  padding: 1.35rem 1.15rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+}
+
+.prayer-box-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary, #492691);
+  margin-bottom: 0.75rem;
+}
+
+.prayer-content {
+  font-size: 1.22rem;
+  line-height: 1.85;
+  color: #1e1b4b;
+  font-family: 'Rubik', 'Assistant', 'Frank Ruhl Libre', serif;
+  text-align: justify;
+  margin: 0;
+  font-weight: 500;
+  word-spacing: 1px;
+}
+
+/* Rotating Step Section */
+.rotation-guidance-box {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.03) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 18px;
+  padding: 1.25rem 1.15rem;
+  margin-bottom: 1.25rem;
+}
+
+.rotation-instruction-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #92400e;
+  margin-bottom: 0.5rem;
+}
+
+.rotation-instruction-desc {
+  font-size: 0.92rem;
+  color: #78350f;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.rotation-formula-box {
+  background: #ffffff;
+  border: 2px solid #f59e0b;
+  border-radius: 16px;
+  padding: 1.1rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.12);
+}
+
+.rotation-formula-text {
+  font-size: 1.28rem;
+  font-weight: 700;
+  line-height: 1.75;
+  color: #78350f;
+  margin: 0;
+  font-family: 'Rubik', 'Assistant', serif;
+}
+
+/* Round completion counters */
+.rounds-counter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.rounds-counter-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #92400e;
+}
+
+.rounds-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+.round-btn {
+  background: #ffffff;
+  border: 1.5px solid rgba(245, 158, 11, 0.4);
+  border-radius: 14px;
+  padding: 0.7rem 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #78350f;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.round-btn.completed {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+/* Donation Card */
+.donation-card {
+  background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
+  border: 2px solid var(--primary, #492691);
+  border-radius: 22px;
+  padding: 1.75rem 1.35rem;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(73, 38, 145, 0.12);
+  margin-bottom: 1.5rem;
+}
+
+.donation-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(73, 38, 145, 0.1);
+  color: var(--primary, #492691);
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.donation-title {
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: var(--primary, #492691);
+  margin: 0 0 0.5rem;
+}
+
+.donation-desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-secondary, #475569);
+  margin: 0 0 1.25rem;
+}
+
+.donation-cta-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  background: linear-gradient(135deg, #492691 0%, #683bb5 100%);
+  color: #ffffff;
+  padding: 1.15rem 1.5rem;
+  border-radius: 18px;
+  font-size: 1.12rem;
+  font-weight: 800;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(73, 38, 145, 0.35);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.donation-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(73, 38, 145, 0.45);
+}
+
+.donation-note {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+/* Footer & Wishes */
+.kaparot-footer-wishes {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.wishes-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary, #1e293b);
+  margin: 0 0 0.35rem;
+}
+
+.wishes-sub {
+  font-size: 0.92rem;
+  color: var(--text-secondary, #64748b);
+  margin: 0 0 1.25rem;
+}
+
+.kaparot-share-big-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #25d366;
+  color: #ffffff;
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+  transition: transform 0.2s;
+}
+
+.kaparot-share-big-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Modal for viewing original flyer */
+.flyer-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.flyer-modal-content {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 1rem;
+}
+
+.flyer-modal-img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  display: block;
+}
+
+.flyer-modal-close {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}

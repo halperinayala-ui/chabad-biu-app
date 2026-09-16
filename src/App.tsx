@@ -22,6 +22,7 @@ import ProfileSettings from './pages/ProfileSettings';
 import Community from './pages/Community';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Accessibility from './pages/Accessibility';
+import Kaparot from './pages/Kaparot';
 import InstallBanner from './components/InstallBanner';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -75,6 +76,10 @@ function App() {
             {/* Public Blessing Request Routes (פ"נ) */}
             <Route path="/pan" element={<BlessingRequest />} />
             <Route path="/blessing-request" element={<BlessingRequest />} />
+            
+            {/* Public Kaparot Routes (פדיון כפרות) */}
+            <Route path="/kaparot" element={<Kaparot />} />
+            <Route path="/kapparot" element={<Kaparot />} />
             
             {/* Protected User Routes */}
             <Route path="/profile" element={

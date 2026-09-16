@@ -138,6 +138,110 @@ const Home = () => {
         </div>
       ) : (
         <>
+          {/* Festive Kaparot Banner */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+            style={{ marginBottom: '1.5rem' }}
+          >
+            <Link
+              to="/kaparot"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '1rem',
+                background: 'linear-gradient(135deg, #2e1065 0%, #492691 60%, #683bb5 100%)',
+                borderRadius: '20px',
+                padding: '1.15rem 1.25rem',
+                color: 'white',
+                textDecoration: 'none',
+                boxShadow: '0 8px 25px rgba(73, 38, 145, 0.28)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '-25px',
+                  left: '-25px',
+                  width: '110px',
+                  height: '110px',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(245, 158, 11, 0.35) 0%, transparent 70%)',
+                  pointerEvents: 'none',
+                }}
+              />
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', zIndex: 1 }}>
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '14px',
+                    background: 'rgba(255, 255, 255, 0.18)',
+                    backdropFilter: 'blur(8px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.45rem',
+                    flexShrink: 0,
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  🪙
+                </div>
+                <div>
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.3rem',
+                      background: 'rgba(245, 158, 11, 0.25)',
+                      color: '#fef08a',
+                      padding: '0.15rem 0.55rem',
+                      borderRadius: '999px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      marginBottom: '0.25rem',
+                    }}
+                  >
+                    <Sparkles size={11} />
+                    <span>עשרת ימי תשובה</span>
+                  </div>
+                  <h3 style={{ fontSize: '1.12rem', fontWeight: 800, margin: 0, lineHeight: 1.25 }}>
+                    סדר פדיון כפרות באפליקציה
+                  </h3>
+                  <p style={{ fontSize: '0.82rem', opacity: 0.9, margin: '0.2rem 0 0', fontWeight: 400 }}>
+                    נוסח התפילה המלא ומתן דמי הכפרות לצדקה
+                  </p>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '50%',
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  zIndex: 1,
+                }}
+              >
+                <ChevronLeft size={18} />
+              </div>
+            </Link>
+          </motion.div>
+
           {/* Announcements List */}
           {announcements.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginBottom: '2rem' }}>
