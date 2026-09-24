@@ -427,6 +427,25 @@
   margin: 0 auto 1rem;
 }
 
+.modal-warning-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(234, 88, 12, 0.12);
+  color: #ea580c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.revert-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
 @media (max-width: 768px) {
   .registrants-table th,
   .registrants-table td {

@@ -21,7 +21,9 @@ import {
   ExternalLink, 
   AlertTriangle, 
   FileSpreadsheet,
-  RotateCcw
+  RotateCcw,
+  Bell,
+  BellOff
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
@@ -66,6 +68,10 @@ const AdminRegistrants = () => {
   const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<Registrant | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  
+  // Revert approval modal state
+  const [revertConfirmTarget, setRevertConfirmTarget] = useState<Registrant | null>(null);
+  const [reverting, setReverting] = useState(false);
   
 
   useEffect(() => {
@@ -196,6 +202,52 @@ const AdminRegistrants = () => {
       toast.error('שגיאה במחיקת הרשמה');
     } finally {
       setDeleting(false);
+    }
+  };
+
+  // Revert registration approval
+  const handleRevertApproval = async (notifyStudent: boolean) => {
+    if (!revertConfirmTarget) return;
+    setReverting(true);
+    try {
+      const reg = revertConfirmTarget;
+      const { error } = await supabase.from('registrations').update({ status: 'pending' }).eq('id', reg.id);
+      if (error) throw error;
+
+      setRegistrants(prev => prev.map(r => r.id === reg.id ? { ...r, status: 'pending' } : r));
+
+      if (notifyStudent) {
+        toast.success('אישור ההרשמה בוטל ונשלחה התראה לסטודנט');
+        if (reg.profiles?.id) {
+          const targetUserId = reg.profiles.id;
+          const session = await supabase.auth.getSession();
+          const token = session.data.session?.access_token;
+          if (token) {
+            fetch('/api/notify-event', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                title: 'עדכון סטטוס הרשמה',
+                body: `שים לב: אישור ההרשמה לאירוע "${eventTitle}" בוטל והסטטוס הוחזר להמתנה.`,
+                url: `https://chabad-biu-app.vercel.app/events/${eventId}`,
+                targetUserId: targetUserId
+              })
+            }).catch(e => console.error("Push notification trigger failed:", e));
+          }
+        }
+      } else {
+        toast.success('אישור ההרשמה בוטל (ללא שליחת התראה)');
+      }
+
+      setRevertConfirmTarget(null);
+    } catch (err: any) {
+      console.error('Error reverting registration status:', err);
+      toast.error('שגיאה בביטול אישור ההרשמה');
+    } finally {
+      setReverting(false);
     }
   };
 
@@ -574,8 +626,8 @@ const AdminRegistrants = () => {
                           <div className="status-action-row">
                             <button 
                               className="revert-btn" 
-                              title="ביטול אישור והחזרה לסטטוס ממתין" 
-                              onClick={() => updateStatus(reg.id, 'pending')}
+                              title="ביטול אישור הרשמה" 
+                              onClick={() => setRevertConfirmTarget(reg)}
                             >
                               <RotateCcw size={12} />
                               <span>ביטול אישור</span>
@@ -765,6 +817,68 @@ const AdminRegistrants = () => {
                 disabled={deleting}
               >
                 {deleting ? <Loader2 className="spinner" size={16} /> : <><Trash2 size={16} /> מחק לצמיתות</>}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* מודאל ביטול אישור הרשמה מעוצב */}
+      {revertConfirmTarget && (
+        <div className="custom-modal-overlay" onClick={() => !reverting && setRevertConfirmTarget(null)}>
+          <motion.div 
+            className="custom-confirm-modal glass"
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="modal-warning-icon">
+              <RotateCcw size={30} />
+            </div>
+            <h3 style={{ margin: '0.5rem 0', fontSize: '1.3rem', color: 'var(--text-primary)' }}>ביטול אישור הרשמה</h3>
+            <p style={{ margin: '0.5rem 0', color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+              ברצונך לבטל את אישור ההרשמה של:
+            </p>
+            <div style={{ background: 'rgba(73,38,145,0.06)', padding: '0.75rem 1rem', borderRadius: '10px', margin: '0.5rem 0 1rem' }}>
+              <strong style={{ fontSize: '1.1rem', color: 'var(--primary)', display: 'block' }}>
+                {getName(revertConfirmTarget)}
+              </strong>
+              {getPhone(revertConfirmTarget) !== '—' && (
+                <span dir="ltr" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                  {getPhone(revertConfirmTarget)}
+                </span>
+              )}
+            </div>
+            <p style={{ margin: '0 0 1rem', color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
+              הסטטוס יוחזר ל־<strong>ממתין</strong>. האם לעדכן את הסטודנט בהתראה לטלפון?
+            </p>
+
+            <div className="revert-modal-actions">
+              <button 
+                className="btn btn-primary" 
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', padding: '0.75rem 1rem', fontWeight: '700' }}
+                onClick={() => handleRevertApproval(true)}
+                disabled={reverting}
+              >
+                {reverting ? <Loader2 className="spinner" size={16} /> : <><Bell size={16} /><span>כן, בטל ושלח התראה לסטודנט</span></>}
+              </button>
+
+              <button 
+                className="btn btn-outline" 
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', padding: '0.75rem 1rem', borderColor: 'rgba(234, 88, 12, 0.4)', color: '#ea580c', fontWeight: '600' }}
+                onClick={() => handleRevertApproval(false)}
+                disabled={reverting}
+              >
+                {reverting ? <Loader2 className="spinner" size={16} /> : <><BellOff size={16} /><span>ביטול שקט (ללא שליחת התראה)</span></>}
+              </button>
+
+              <button 
+                className="btn" 
+                style={{ background: '#f1f2f6', color: '#555', border: 'none', width: '100%', padding: '0.55rem 1rem', marginTop: '0.25rem' }}
+                onClick={() => setRevertConfirmTarget(null)}
+                disabled={reverting}
+              >
+                חזרה
               </button>
             </div>
           </motion.div>
