@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { CalendarDays, MapPin, Clock, ChevronLeft, Users, Loader2, Scroll, Sparkles } from 'lucide-react';
+import { CalendarDays, MapPin, Clock, ChevronLeft, Users, Loader2, Scroll } from 'lucide-react';
 import { formatHebrewDate } from '../utils/dateUtils';
 
 interface EventData {
@@ -138,92 +138,7 @@ const Home = () => {
         </div>
       ) : (
         <>
-          {/* Festive Kaparot Banner */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-            style={{ marginBottom: '1.75rem' }}
-          >
-            <Link
-              to="/kaparot"
-              style={{
-                display: 'block',
-                borderRadius: '22px',
-                overflow: 'hidden',
-                textDecoration: 'none',
-                boxShadow: '0 10px 28px rgba(73, 38, 145, 0.28)',
-                border: '1.5px solid rgba(245, 158, 11, 0.3)',
-                background: '#2e1065',
-                position: 'relative',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
-            >
-              <div style={{ position: 'relative', width: '100%', height: '140px', overflow: 'hidden' }}>
-                <img
-                  src="/kaparot-banner.jpeg"
-                  alt="פדיון כפרות חב״ד בקמפוס בר אילן"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'linear-gradient(to top, rgba(20, 5, 45, 0.92) 0%, rgba(20, 5, 45, 0.35) 60%, rgba(0, 0, 0, 0.05) 100%)',
-                  }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '0.85rem',
-                    right: '1rem',
-                    left: '1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.3rem',
-                      background: 'rgba(245, 158, 11, 0.95)',
-                      color: '#ffffff',
-                      padding: '0.25rem 0.75rem',
-                      borderRadius: '999px',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                    }}
-                  >
-                    <Sparkles size={12} />
-                    <span>עשרת ימי תשובה</span>
-                  </span>
 
-                  <div
-                    style={{
-                      background: 'white',
-                      color: 'var(--primary, #492691)',
-                      borderRadius: '999px',
-                      padding: '0.45rem 1rem',
-                      fontSize: '0.88rem',
-                      fontWeight: 800,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.3rem',
-                      boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
-                      flexShrink: 0,
-                    }}
-                  >
-                    <span>לפדיון כפרות</span>
-                    <ChevronLeft size={16} />
-                  </div>
-                </div>
-              </div>
-            </Link>
-          </motion.div>
 
           {/* Announcements List */}
           {announcements.length > 0 && (

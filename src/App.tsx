@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Navbar from './components/Navbar';
 import BottomTabBar from './components/BottomTabBar';
@@ -78,10 +78,10 @@ function App() {
             <Route path="/pan" element={<BlessingRequest />} />
             <Route path="/blessing-request" element={<BlessingRequest />} />
             
-            {/* Public Kaparot Routes (פדיון כפרות) */}
-            <Route path="/kaparot" element={<Kaparot />} />
-            <Route path="/kapparot" element={<Kaparot />} />
-            <Route path="/kaparot-view" element={<Kaparot />} />
+            {/* Public Kaparot Routes (פדיון כפרות - מועבר לדף הבית לאחר יום כיפור) */}
+            <Route path="/kaparot" element={<Navigate to="/" replace />} />
+            <Route path="/kapparot" element={<Navigate to="/" replace />} />
+            <Route path="/kaparot-view" element={<Navigate to="/" replace />} />
             
             {/* Protected User Routes */}
             <Route path="/profile" element={

@@ -20,7 +20,8 @@ import {
   Copy, 
   ExternalLink, 
   AlertTriangle, 
-  FileSpreadsheet 
+  FileSpreadsheet,
+  RotateCcw
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
@@ -112,17 +113,24 @@ const AdminRegistrants = () => {
     }
   };
 
-  const updateStatus = async (id: string, status: 'approved' | 'rejected') => {
+  const updateStatus = async (id: string, status: 'approved' | 'rejected' | 'pending') => {
     try {
       const { error } = await supabase.from('registrations').update({ status }).eq('id', id);
       if (error) throw error;
       
       const updatedReg = registrants.find(r => r.id === id);
       setRegistrants(registrants.map(r => r.id === id ? { ...r, status } : r));
-      toast.success(status === 'approved' ? 'ההרשמה אושרה' : 'ההרשמה נדחתה');
       
-      // Trigger Push Notification
-      if (updatedReg && updatedReg.profiles?.id) {
+      if (status === 'approved') {
+        toast.success('ההרשמה אושרה בהצלחה! 🎉');
+      } else if (status === 'pending') {
+        toast.success('אישור ההרשמה בוטל (הוחזר להמתנה)');
+      } else {
+        toast.success('ההרשמה נדחתה');
+      }
+      
+      // Trigger Push Notification only on actual approval or rejection
+      if (status !== 'pending' && updatedReg && updatedReg.profiles?.id) {
         const targetUserId = updatedReg.profiles.id;
         const session = await supabase.auth.getSession();
         const token = session.data.session?.access_token;
@@ -554,10 +562,53 @@ const AdminRegistrants = () => {
                           {reg.status === 'rejected' && <><XCircle size={14} /> נדחה</>}
                           {reg.status === 'rsvp' && <><CheckCircle size={14} /> מגיע/ה</>}
                         </span>
+
                         {reg.status === 'pending' && (
-                          <div className="approval-actions" style={{ marginTop: '0.4rem' }}>
-                            <button className="icon-btn approve-btn" title="אשר" onClick={() => updateStatus(reg.id, 'approved')}><UserCheck size={16} /></button>
-                            <button className="icon-btn reject-btn" title="דחה" onClick={() => updateStatus(reg.id, 'rejected')}><XCircle size={16} /></button>
+                          <div className="status-action-row">
+                            <button className="icon-btn approve-btn" title="אשר הרשמה" onClick={() => updateStatus(reg.id, 'approved')}><UserCheck size={16} /></button>
+                            <button className="icon-btn reject-btn" title="דחה הרשמה" onClick={() => updateStatus(reg.id, 'rejected')}><XCircle size={16} /></button>
+                          </div>
+                        )}
+
+                        {(reg.status === 'approved' || reg.status === 'rsvp') && (
+                          <div className="status-action-row">
+                            <button 
+                              className="revert-btn" 
+                              title="ביטול אישור והחזרה לסטטוס ממתין" 
+                              onClick={() => updateStatus(reg.id, 'pending')}
+                            >
+                              <RotateCcw size={12} />
+                              <span>ביטול אישור</span>
+                            </button>
+                            <button 
+                              className="icon-btn reject-btn" 
+                              title="דחה הרשמה" 
+                              onClick={() => updateStatus(reg.id, 'rejected')}
+                              style={{ padding: '0.2rem 0.35rem' }}
+                            >
+                              <XCircle size={13} />
+                            </button>
+                          </div>
+                        )}
+
+                        {reg.status === 'rejected' && (
+                          <div className="status-action-row">
+                            <button 
+                              className="revert-btn" 
+                              title="החזרה לסטטוס ממתין" 
+                              onClick={() => updateStatus(reg.id, 'pending')}
+                            >
+                              <RotateCcw size={12} />
+                              <span>החזר להמתנה</span>
+                            </button>
+                            <button 
+                              className="icon-btn approve-btn" 
+                              title="אשר הרשמה" 
+                              onClick={() => updateStatus(reg.id, 'approved')}
+                              style={{ padding: '0.2rem 0.35rem' }}
+                            >
+                              <UserCheck size={14} />
+                            </button>
                           </div>
                         )}
                       </td>

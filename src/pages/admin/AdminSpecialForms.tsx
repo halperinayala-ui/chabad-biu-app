@@ -45,7 +45,7 @@ const AdminSpecialForms = ({ defaultTab }: AdminSpecialFormsProps) => {
     if (tabParam === 'future' || tabParam === 'other') return 'future';
     if (tabParam === 'kaparot') return 'kaparot';
     if (defaultTab) return defaultTab;
-    return 'kaparot'; // Default to Kaparot during Tishrei
+    return 'pan'; // Default to Pan now that Kaparot has passed
   });
 
   // Selection state
