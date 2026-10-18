@@ -17,6 +17,10 @@
       "destination": "/api/og-event?id=:id"
     },
     {
+      "source": "/pan",
+      "destination": "/api/og-pan"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
