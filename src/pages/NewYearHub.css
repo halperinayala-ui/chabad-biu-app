@@ -1,8 +1,57 @@
+.newyear-page-wrapper {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Floating Ambient Festive Background Elements */
+.floating-bg-item {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.16;
+  font-size: 2.2rem;
+  user-select: none;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.05));
+  animation: float-drift 12s ease-in-out infinite;
+}
+
+.floating-bg-1 {
+  top: 14%;
+  left: 5%;
+  animation-duration: 9s;
+}
+
+.floating-bg-2 {
+  top: 48%;
+  right: 4%;
+  animation-duration: 13s;
+  animation-delay: -3s;
+}
+
+.floating-bg-3 {
+  top: 80%;
+  left: 7%;
+  animation-duration: 11s;
+  animation-delay: -6s;
+}
+
+@keyframes float-drift {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-22px) rotate(12deg);
+  }
+}
+
 .newyear-page {
   max-width: 620px;
   margin: 0 auto;
   padding: 0.5rem 0.75rem 2.5rem;
   direction: rtl;
+  position: relative;
+  z-index: 1;
 }
 
 /* Hero Banner Card Inspired by the Flyer */
@@ -14,7 +63,7 @@
   color: #ffffff;
   overflow: hidden;
   box-shadow: 0 16px 40px rgba(68, 30, 140, 0.32);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
   text-align: center;
 }
 
@@ -122,6 +171,94 @@
   padding: 0.5rem 1.1rem;
   font-size: 0.92rem;
   font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.badge-sparkle-spin {
+  animation: spin-slow 9s linear infinite;
+}
+
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.popcorn-badge-icon {
+  display: inline-block;
+  animation: cheer-bounce 2.2s infinite ease-in-out;
+}
+
+/* Interactive Festive Celebration Bar */
+.newyear-interactive-celebration {
+  margin: -0.25rem 0 1.25rem;
+  position: relative;
+  z-index: 2;
+}
+
+.celebration-cheer-btn {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 248, 240, 0.98) 100%);
+  border: 1.5px dashed rgba(241, 90, 36, 0.45);
+  border-radius: 20px;
+  padding: 0.9rem 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(241, 90, 36, 0.1);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-align: right;
+}
+
+.celebration-cheer-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(241, 90, 36, 0.85);
+  box-shadow: 0 10px 25px rgba(241, 90, 36, 0.18);
+}
+
+.celebration-cheer-btn:active {
+  transform: scale(0.97);
+}
+
+.cheer-icon {
+  font-size: 1.9rem;
+  animation: cheer-bounce 2.2s infinite ease-in-out;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+@keyframes cheer-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.12); }
+}
+
+.cheer-text-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.cheer-title {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--primary);
+  font-family: 'Rubik', system-ui, sans-serif;
+  line-height: 1.3;
+}
+
+.cheer-sub {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-family: 'Rubik', system-ui, sans-serif;
+  margin-top: 0.2rem;
+  line-height: 1.35;
+}
+
+.cheer-sparkle-icon {
+  color: #f26522;
+  animation: spin-slow 9s linear infinite;
+  flex-shrink: 0;
 }
 
 /* Section Titles */
@@ -153,7 +290,7 @@
   padding: 1.1rem 1.25rem;
   border-radius: 20px;
   text-decoration: none;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
   cursor: pointer;
@@ -193,6 +330,10 @@
   margin-bottom: 0.25rem;
   line-height: 1.35;
   letter-spacing: normal;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .action-card-desc {
@@ -207,8 +348,54 @@
 .action-card-scholarship {
   background: linear-gradient(135deg, #e65c00 0%, #f27121 50%, #e94057 100%);
   color: #ffffff;
-  box-shadow: 0 8px 26px rgba(230, 92, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 28px rgba(230, 92, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card-scholarship::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -80%;
+  width: 45%;
+  height: 200%;
+  background: linear-gradient(
+    65deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.42) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(25deg);
+  animation: scholarship-beam 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes scholarship-beam {
+  0% { left: -80%; }
+  32% { left: 150%; }
+  100% { left: 150%; }
+}
+
+.scholarship-pulse-tag {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  vertical-align: middle;
+  animation: tag-pulse 2s infinite ease-in-out;
+}
+
+@keyframes tag-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.95; }
+  50% { transform: scale(1.08); opacity: 1; }
 }
 
 .action-card-scholarship .action-card-icon {
@@ -226,6 +413,12 @@
 .action-card-whatsapp .action-card-icon {
   background: rgba(255, 255, 255, 0.2);
   color: #ffffff;
+  animation: pulse-soft 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
 }
 
 .action-card-events {
@@ -252,6 +445,18 @@
   color: #128c7e;
 }
 
+.location-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--primary), #f15a24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
 /* Annual Activities Grid based on Flyer */
 .activities-grid {
   display: grid;
@@ -274,13 +479,13 @@
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
   position: relative;
 }
 
 .activity-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(73, 38, 145, 0.08);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 24px rgba(68, 30, 140, 0.12);
 }
 
 .activity-card.card-highlight {
@@ -291,6 +496,12 @@
 .activity-card-emoji {
   font-size: 2rem;
   margin-bottom: 0.2rem;
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.activity-card:hover .activity-card-emoji {
+  transform: scale(1.22) rotate(10deg);
 }
 
 .activity-card-title {
