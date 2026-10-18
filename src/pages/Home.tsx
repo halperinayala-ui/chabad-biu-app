@@ -57,6 +57,7 @@ const Home = () => {
   const [events, setEvents] = useState<EventData[]>([]);
   const [recentPosts, setRecentPosts] = useState<CommunityPost[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [showNewYearBanner, setShowNewYearBanner] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -69,7 +70,7 @@ const Home = () => {
       const d = new Date();
       const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-      const [eventsRes, postsRes, announcementsRes] = await Promise.all([
+      const [eventsRes, postsRes, announcementsRes, settingsRes] = await Promise.all([
         supabase
           .from('events')
           .select('id, title, event_date, event_time, location, category, description, registration_mode, external_registration_link')
@@ -86,12 +87,21 @@ const Home = () => {
           .from('announcements')
           .select('id, text, emoji, expires_at')
           .gte('expires_at', new Date().toISOString())
-          .order('created_at', { ascending: false })
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('settings')
+          .select('wa_templates')
+          .eq('id', 1)
+          .single()
       ]);
 
       setEvents(eventsRes.data || []);
       setRecentPosts(postsRes.data || []);
       setAnnouncements(announcementsRes.data || []);
+
+      if (settingsRes.data && settingsRes.data.wa_templates) {
+        setShowNewYearBanner(settingsRes.data.wa_templates.show_new_year_banner !== false);
+      }
     } catch (err) {
       console.error('Error fetching home data:', err);
     } finally {
@@ -138,7 +148,79 @@ const Home = () => {
         </div>
       ) : (
         <>
-
+          {/* New Year Banner */}
+          {showNewYearBanner && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{ marginBottom: '1.25rem' }}
+            >
+              <Link
+                to="/new-year"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '1.1rem 1.25rem',
+                  borderRadius: '20px',
+                  background: 'linear-gradient(135deg, #2f1263 0%, #5d259c 45%, #ea580c 105%)',
+                  color: '#ffffff',
+                  boxShadow: '0 8px 24px rgba(73, 38, 145, 0.22)',
+                  textDecoration: 'none',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', position: 'relative', zIndex: 1 }}>
+                  <div style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '14px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    backdropFilter: 'blur(8px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem',
+                    flexShrink: 0
+                  }}>
+                    🍿
+                  </div>
+                  <div>
+                    <div style={{
+                      fontSize: '1.08rem',
+                      fontWeight: 800,
+                      lineHeight: 1.25,
+                      marginBottom: '0.2rem',
+                      fontFamily: "'Rubik', system-ui, sans-serif"
+                    }}>
+                      יש לך בית בקמפוס!
+                    </div>
+                    <div style={{
+                      fontSize: '0.85rem',
+                      opacity: 0.92,
+                      fontFamily: "'Rubik', system-ui, sans-serif"
+                    }}>
+                      מלגות, ארוחות שבת, חגים ואירועים • לכל הפרטים
+                    </div>
+                  </div>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: 'rgba(255, 255, 255, 0.22)',
+                  borderRadius: '50%',
+                  padding: '0.45rem',
+                  flexShrink: 0,
+                  marginRight: '0.5rem',
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  <ChevronLeft size={20} color="#fff" />
+                </div>
+              </Link>
+            </motion.div>
+          )}
 
           {/* Announcements List */}
           {announcements.length > 0 && (

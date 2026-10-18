@@ -13,6 +13,8 @@ const AdminSettings = () => {
   
   const [categories, setCategories] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
+  const [waTemplates, setWaTemplates] = useState<any>({});
+  const [showNewYearBanner, setShowNewYearBanner] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
@@ -43,6 +45,10 @@ const AdminSettings = () => {
         setCategories(data.categories || []);
         setTags(data.tags || []);
         if (data.wa_template_approved) setWaTemplateApproved(data.wa_template_approved);
+        setWaTemplates(data.wa_templates || {});
+        if (data.wa_templates) {
+          setShowNewYearBanner(data.wa_templates.show_new_year_banner !== false);
+        }
       }
     } catch (err) {
       console.error('Error fetching settings:', err);
@@ -54,15 +60,21 @@ const AdminSettings = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const updatedWaTemplates = {
+        ...waTemplates,
+        show_new_year_banner: showNewYearBanner
+      };
+
       const { error } = await supabase
         .from('settings')
-        .upsert({ 
-          id: 1, 
+        .update({ 
           categories, 
           tags, 
           wa_template_approved: waTemplateApproved,
+          wa_templates: updatedWaTemplates,
           updated_at: new Date().toISOString() 
-        });
+        })
+        .eq('id', 1);
 
       if (error) throw error;
       toast.success('ההגדרות נשמרו בהצלחה!');
@@ -181,6 +193,49 @@ const AdminSettings = () => {
               ))}
               {tags.length === 0 && <div className="empty-state">אין תגיות. הוסף אחת למעלה.</div>}
             </div>
+          </div>
+        </div>
+
+        {/* New Year Banner Settings */}
+        <div className="settings-section" style={{ marginTop: '2rem' }}>
+          <h3>באנר פתיחת שנה ועמוד הפופקורן במסך הבית</h3>
+          <p className="settings-desc">באפשרותכם להציג או להסיר את הבאנר של פתיחת השנה ממסך הבית הראשי של האפליקציה.</p>
+          
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '1rem',
+            borderRadius: '14px',
+            background: 'var(--background)',
+            border: '1px solid var(--border)',
+            marginTop: '1rem'
+          }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+                {showNewYearBanner ? 'הבאנר מוצג כעת בעמוד הבית' : 'הבאנר מוסתר כעת (לא מופיע בעמוד הבית)'}
+              </div>
+              <div style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+                לחיצה על הכפתור תשנה את המצב (זכרו ללחוץ על "שמירת שינויים")
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowNewYearBanner(!showNewYearBanner)}
+              style={{
+                padding: '0.5rem 1.15rem',
+                borderRadius: '999px',
+                fontWeight: 700,
+                fontSize: '0.86rem',
+                border: 'none',
+                cursor: 'pointer',
+                background: showNewYearBanner ? '#e74c3c' : '#27ae60',
+                color: 'white'
+              }}
+            >
+              {showNewYearBanner ? 'הסרה ממסך הבית' : 'הצגה במסך הבית'}
+            </button>
           </div>
         </div>
 

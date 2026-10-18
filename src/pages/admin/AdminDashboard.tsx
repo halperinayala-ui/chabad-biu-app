@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { Plus, Users, Settings, BarChart2, Archive, CalendarDays, CalendarCheck, ChevronLeft, Edit, Megaphone, Scroll, ClipboardList } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatHebrewDate } from '../../utils/dateUtils';
+import toast from 'react-hot-toast';
 import './AdminDashboard.css';
 
 interface EventRow {
@@ -22,6 +23,8 @@ const AdminDashboard = () => {
   const { profile } = useAuth();
   const [events, setEvents] = useState<EventRow[]>([]);
   const [regCounts, setRegCounts] = useState<Record<string, number>>({});
+  const [showNewYearBanner, setShowNewYearBanner] = useState(true);
+  const [togglingBanner, setTogglingBanner] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showArchived, setShowArchived] = useState(false);
 
@@ -41,25 +44,58 @@ const AdminDashboard = () => {
         .lt('event_date', todayStr)
         .eq('archived', false);
 
-      const { data: evs } = await supabase
-        .from('events')
-        .select('id, title, event_date, category, registration_mode, archived')
-        .order('event_date', { ascending: false });
+      const [evsRes, regsRes, setRes] = await Promise.all([
+        supabase
+          .from('events')
+          .select('id, title, event_date, category, registration_mode, archived')
+          .order('event_date', { ascending: false }),
+        supabase
+          .from('registrations')
+          .select('event_id'),
+        supabase
+          .from('settings')
+          .select('wa_templates')
+          .eq('id', 1)
+          .single()
+      ]);
 
-      setEvents(evs || []);
-
-      // Fetch registration counts per event
-      const { data: regs } = await supabase
-        .from('registrations')
-        .select('event_id');
+      setEvents(evsRes.data || []);
 
       const counts: Record<string, number> = {};
-      (regs || []).forEach((r: any) => {
+      (regsRes.data || []).forEach((r: any) => {
         counts[r.event_id] = (counts[r.event_id] || 0) + 1;
       });
       setRegCounts(counts);
+
+      if (setRes.data?.wa_templates) {
+        setShowNewYearBanner(setRes.data.wa_templates.show_new_year_banner !== false);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleNewYearBanner = async () => {
+    setTogglingBanner(true);
+    try {
+      const newValue = !showNewYearBanner;
+      const { data: setRes } = await supabase.from('settings').select('wa_templates').eq('id', 1).single();
+      const currentTemplates = setRes?.wa_templates || {};
+      const updatedTemplates = { ...currentTemplates, show_new_year_banner: newValue };
+
+      const { error } = await supabase
+        .from('settings')
+        .update({ wa_templates: updatedTemplates, updated_at: new Date().toISOString() })
+        .eq('id', 1);
+
+      if (error) throw error;
+      setShowNewYearBanner(newValue);
+      toast.success(newValue ? 'באנר פתיחת שנה הופעל ומוצג בעמוד הבית!' : 'באנר פתיחת שנה הוסר בהצלחה ממסך הבית');
+    } catch (err: any) {
+      console.error('Error toggling banner:', err);
+      toast.error('שגיאה בעדכון: ' + err.message);
+    } finally {
+      setTogglingBanner(false);
     }
   };
 
@@ -109,6 +145,88 @@ const AdminDashboard = () => {
           <div className="kpi-icon" style={{ background: 'rgba(39,174,96,0.1)', color: '#27ae60' }}><BarChart2 size={22} /></div>
           <div className="kpi-value">{activeEvents.length > 0 ? Math.round(totalRegs / activeEvents.length) : 0}</div>
           <div className="kpi-label">ממוצע הרשמות לאירוע</div>
+        </div>
+      </div>
+
+      {/* New Year Banner Toggle Control for Home Page */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '1.1rem 1.3rem',
+        borderRadius: '20px',
+        margin: '1.5rem 0',
+        background: 'linear-gradient(135deg, rgba(242, 101, 34, 0.08) 0%, rgba(73, 38, 145, 0.06) 100%)',
+        border: '1px solid rgba(242, 101, 34, 0.25)',
+        gap: '1rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <div style={{
+            width: '44px',
+            height: '44px',
+            borderRadius: '14px',
+            background: 'linear-gradient(135deg, #f26522, #ff944d)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.4rem',
+            color: '#fff',
+            flexShrink: 0
+          }}>
+            🍿
+          </div>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-primary)' }}>
+              באנר פתיחת שנה ועמוד הפופקורן במסך הבית
+            </div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              {showNewYearBanner ? 'מוצג כרגע לסטודנטים בעמוד הבית' : 'מוסתר כרגע מעמוד הבית (כבוי)'}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => navigate('/new-year')}
+            style={{
+              padding: '0.55rem 1rem',
+              borderRadius: '999px',
+              fontWeight: 600,
+              fontSize: '0.86rem',
+              cursor: 'pointer',
+              border: '1px solid var(--border)',
+              background: 'var(--surface)',
+              color: 'var(--text-primary)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem'
+            }}
+          >
+            <span>לצפייה בעמוד</span>
+            <ChevronLeft size={16} />
+          </button>
+
+          <button
+            onClick={toggleNewYearBanner}
+            disabled={togglingBanner}
+            style={{
+              padding: '0.55rem 1.25rem',
+              borderRadius: '999px',
+              fontWeight: 700,
+              fontSize: '0.88rem',
+              cursor: 'pointer',
+              border: 'none',
+              background: showNewYearBanner ? '#e74c3c' : '#27ae60',
+              color: 'white',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              boxShadow: showNewYearBanner ? '0 4px 14px rgba(231, 76, 60, 0.3)' : '0 4px 14px rgba(39, 174, 96, 0.3)'
+            }}
+          >
+            {showNewYearBanner ? 'הסרה ממסך הבית' : 'הצגה במסך הבית'}
+          </button>
         </div>
       </div>
 
