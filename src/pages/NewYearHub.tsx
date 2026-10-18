@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, 
   GraduationCap, 
@@ -10,11 +10,15 @@ import {
   ChevronLeft, 
   ExternalLink, 
   Share2, 
-  Phone,
-  Heart,
-  ImageIcon,
-  ChevronDown,
-  ChevronUp
+  Phone, 
+  Heart, 
+  ImageIcon, 
+  ChevronDown, 
+  ChevronUp,
+  Volume2,
+  VolumeX,
+  FastForward,
+  Play
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -79,6 +83,18 @@ const ACTIVITIES: ActivityItem[] = [
 const NewYearHub: React.FC = () => {
   const navigate = useNavigate();
   const [showFlyer, setShowFlyer] = useState(false);
+  const [showIntro, setShowIntro] = useState(() => !sessionStorage.getItem('seen_newyear_intro'));
+  const [isMuted, setIsMuted] = useState(true);
+
+  const handleCloseIntro = () => {
+    setShowIntro(false);
+    sessionStorage.setItem('seen_newyear_intro', 'true');
+  };
+
+  const handleReplayIntro = () => {
+    setIsMuted(false);
+    setShowIntro(true);
+  };
 
   const pageUrl = 'https://chabad-biu-app.vercel.app/new-year';
 
@@ -143,6 +159,55 @@ const NewYearHub: React.FC = () => {
 
   return (
     <div className="newyear-page">
+      {/* Intro Video Splash Modal */}
+      <AnimatePresence>
+        {showIntro && (
+          <motion.div 
+            className="intro-video-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.35 }}
+          >
+            <div className="intro-video-container">
+              <video
+                src="/popcorn-intro.mp4"
+                className="intro-video-player"
+                autoPlay
+                muted={isMuted}
+                playsInline
+                onEnded={handleCloseIntro}
+              />
+
+              <div className="intro-video-controls">
+                <button
+                  type="button"
+                  onClick={() => setIsMuted(!isMuted)}
+                  className="intro-sound-btn"
+                  title={isMuted ? 'הפעלת שמע' : 'השתקת שמע'}
+                >
+                  {isMuted ? <VolumeX size={18} color="#fff" /> : <Volume2 size={18} color="#fff" />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCloseIntro}
+                  className="intro-skip-btn"
+                >
+                  <span>דלג לעמוד</span>
+                  <FastForward size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="intro-bottom-hint">
+              <span>🍿</span>
+              <span>אותו תואר. מרגיש אחרת ✨</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Hero Welcome Card Inspired by Flyer */}
       <motion.div 
         className="newyear-hero"
@@ -378,6 +443,15 @@ const NewYearHub: React.FC = () => {
             />
           </motion.div>
         )}
+
+        <button
+          onClick={handleReplayIntro}
+          className="flyer-preview-toggle"
+          style={{ marginTop: '0.65rem' }}
+        >
+          <Play size={16} />
+          <span>צפייה בסרטון האנימציה (10 שניות) 🍿</span>
+        </button>
       </div>
 
       {/* Share Section with Friends */}
