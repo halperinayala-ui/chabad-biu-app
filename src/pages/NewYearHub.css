@@ -1,0 +1,408 @@
+.newyear-page {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 0.5rem 0.75rem 2rem;
+  direction: rtl;
+}
+
+/* Hero Banner Card */
+.newyear-hero {
+  position: relative;
+  background: linear-gradient(135deg, #3d1b7a 0%, #492691 40%, #7f58c2 85%, #ff8c5a 120%);
+  border-radius: 28px;
+  padding: 2.2rem 1.5rem 1.8rem;
+  color: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(73, 38, 145, 0.28);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.newyear-hero-glow {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(255, 151, 96, 0.4) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.newyear-hero-glow-2 {
+  position: absolute;
+  bottom: -50px;
+  left: -50px;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.newyear-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 0.45rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.newyear-hero-title {
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1.25;
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.02em;
+}
+
+.newyear-hero-subtitle {
+  font-size: 1.05rem;
+  line-height: 1.55;
+  opacity: 0.95;
+  max-width: 480px;
+  margin: 0 auto 1.2rem;
+  font-weight: 400;
+}
+
+.newyear-popcorn-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 14px;
+  padding: 0.5rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+/* Section Titles */
+.newyear-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 1.8rem 0 0.9rem;
+}
+
+.newyear-section-title span.accent {
+  color: var(--secondary);
+}
+
+/* Quick Action Cards */
+.newyear-actions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.action-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.25rem;
+  border-radius: 20px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.action-card:active {
+  transform: scale(0.98);
+}
+
+.action-card-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.action-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.4rem;
+}
+
+.action-card-text {
+  text-align: right;
+  flex: 1;
+}
+
+.action-card-title {
+  font-size: 1.08rem;
+  font-weight: 800;
+  margin-bottom: 0.2rem;
+  line-height: 1.3;
+}
+
+.action-card-desc {
+  font-size: 0.86rem;
+  opacity: 0.85;
+  line-height: 1.35;
+}
+
+/* Specific Action Card Themes */
+.action-card-whatsapp {
+  background: linear-gradient(135deg, #1fa855 0%, #128c7e 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(31, 168, 85, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.action-card-whatsapp .action-card-icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.action-card-scholarship {
+  background: linear-gradient(135deg, #e65c00 0%, #f9d423 120%);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(230, 92, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.action-card-scholarship .action-card-icon {
+  background: rgba(0, 0, 0, 0.15);
+  color: #ffffff;
+}
+
+.action-card-events {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+}
+
+.action-card-events .action-card-icon {
+  background: rgba(73, 38, 145, 0.1);
+  color: var(--primary);
+}
+
+.action-card-location {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+}
+
+.action-card-location .action-card-icon {
+  background: rgba(221, 103, 85, 0.12);
+  color: var(--secondary);
+}
+
+.action-card-contact {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+}
+
+.action-card-contact .action-card-icon {
+  background: rgba(37, 211, 102, 0.12);
+  color: #128c7e;
+}
+
+/* Annual Activities Grid */
+.activities-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+}
+
+@media (min-width: 500px) {
+  .activities-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.activity-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  transition: transform 0.2s ease;
+}
+
+.activity-card:hover {
+  transform: translateY(-2px);
+}
+
+.activity-card-emoji {
+  font-size: 1.8rem;
+  margin-bottom: 0.2rem;
+}
+
+.activity-card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.activity-card-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+/* Location Card Highlight */
+.location-highlight-card {
+  background: linear-gradient(135deg, rgba(73, 38, 145, 0.05) 0%, rgba(221, 103, 85, 0.05) 100%);
+  border: 1px solid rgba(73, 38, 145, 0.15);
+  border-radius: 22px;
+  padding: 1.4rem;
+  margin-top: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.location-highlight-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.location-highlight-title {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.location-highlight-body {
+  font-size: 0.94rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.location-buttons-row {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.btn-pill-waze {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #33ccff;
+  color: #0b3954;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(51, 204, 255, 0.25);
+}
+
+.btn-pill-maps {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+/* QR Code & Share Section for Ayala / Admins */
+.qr-admin-box {
+  background: var(--surface);
+  border: 2px dashed rgba(73, 38, 145, 0.25);
+  border-radius: 22px;
+  padding: 1.4rem;
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.qr-admin-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(73, 38, 145, 0.08);
+  color: var(--primary);
+  border: 1px solid rgba(73, 38, 145, 0.2);
+  padding: 0.65rem 1.3rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.qr-admin-toggle:hover {
+  background: rgba(73, 38, 145, 0.15);
+}
+
+.qr-display-area {
+  margin-top: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.qr-image-wrapper {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  display: inline-block;
+}
+
+.qr-image-wrapper img {
+  display: block;
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
+}
+
+.qr-link-copy {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--background);
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.9rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  direction: ltr;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Footer info */
+.newyear-footer {
+  text-align: center;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}

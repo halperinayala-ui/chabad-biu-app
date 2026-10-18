@@ -24,6 +24,7 @@ import Community from './pages/Community';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Accessibility from './pages/Accessibility';
 import Kaparot from './pages/Kaparot';
+import NewYearHub from './pages/NewYearHub';
 import InstallBanner from './components/InstallBanner';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -39,7 +40,13 @@ function OnboardingGuard({ children }: { children: React.ReactNode }) {
     if (!loading && user && profile) {
       const isProfileIncomplete = !profile.full_name || !profile.phone || !profile.gender || !(profile as any).user_status;
       
-      if (isProfileIncomplete && location.pathname !== '/profile' && location.pathname !== '/auth') {
+      if (
+        isProfileIncomplete && 
+        location.pathname !== '/profile' && 
+        location.pathname !== '/auth' &&
+        !location.pathname.startsWith('/new-year') &&
+        !location.pathname.startsWith('/newyear')
+      ) {
         navigate('/profile', { replace: true, state: { requireOnboarding: true } });
       }
     }
@@ -77,6 +84,10 @@ function App() {
             {/* Public Blessing Request Routes (פ"נ) */}
             <Route path="/pan" element={<BlessingRequest />} />
             <Route path="/blessing-request" element={<BlessingRequest />} />
+            
+            {/* Public New Year / QR Hub Route */}
+            <Route path="/new-year" element={<NewYearHub />} />
+            <Route path="/newyear" element={<Navigate to="/new-year" replace />} />
             
             {/* Public Kaparot Routes (פדיון כפרות - מועבר לדף הבית לאחר יום כיפור) */}
             <Route path="/kaparot" element={<Navigate to="/" replace />} />
