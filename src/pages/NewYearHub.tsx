@@ -35,13 +35,13 @@ const ACTIVITIES: ActivityItem[] = [
     isFromFlyer: true
   },
   {
-    emoji: '🥖',
+    emoji: '🍷',
     title: 'ארוחות שבת',
     desc: 'סעודות שבת מושקעות באווירה ביתית וחמה, אוכל מעולה וחיבורים חדשים במעונות.',
     isFromFlyer: true
   },
   {
-    emoji: '🕎',
+    emoji: '🎉',
     title: 'חגים',
     desc: 'מסיבות חנוכה, פורים, ערבי חג, הדלקות נרות ואירועי שיא לאורך כל לוח השנה.',
     isFromFlyer: true
@@ -170,7 +170,7 @@ const NewYearHub: React.FC = () => {
               <GraduationCap size={28} />
             </div>
             <div className="action-card-text">
-              <div className="action-card-title">הרשמה למלגת לימוד ופעילות 🎓</div>
+              <div className="action-card-title">הרשמה למלגת לימוד ופעילות</div>
               <div className="action-card-desc">לחצו להרשמה מהירה בוואטסאפ והבטחת מקומכם במלגה</div>
             </div>
           </div>
@@ -191,7 +191,7 @@ const NewYearHub: React.FC = () => {
               <MessageCircle size={26} />
             </div>
             <div className="action-card-text">
-              <div className="action-card-title">קבוצת העדכונים השקטה בוואטסאפ 💬</div>
+              <div className="action-card-title">קבוצת העדכונים השקטה בוואטסאפ</div>
               <div className="action-card-desc">עדכונים בלבד על אירועים, ארוחות שבת, הטבות ופעילויות</div>
             </div>
           </div>
@@ -210,7 +210,7 @@ const NewYearHub: React.FC = () => {
               <CalendarDays size={26} />
             </div>
             <div className="action-card-text">
-              <div className="action-card-title">לוח האירועים וההרשמה 📅</div>
+              <div className="action-card-title">לוח האירועים וההרשמה</div>
               <div className="action-card-desc">סעודות שבת, שיעורים ומפגשים קרובים</div>
             </div>
           </div>
@@ -231,7 +231,7 @@ const NewYearHub: React.FC = () => {
               <Phone size={24} />
             </div>
             <div className="action-card-text">
-              <div className="action-card-title">דברו איתנו בוואטסאפ 📞</div>
+              <div className="action-card-title">דברו איתנו בוואטסאפ</div>
               <div className="action-card-desc">הרב אפרים: 054-6371566 • לכל שאלה או שיחה אישית</div>
             </div>
           </div>
