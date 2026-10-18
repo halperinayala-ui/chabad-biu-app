@@ -330,71 +330,42 @@
   text-decoration: none;
 }
 
-/* QR Code & Share Section for Ayala / Admins */
-.qr-admin-box {
+/* Share Section */
+.newyear-share-box {
   background: var(--surface);
-  border: 2px dashed rgba(73, 38, 145, 0.25);
+  border: 1px solid var(--border);
   border-radius: 22px;
-  padding: 1.4rem;
+  padding: 1.5rem 1.25rem;
   margin-top: 2rem;
   text-align: center;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
 }
 
-.qr-admin-toggle {
+.newyear-share-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  background: rgba(73, 38, 145, 0.08);
-  color: var(--primary);
-  border: 1px solid rgba(73, 38, 145, 0.2);
-  padding: 0.65rem 1.3rem;
+  justify-content: center;
+  gap: 0.6rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: #ffffff;
+  padding: 0.85rem 1.8rem;
   border-radius: 999px;
   font-weight: 700;
-  font-size: 0.92rem;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: 0 6px 20px rgba(73, 38, 145, 0.25);
+  transition: all 0.25s ease;
+  width: 100%;
+  max-width: 320px;
 }
 
-.qr-admin-toggle:hover {
-  background: rgba(73, 38, 145, 0.15);
+.newyear-share-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(73, 38, 145, 0.35);
 }
 
-.qr-display-area {
-  margin-top: 1.2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.9rem;
-}
-
-.qr-image-wrapper {
-  background: #ffffff;
-  padding: 12px;
-  border-radius: 18px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  display: inline-block;
-}
-
-.qr-image-wrapper img {
-  display: block;
-  width: 200px;
-  height: 200px;
-  border-radius: 8px;
-}
-
-.qr-link-copy {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--background);
-  border: 1px solid var(--border);
-  padding: 0.5rem 0.9rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  direction: ltr;
-  max-width: 100%;
-  overflow-x: auto;
+.newyear-share-btn:active {
+  transform: scale(0.98);
 }
 
 /* Footer info */

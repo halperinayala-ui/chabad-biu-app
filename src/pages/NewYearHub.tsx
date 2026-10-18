@@ -1,18 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   MessageCircle, 
   GraduationCap, 
   CalendarDays, 
   MapPin, 
-  Coffee, 
+  Home, 
   Sparkles, 
   ChevronLeft, 
   ExternalLink, 
   Share2, 
-  QrCode, 
-  Copy, 
-  Check, 
   Phone,
   Heart
 } from 'lucide-react';
@@ -38,11 +35,6 @@ const ACTIVITIES: ActivityItem[] = [
     desc: 'שיעורים וסדנאות עומק מרתקות בנושאים שנוגעים בחיים, כולל מלגות לימוד שוות.'
   },
   {
-    emoji: '☕',
-    title: 'פינת קפה והאב במעונות',
-    desc: 'מרחב למידה רגוע וממוזג, שתייה חמה חופשית, חטיפים ומקום להפסקה בין השיעורים.'
-  },
-  {
     emoji: '🎉',
     title: 'אירועי שיא והפוגות',
     desc: 'מנגלים, ערבי על האש, מסיבות חג, הפנינג בתקופת מבחנים וטיולים משותפים.'
@@ -50,7 +42,7 @@ const ACTIVITIES: ActivityItem[] = [
   {
     emoji: '🤝',
     title: 'אוזן קשבת וסיוע אישי',
-    desc: 'אנחנו כאן לכל שאלה, הכוונה, עזרה אישית או סתם שיחה טובה על כוס קפה.'
+    desc: 'אנחנו כאן לכל שאלה, הכוונה, עזרה אישית או סתם שיחה טובה.'
   },
   {
     emoji: '📱',
@@ -61,22 +53,8 @@ const ACTIVITIES: ActivityItem[] = [
 
 const NewYearHub: React.FC = () => {
   const navigate = useNavigate();
-  const [copiedLink, setCopiedLink] = useState(false);
-  const [showQrBox, setShowQrBox] = useState(false);
 
   const pageUrl = 'https://chabad-biu-app.vercel.app/new-year';
-  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(pageUrl)}`;
-
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(pageUrl);
-      setCopiedLink(true);
-      toast.success('הקישור הועתק בהצלחה!');
-      setTimeout(() => setCopiedLink(false), 2500);
-    } catch {
-      toast.error('לא ניתן היה להעתיק את הקישור');
-    }
-  };
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -86,11 +64,16 @@ const NewYearHub: React.FC = () => {
           text: 'פותחים שנת לימודים מתוקה עם חב״ד בקמפוס בר אילן! כל הפעילויות, העדכונים והמלגות במקום אחד:',
           url: pageUrl
         });
-      } catch (err) {
-        // user cancelled share
+      } catch {
+        // User closed the share menu
       }
     } else {
-      handleCopyLink();
+      try {
+        await navigator.clipboard.writeText(pageUrl);
+        toast.success('הקישור הועתק בהצלחה! שתפו אותו עם חברים');
+      } catch {
+        toast.error('לא ניתן היה להעתיק את הקישור');
+      }
     }
   };
 
@@ -241,10 +224,10 @@ const NewYearHub: React.FC = () => {
             justifyContent: 'center',
             color: 'white'
           }}>
-            <Coffee size={22} />
+            <Home size={22} />
           </div>
           <div>
-            <div className="location-highlight-title">איפה אנחנו בקמפוס? הבית החם במעונות ☕</div>
+            <div className="location-highlight-title">איפה אנחנו בקמפוס? הבית החם במעונות</div>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>הדלת שלנו פתוחה לכולכם!</div>
           </div>
         </div>
@@ -252,7 +235,7 @@ const NewYearHub: React.FC = () => {
         <p className="location-highlight-body">
           מעונות פארק המאה, בניין B קומת מסחר, ז׳בוטינסקי 514, גבעת שמואל.
           <br />
-          מוזמנים לקפוץ לקפה, לשבת ללמוד, או להגיע לסעודות ושיעורים.
+          מוזמנים לקפוץ להכיר, לשבת ללמוד, או להגיע לסעודות ושיעורים.
         </p>
 
         <div className="location-buttons-row">
@@ -300,99 +283,15 @@ const NewYearHub: React.FC = () => {
         ))}
       </div>
 
-      {/* Share / QR Code Toolkit Box for Ayala & Staff */}
-      <div className="qr-admin-box">
-        <button 
-          onClick={() => setShowQrBox(!showQrBox)}
-          className="qr-admin-toggle"
+      {/* Share Section with Friends */}
+      <div className="newyear-share-box">
+        <button
+          onClick={handleShare}
+          className="newyear-share-btn"
         >
-          <QrCode size={18} />
-          <span>{showQrBox ? 'הסתרת קוד QR להדפסה' : 'הצגת קוד ה-QR להדפסת המדבקות'}</span>
+          <Share2 size={20} />
+          <span>שיתוף עם חברים</span>
         </button>
-
-        {showQrBox && (
-          <motion.div 
-            className="qr-display-area"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-          >
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
-              זהו קוד ה-QR המדויק לעמוד זה. ניתן לשמור אותו ישירות למחשב או לטלפון ולהדפיס על מדבקות הפופקורן:
-            </p>
-
-            <div className="qr-image-wrapper">
-              <img 
-                src={qrImageUrl} 
-                alt="QR Code for /new-year" 
-              />
-            </div>
-
-            <div className="qr-link-copy">
-              <span>{pageUrl}</span>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.6rem', marginTop: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-              <button 
-                onClick={handleCopyLink}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  padding: '0.55rem 1.1rem',
-                  borderRadius: '12px',
-                  background: 'var(--primary)',
-                  color: 'white',
-                  fontWeight: 600,
-                  fontSize: '0.88rem'
-                }}
-              >
-                {copiedLink ? <Check size={16} /> : <Copy size={16} />}
-                <span>{copiedLink ? 'הועתק!' : 'העתקת הקישור'}</span>
-              </button>
-
-              <a
-                href={qrImageUrl}
-                download="chabad-new-year-qr.png"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  padding: '0.55rem 1.1rem',
-                  borderRadius: '12px',
-                  background: 'var(--surface)',
-                  color: 'var(--text-primary)',
-                  border: '1px solid var(--border)',
-                  fontWeight: 600,
-                  fontSize: '0.88rem',
-                  textDecoration: 'none'
-                }}
-              >
-                <QrCode size={16} />
-                <span>פתיחת התמונה באיכות מלאה</span>
-              </a>
-            </div>
-          </motion.div>
-        )}
-
-        <div style={{ marginTop: '1rem' }}>
-          <button
-            onClick={handleShare}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              color: 'var(--text-secondary)',
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              padding: '0.4rem 0.8rem'
-            }}
-          >
-            <Share2 size={16} />
-            <span>שיתוף העמוד עם סטודנטים</span>
-          </button>
-        </div>
       </div>
 
       {/* Footer */}
@@ -401,7 +300,7 @@ const NewYearHub: React.FC = () => {
           חב״ד בקמפוס בר אילן
         </p>
         <p style={{ margin: 0, opacity: 0.8 }}>
-          הרב אפרים ואילה הלפרין • הבית שלכם בקמפוס <Heart size={14} style={{ display: 'inline', color: 'var(--secondary)' }} />
+          הרב אפרים ואילה פיקארסקי • הבית שלכם בקמפוס <Heart size={14} style={{ display: 'inline', color: 'var(--secondary)' }} />
         </p>
       </div>
     </div>
