@@ -90,6 +90,36 @@ const NewYearHub: React.FC = () => {
     'היי הרב אפרים ואילה, פגשתי אתכם בחלוקת הפופקורן בקמפוס :)'
   )}`;
 
+  useEffect(() => {
+    // Track scan / visit
+    const trackedSessionKey = 'tracked_newyear_view_' + new Date().toDateString();
+    if (!sessionStorage.getItem(trackedSessionKey)) {
+      sessionStorage.setItem(trackedSessionKey, 'true');
+      const isFromHome = window.location.search.includes('source=home');
+      fetch('/api/track-newyear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'view', source: isFromHome ? 'home' : 'qr' })
+      }).catch(() => {});
+    }
+  }, []);
+
+  const handleScholarshipClick = () => {
+    fetch('/api/track-newyear', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'click_scholarship' })
+    }).catch(() => {});
+  };
+
+  const handleWhatsAppClick = () => {
+    fetch('/api/track-newyear', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'click_whatsapp' })
+    }).catch(() => {});
+  };
+
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -161,6 +191,7 @@ const NewYearHub: React.FC = () => {
           href={scholarshipWhatsAppUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleScholarshipClick}
           className="action-card action-card-scholarship"
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
@@ -182,6 +213,7 @@ const NewYearHub: React.FC = () => {
           href="https://chat.whatsapp.com/HxxrQxeydVb4H3YFxpngTs"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleWhatsAppClick}
           className="action-card action-card-whatsapp"
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}

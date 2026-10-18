@@ -156,7 +156,7 @@ const Home = () => {
               style={{ marginBottom: '1.25rem' }}
             >
               <Link
-                to="/new-year"
+                to="/new-year?source=home"
                 style={{
                   display: 'flex',
                   alignItems: 'center',

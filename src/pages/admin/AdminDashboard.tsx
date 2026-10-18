@@ -24,6 +24,13 @@ const AdminDashboard = () => {
   const [events, setEvents] = useState<EventRow[]>([]);
   const [regCounts, setRegCounts] = useState<Record<string, number>>({});
   const [showNewYearBanner, setShowNewYearBanner] = useState(true);
+  const [newYearStats, setNewYearStats] = useState({
+    total_views: 0,
+    qr_scans: 0,
+    home_clicks: 0,
+    scholarship_clicks: 0,
+    whatsapp_clicks: 0
+  });
   const [togglingBanner, setTogglingBanner] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showArchived, setShowArchived] = useState(false);
@@ -69,6 +76,9 @@ const AdminDashboard = () => {
 
       if (setRes.data?.wa_templates) {
         setShowNewYearBanner(setRes.data.wa_templates.show_new_year_banner !== false);
+        if (setRes.data.wa_templates.new_year_stats) {
+          setNewYearStats(setRes.data.wa_templates.new_year_stats);
+        }
       }
     } finally {
       setLoading(false);
@@ -227,6 +237,77 @@ const AdminDashboard = () => {
           >
             {showNewYearBanner ? 'הסרה ממסך הבית' : 'הצגה במסך הבית'}
           </button>
+        </div>
+
+        {/* Live Popcorn & New Year Analytics Grid */}
+        <div style={{
+          width: '100%',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+          gap: '0.75rem',
+          marginTop: '0.5rem',
+          paddingTop: '0.85rem',
+          borderTop: '1px dashed rgba(242, 101, 34, 0.25)'
+        }}>
+          <div style={{
+            background: 'var(--surface)',
+            borderRadius: '12px',
+            padding: '0.65rem 0.85rem',
+            textAlign: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+          }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#f26522' }}>
+              {newYearStats.qr_scans}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+              🍿 סריקות מהפופקורן
+            </div>
+          </div>
+
+          <div style={{
+            background: 'var(--surface)',
+            borderRadius: '12px',
+            padding: '0.65rem 0.85rem',
+            textAlign: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+          }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--primary)' }}>
+              {newYearStats.home_clicks}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+              🏠 כניסות מעמוד הבית
+            </div>
+          </div>
+
+          <div style={{
+            background: 'var(--surface)',
+            borderRadius: '12px',
+            padding: '0.65rem 0.85rem',
+            textAlign: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+          }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#e65c00' }}>
+              {newYearStats.scholarship_clicks}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+              🎓 התעניינו במלגה
+            </div>
+          </div>
+
+          <div style={{
+            background: 'var(--surface)',
+            borderRadius: '12px',
+            padding: '0.65rem 0.85rem',
+            textAlign: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+          }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#128c7e' }}>
+              {newYearStats.whatsapp_clicks}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+              💬 לחצו לעדכונים
+            </div>
+          </div>
         </div>
       </div>
 
