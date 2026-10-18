@@ -18,7 +18,12 @@ import {
   Volume2,
   VolumeX,
   FastForward,
-  Play
+  Play,
+  Smartphone,
+  Download,
+  X,
+  Share,
+  PlusSquare
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import confetti from 'canvas-confetti';
@@ -81,14 +86,6 @@ const ACTIVITIES: ActivityItem[] = [
   }
 ];
 
-const BLESSINGS = [
-  'שנה של הצלחה ענקית בכל המבחנים והאתגרים! 🎓✨',
-  'כיף שקפצתם! הדלת פתוחה והקפה חם במעונות 🏠💛',
-  'שנה מלאה בחברים טובים, חוויות וסעודות שבת מפנקות 🍷🍿',
-  'הפופקורן עלינו, ההצטיינות עליכם! 💯🌟',
-  'שתהיה לכם שנה מתוקה, מוצלחת ומוארת מכל הלב 🍯🎉'
-];
-
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -149,12 +146,48 @@ const NewYearHub: React.FC = () => {
 
   const [isMuted, setIsMuted] = useState(true);
 
-  // Interactive cheer & blessings
-  const [cheerCount, setCheerCount] = useState(() => {
-    const saved = localStorage.getItem('newyear_cheers_count');
-    return saved ? parseInt(saved, 10) : 48;
-  });
-  const [activeBlessing, setActiveBlessing] = useState<string | null>(null);
+  // PWA Install State & Detection
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const standalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+      setIsStandalone(standalone);
+
+      const ua = window.navigator.userAgent.toLowerCase();
+      const isIosDevice = /iphone|ipad|ipod/.test(ua);
+      setIsIOS(isIosDevice);
+
+      const handlePrompt = (e: Event) => {
+        e.preventDefault();
+        setDeferredPrompt(e);
+      };
+
+      window.addEventListener('beforeinstallprompt', handlePrompt);
+      return () => window.removeEventListener('beforeinstallprompt', handlePrompt);
+    }
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (isStandalone) {
+      toast.success('האפליקציה כבר שמורה במסך הבית שלך! ✨');
+      return;
+    }
+
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        toast.success('תודה שהתקנתם! ניפגש בפעילויות 💛');
+        setDeferredPrompt(null);
+      }
+    } else {
+      setShowInstallModal(true);
+    }
+  };
 
   const triggerFestiveConfetti = () => {
     try {
@@ -198,24 +231,6 @@ const NewYearHub: React.FC = () => {
   const handleReplayIntro = () => {
     setIsMuted(false);
     setShowIntro(true);
-  };
-
-  const handleInteractiveCheer = () => {
-    const nextCount = cheerCount + 1;
-    setCheerCount(nextCount);
-    localStorage.setItem('newyear_cheers_count', String(nextCount));
-
-    const randomMsg = BLESSINGS[Math.floor(Math.random() * BLESSINGS.length)];
-    setActiveBlessing(randomMsg);
-
-    try {
-      confetti({
-        particleCount: 35,
-        spread: 60,
-        origin: { y: 0.5, x: 0.5 },
-        colors: ['#f26522', '#ffc107', '#ff6b6b', '#7a3ebb']
-      });
-    } catch {}
   };
 
   const pageUrl = 'https://chabad-biu-app.vercel.app/new-year';
@@ -389,24 +404,37 @@ const NewYearHub: React.FC = () => {
           </motion.div>
         </motion.div>
 
-        {/* Interactive Festive Popcorn & Blessing Bar */}
+        {/* Install / Add to Home Screen Button */}
         <motion.div 
-          className="newyear-interactive-celebration"
+          className="newyear-install-box"
           variants={itemVariants}
         >
           <button 
             type="button"
-            onClick={handleInteractiveCheer}
-            className="celebration-cheer-btn"
+            onClick={handleInstallClick}
+            className="newyear-install-btn"
           >
-            <span className="cheer-icon">🍿</span>
-            <div className="cheer-text-col">
-              <span className="cheer-title">קבלו ברכה חמה לשנה החדשה! ✨</span>
-              <span className="cheer-sub">
-                {activeBlessing ? activeBlessing : `לחצו כאן לפופקורן של הצלחה ואיחול לשנה החדשה (${cheerCount} איחולים נאספו)`}
-              </span>
+            <div className="install-btn-content">
+              <div className="install-btn-icon-wrap">
+                <Smartphone size={24} />
+              </div>
+              <div className="install-btn-text">
+                <div className="install-btn-title">
+                  <span>הורדת האפליקציה למסך הבית</span>
+                  <span className="install-badge-shine">
+                    {isStandalone ? 'מותקן ✨' : 'התקנה מהירה 📲'}
+                  </span>
+                </div>
+                <div className="install-btn-sub">
+                  {isStandalone 
+                    ? 'האפליקציה כבר שמורה אצלכם במסך הבית' 
+                    : 'שמרו אותנו במסך הבית לגישה מהירה לאירועים, שבתות ומלגות'}
+                </div>
+              </div>
             </div>
-            <Sparkles size={20} className="cheer-sparkle-icon" />
+            <div className="install-btn-action">
+              <Download size={20} />
+            </div>
           </button>
         </motion.div>
 
@@ -643,6 +671,96 @@ const NewYearHub: React.FC = () => {
           </p>
         </motion.div>
       </motion.div>
+
+      {/* Install Guidance Modal (iOS & Android) */}
+      <AnimatePresence>
+        {showInstallModal && (
+          <motion.div 
+            className="install-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowInstallModal(false)}
+          >
+            <motion.div 
+              className="install-modal-content"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                type="button"
+                className="install-modal-close" 
+                onClick={() => setShowInstallModal(false)}
+                aria-label="סגירה"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="install-modal-header">
+                <div className="install-modal-app-icon">
+                  <img src="/app-icon.png" alt="חב״ד בקמפוס" />
+                </div>
+                <h3>הוספת האפליקציה למסך הבית 📲</h3>
+                <p>כדי שחב״ד בקמפוס יהיה זמין לכם תמיד בלחיצה אחת מהירה:</p>
+              </div>
+
+              {isIOS ? (
+                <div className="install-steps-list">
+                  <div className="install-step-item">
+                    <span className="step-num">1</span>
+                    <div className="step-text">
+                      לחצו על כפתור השיתוף בתחתית הדפדפן <strong>(סמל <Share size={15} style={{ display: 'inline', verticalAlign: 'middle', margin: '0 2px' }} /> Share)</strong>
+                    </div>
+                  </div>
+                  <div className="install-step-item">
+                    <span className="step-num">2</span>
+                    <div className="step-text">
+                      גללו קלות בתפריט ולחצו על <strong>"הוסף למסך הבית" <PlusSquare size={15} style={{ display: 'inline', verticalAlign: 'middle', margin: '0 2px' }} /></strong>
+                    </div>
+                  </div>
+                  <div className="install-step-item">
+                    <span className="step-num">3</span>
+                    <div className="step-text">
+                      לחצו על <strong>"הוסף" (Add)</strong> בפינה העליונה – והאייקון של חב״ד מוכן אצלכם במסך הבית! ✨
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="install-steps-list">
+                  <div className="install-step-item">
+                    <span className="step-num">1</span>
+                    <div className="step-text">
+                      לחצו על תפריט <strong>3 הנקודות (⋮)</strong> בפינת הדפדפן למעלה
+                    </div>
+                  </div>
+                  <div className="install-step-item">
+                    <span className="step-num">2</span>
+                    <div className="step-text">
+                      בחרו באפשרות <strong>"התקנת אפליקציה"</strong> או <strong>"הוספה למסך הבית"</strong>
+                    </div>
+                  </div>
+                  <div className="install-step-item">
+                    <span className="step-num">3</span>
+                    <div className="step-text">
+                      אשרו את ההתקנה – והאפליקציה תופיע במסך הבית שלכם! ✨
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <button 
+                type="button"
+                className="install-modal-confirm-btn"
+                onClick={() => setShowInstallModal(false)}
+              >
+                הבנתי, תודה! 👍
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
