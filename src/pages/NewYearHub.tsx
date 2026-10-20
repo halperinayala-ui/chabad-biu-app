@@ -41,7 +41,7 @@ const ACTIVITIES: ActivityItem[] = [
   {
     emoji: '🎓',
     title: 'מלגה',
-    desc: 'מפגשי לימוד והעשרה מרתקים אחת לשבוע עם מלגת לימודים שווה לשנה הקרובה.',
+    desc: '10 מפגשים — 1,000 ש״ח לסמסטר. מפגשי לימוד והעשרה מרתקים אחת לשבוע.',
     isFromFlyer: true
   },
   {
@@ -463,7 +463,10 @@ const NewYearHub: React.FC = () => {
               <div className="action-card-text">
                 <div className="action-card-title">
                   <span>הרשמה למלגת לימוד ופעילות</span>
-                  <span className="scholarship-pulse-tag">מלגה שווה</span>
+                  <span className="scholarship-pulse-tag">1,000 ₪</span>
+                </div>
+                <div className="scholarship-terms-badge">
+                  <span>10 מפגשים — 1,000 ש״ח לסמסטר</span>
                 </div>
                 <div className="action-card-desc">לחצו להרשמה מהירה בוואטסאפ והבטחת מקומכם במלגה</div>
               </div>
