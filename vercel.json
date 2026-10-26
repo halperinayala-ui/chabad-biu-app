@@ -5,6 +5,28 @@
   }],
   "rewrites": [
     {
+      "source": "/new-year",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([wW][hH][aA][tT][sS][aA][pP][pP]|[fF][aA][cC][eE][bB][oO][oO][kK][eE][xX][tT][eE][rR][nN][aA][lL][hH][iI][tT]|[fF][aA][cC][eE][bB][oO][tT]|[tT][wW][iI][tT][tT][eE][rR][bB][oO][tT]|[tT][eE][lL][eE][gG][rR][aA][mM][bB][oO][tT]|[sS][lL][aA][cC][kK][bB][oO][tT]|[dD][iI][sS][cC][oO][rR][dD][bB][oO][tT]|[lL][iI][nN][kK][eE][dD][iI][nN][bB][oO][tT]|[aA][pP][pP][lL][eE][bB][oO][tT]).*"
+        }
+      ],
+      "destination": "/api/og-newyear"
+    },
+    {
+      "source": "/newyear",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([wW][hH][aA][tT][sS][aA][pP][pP]|[fF][aA][cC][eE][bB][oO][oO][kK][eE][xX][tT][eE][rR][nN][aA][lL][hH][iI][tT]|[fF][aA][cC][eE][bB][oO][tT]|[tT][wW][iI][tT][tT][eE][rR][bB][oO][tT]|[tT][eE][lL][eE][gG][rR][aA][mM][bB][oO][tT]|[sS][lL][aA][cC][kK][bB][oO][tT]|[dD][iI][sS][cC][oO][rR][dD][bB][oO][tT]|[lL][iI][nN][kK][eE][dD][iI][nN][bB][oO][tT]|[aA][pP][pP][lL][eE][bB][oO][tT]).*"
+        }
+      ],
+      "destination": "/api/og-newyear"
+    },
+    {
       "source": "/kaparot",
       "destination": "/api/og-kaparot"
     },

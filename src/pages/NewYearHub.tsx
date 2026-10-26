@@ -244,6 +244,7 @@ const NewYearHub: React.FC = () => {
   )}`;
 
   useEffect(() => {
+    document.title = 'יש לך בית בקמפוס - חב״ד בר אילן 🍿';
     // Track scan / visit
     const trackedSessionKey = 'tracked_newyear_view_' + new Date().toDateString();
     if (!sessionStorage.getItem(trackedSessionKey)) {
