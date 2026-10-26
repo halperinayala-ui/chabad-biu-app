@@ -772,14 +772,15 @@ const EventDetails = () => {
                 className="meta-card share-card" 
                 style={{ cursor: 'pointer', background: 'rgba(230, 126, 34, 0.08)', border: '1px solid rgba(230, 126, 34, 0.2)' }}
                 onClick={() => {
+                  const shareUrl = `${window.location.origin}/events/${event.id}`;
                   if (navigator.share) {
                     navigator.share({
                       title: event.title,
                       text: 'הצטרפו אליי לאירוע בחב״ד קמפוס בר אילן!',
-                      url: window.location.href,
+                      url: shareUrl,
                     }).catch(console.error);
                   } else {
-                    navigator.clipboard.writeText(window.location.href);
+                    navigator.clipboard.writeText(shareUrl);
                     toast.success('הקישור הועתק בהצלחה!');
                   }
                 }}

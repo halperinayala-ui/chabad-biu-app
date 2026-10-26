@@ -4,6 +4,7 @@ import { ArrowRight, Plus, Trash2, Image as ImageIcon, Save, Loader2, X, Tag } f
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
+import { compressImage } from '../../utils/imageUtils';
 import './AdminEventEditor.css';
 
 interface FormField {
@@ -152,11 +153,13 @@ const AdminEventEditor = () => {
   };
 
   const uploadImage = async (file: File, folder: string) => {
-    const fileExt = file.name.split('.').pop();
+    // Compress image client-side to ensure fast uploads and WhatsApp preview compatibility (<300KB)
+    const compressed = await compressImage(file);
+    const fileExt = compressed.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
     const filePath = `${folder}/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage.from('events').upload(filePath, file);
+    const { error: uploadError } = await supabase.storage.from('events').upload(filePath, compressed);
     if (uploadError) throw uploadError;
 
     const { data } = supabase.storage.from('events').getPublicUrl(filePath);
