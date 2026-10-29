@@ -69,19 +69,52 @@ const EventDetails = () => {
     }
   }, [event, user]);
 
-  const fetchRegistrationsCount = async () => {
-    if (!id) return;
+  const getEventRegisteredCount = async (eventId: string): Promise<number | null> => {
+    // 1. Try Supabase RPC get_event_registrations_count (bypasses RLS securely, without exposing attendee data)
+    try {
+      const { data, error } = await supabase.rpc('get_event_registrations_count', { target_event_id: eventId });
+      if (!error && typeof data === 'number') {
+        return data;
+      }
+    } catch (e) {
+      // ignore and try fallback
+    }
+
+    // 2. Try Vercel Serverless API fallback
+    try {
+      const res = await fetch(`/api/event-capacity?eventId=${eventId}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (typeof json.count === 'number') {
+          return json.count;
+        }
+      }
+    } catch (e) {
+      // ignore and try fallback
+    }
+
+    // 3. Fallback to direct table query (works for admins)
     try {
       const { count, error } = await supabase
         .from('registrations')
         .select('*', { count: 'exact', head: true })
-        .eq('event_id', id)
+        .eq('event_id', eventId)
         .neq('status', 'rejected');
       if (!error && count !== null) {
-        setRegisteredCount(count);
+        return count;
       }
     } catch (err) {
-      console.error('Error fetching registrations count:', err);
+      console.error('Error fetching count fallback:', err);
+    }
+
+    return null;
+  };
+
+  const fetchRegistrationsCount = async () => {
+    if (!id) return;
+    const count = await getEventRegisteredCount(id);
+    if (count !== null) {
+      setRegisteredCount(count);
     }
   };
 
@@ -116,14 +149,10 @@ const EventDetails = () => {
     try {
       // Check capacity limit
       if (event.max_registrants && event.max_registrants > 0) {
-        const { count } = await supabase
-          .from('registrations')
-          .select('*', { count: 'exact', head: true })
-          .eq('event_id', event.id)
-          .neq('status', 'rejected');
+        const count = await getEventRegisteredCount(event.id);
         if (count !== null && count >= event.max_registrants) {
           setRegisteredCount(count);
-          toast.error('מצטערים, ההרשמה לאירוע זה הגיעה למכסה המרבית ונסגרה.');
+          toast.error(event.closed_message || 'מצטערים, ההרשמה לאירוע זה הגיעה למכסה המרבית ונסגרה.');
           setSubmitting(false);
           return;
         }
@@ -177,7 +206,19 @@ const EventDetails = () => {
       }
 
       const { error } = await supabase.from('registrations').insert(payload);
-      if (error) throw error;
+      if (error) {
+        if (
+          error.message?.includes('מכסה') ||
+          error.message?.includes('הגיעה למכסה') ||
+          error.message?.includes('check_registration_limit')
+        ) {
+          toast.error(event.closed_message || 'מצטערים, ההרשמה לאירוע זה הגיעה למכסה המרבית ונסגרה.');
+          if (event.max_registrants) setRegisteredCount(event.max_registrants);
+          setSubmitting(false);
+          return;
+        }
+        throw error;
+      }
 
       setRegisteredCount(prev => prev + 1);
       setMyRegistration({
@@ -227,14 +268,10 @@ const EventDetails = () => {
     try {
       // Check capacity limit
       if (event.max_registrants && event.max_registrants > 0) {
-        const { count } = await supabase
-          .from('registrations')
-          .select('*', { count: 'exact', head: true })
-          .eq('event_id', event.id)
-          .neq('status', 'rejected');
+        const count = await getEventRegisteredCount(event.id);
         if (count !== null && count >= event.max_registrants) {
           setRegisteredCount(count);
-          toast.error('מצטערים, ההרשמה לאירוע זה הגיעה למכסה המרבית ונסגרה.');
+          toast.error(event.closed_message || 'מצטערים, ההרשמה לאירוע זה הגיעה למכסה המרבית ונסגרה.');
           setSubmitting(false);
           return;
         }
@@ -246,7 +283,20 @@ const EventDetails = () => {
         status: event.requires_approval ? 'pending' : 'rsvp',
         answers: {},
       }).select('id, status').single();
-      if (error) throw error;
+      
+      if (error) {
+        if (
+          error.message?.includes('מכסה') ||
+          error.message?.includes('הגיעה למכסה') ||
+          error.message?.includes('check_registration_limit')
+        ) {
+          toast.error(event.closed_message || 'מצטערים, ההרשמה לאירוע זה הגיעה למכסה המרבית ונסגרה.');
+          if (event.max_registrants) setRegisteredCount(event.max_registrants);
+          setSubmitting(false);
+          return;
+        }
+        throw error;
+      }
       setRegisteredCount(prev => prev + 1);
       setMyRegistration(data);
       toast.success(profile?.gender === 'female' ? 'אחלה! רשמנו אותך 🎉' : 'אחלה! רשמנו אותך 🎉');
@@ -278,14 +328,20 @@ const EventDetails = () => {
 
   const handleCancelRegistration = async () => {
     if (!myRegistration) return;
-    if (!confirm('האם אתה בטוח שברצונך לבטל את ההרשמה?')) return;
+    if (!confirm('האם את/ה בטוח/ה שברצונך לבטל את ההרשמה?')) return;
     
     setCancelling(true);
     try {
       const { error } = await supabase.from('registrations').delete().eq('id', myRegistration.id);
       if (error) throw error;
       setMyRegistration(null);
-      setRegisteredCount(prev => Math.max(0, prev - 1));
+      if (id) {
+        const count = await getEventRegisteredCount(id);
+        if (count !== null) setRegisteredCount(count);
+        else setRegisteredCount(prev => Math.max(0, prev - 1));
+      } else {
+        setRegisteredCount(prev => Math.max(0, prev - 1));
+      }
       toast.success('ההרשמה בוטלה.');
 
       // Notify admins about cancellation

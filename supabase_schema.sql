@@ -333,3 +333,57 @@ USING (
   auth.uid() = user_id OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
 );
 
+-- ==========================================
+-- PHASE 13 MIGRATION: Capacity Limit & Public Count
+-- ==========================================
+
+-- 1. Function to safely get registration count for any event (bypassing RLS without exposing user personal data)
+CREATE OR REPLACE FUNCTION public.get_event_registrations_count(target_event_id UUID)
+RETURNS INTEGER AS $$
+BEGIN
+  RETURN (
+    SELECT COUNT(*)::INTEGER
+    FROM public.registrations
+    WHERE event_id = target_event_id
+      AND status != 'rejected'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION public.get_event_registrations_count(UUID) TO anon, authenticated, service_role;
+
+-- 2. Trigger function to enforce max_registrants at database level
+CREATE OR REPLACE FUNCTION public.check_registration_limit()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_max_registrants INTEGER;
+  v_current_count INTEGER;
+BEGIN
+  -- קבלת מכסת המשתתפים של האירוע
+  SELECT max_registrants INTO v_max_registrants
+  FROM public.events
+  WHERE id = NEW.event_id;
+
+  -- אם קיימת מכסה והיא חיובית
+  IF v_max_registrants IS NOT NULL AND v_max_registrants > 0 THEN
+    SELECT COUNT(*) INTO v_current_count
+    FROM public.registrations
+    WHERE event_id = NEW.event_id
+      AND status != 'rejected';
+
+    IF v_current_count >= v_max_registrants THEN
+      RAISE EXCEPTION 'מצטערים, ההרשמה לאירוע זה הגיעה למכסה המרבית ונסגרה.';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- הרצת הטריגר לפני כל הוספת נרשם חדש
+DROP TRIGGER IF EXISTS trg_check_registration_limit ON public.registrations;
+CREATE TRIGGER trg_check_registration_limit
+  BEFORE INSERT ON public.registrations
+  FOR EACH ROW
+  EXECUTE FUNCTION public.check_registration_limit();
+
