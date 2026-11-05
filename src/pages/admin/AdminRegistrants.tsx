@@ -23,7 +23,11 @@ import {
   FileSpreadsheet,
   RotateCcw,
   Bell,
-  BellOff
+  BellOff,
+  Filter,
+  ArrowUp,
+  ArrowDown,
+  Search
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
@@ -43,7 +47,10 @@ interface Registrant {
     id: string;
     full_name: string;
     phone: string;
-    gender: string;
+    gender?: string;
+    user_status?: string;
+    study_field?: string;
+    status_detail?: string;
   } | null;
   guest_name?: string;
   guest_phone?: string;
@@ -72,6 +79,15 @@ const AdminRegistrants = () => {
   // Revert approval modal state
   const [revertConfirmTarget, setRevertConfirmTarget] = useState<Registrant | null>(null);
   const [reverting, setReverting] = useState(false);
+
+  // Dynamic Filtering & Sorting states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [columnFilters, setColumnFilters] = useState<Record<string, string | null>>({});
+  const [activeColumnMenu, setActiveColumnMenu] = useState<string | null>(null);
+  const [sortConfig, setSortConfig] = useState<{
+    key: string | null;
+    direction: 'asc' | 'desc';
+  }>({ key: 'created_at', direction: 'desc' });
   
 
   useEffect(() => {
@@ -104,8 +120,8 @@ const AdminRegistrants = () => {
       const { data, error } = await supabase
         .from('registrations')
         .select(`
-          id, status, guest_name, guest_phone, answers, created_at, attended, admin_note,
-          profiles (id, full_name, phone)
+          id, user_id, status, guest_name, guest_phone, answers, created_at, attended, admin_note,
+          profiles (id, full_name, phone, gender, user_status, study_field, status_detail)
         `)
         .eq('event_id', eventId)
         .order('created_at', { ascending: false });
@@ -322,16 +338,167 @@ const AdminRegistrants = () => {
     return headers;
   };
 
-  // 1. Export to CSV (Compatible with Excel & Google Sheets)
+  // Helper to extract unique values for any column dynamically
+  const getColumnUniqueValues = (columnKey: string) => {
+    const counts: Record<string, number> = {};
+
+    if (columnKey === 'status') {
+      registrants.forEach(r => {
+        const val = r.status || 'unknown';
+        counts[val] = (counts[val] || 0) + 1;
+      });
+      const statusLabels: Record<string, string> = {
+        approved: 'מאושר',
+        pending: 'ממתין',
+        rejected: 'נדחה',
+        rsvp: 'מגיע/ה'
+      };
+      return Object.entries(counts).map(([val, count]) => ({
+        value: val,
+        label: statusLabels[val] || val,
+        count
+      }));
+    }
+
+    if (columnKey === 'attended') {
+      registrants.forEach(r => {
+        const val = r.attended === true ? 'true' : r.attended === false ? 'false' : 'null';
+        counts[val] = (counts[val] || 0) + 1;
+      });
+      const attendanceLabels: Record<string, string> = {
+        'true': 'הגיע בפועל',
+        'false': 'לא הגיע',
+        'null': 'טרם סומן'
+      };
+      return Object.entries(counts).map(([val, count]) => ({
+        value: val,
+        label: attendanceLabels[val] || val,
+        count
+      }));
+    }
+
+    // Dynamic question columns
+    registrants.forEach(r => {
+      const raw = r.answers?.[columnKey];
+      const val = (raw === undefined || raw === null || String(raw).trim() === '') ? '__EMPTY__' : String(raw).trim();
+      counts[val] = (counts[val] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([val, count]) => ({
+        value: val,
+        label: val === '__EMPTY__' ? '(ללא מענה / ריק)' : val,
+        count
+      }));
+  };
+
+  // Dynamic filtered and sorted registrants
+  const filteredRegistrants = registrants
+    .filter(reg => {
+      // 1. Global text search
+      if (searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase();
+        const name = getName(reg).toLowerCase();
+        const phone = getPhone(reg).toLowerCase();
+        const note = (reg.admin_note || '').toLowerCase();
+        const answersStr = Object.values(reg.answers || {}).map(v => String(v)).join(' ').toLowerCase();
+        if (!name.includes(q) && !phone.includes(q) && !note.includes(q) && !answersStr.includes(q)) {
+          return false;
+        }
+      }
+
+      // 2. Dynamic column filters
+      for (const [colKey, filterVal] of Object.entries(columnFilters)) {
+        if (!filterVal) continue;
+
+        if (colKey === 'status') {
+          if (reg.status !== filterVal) return false;
+        } else if (colKey === 'attended') {
+          const val = reg.attended === true ? 'true' : reg.attended === false ? 'false' : 'null';
+          if (val !== filterVal) return false;
+        } else {
+          // Dynamic question column
+          const raw = reg.answers?.[colKey];
+          const val = (raw === undefined || raw === null || String(raw).trim() === '') ? '__EMPTY__' : String(raw).trim();
+          if (val !== filterVal) return false;
+        }
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      if (!sortConfig.key) return 0;
+      const { key, direction } = sortConfig;
+      const mult = direction === 'asc' ? 1 : -1;
+
+      if (key === 'name') {
+        return getName(a).localeCompare(getName(b), 'he') * mult;
+      }
+      if (key === 'status') {
+        return (a.status || '').localeCompare(b.status || '', 'he') * mult;
+      }
+      if (key === 'attended') {
+        const aVal = a.attended === true ? 2 : a.attended === false ? 0 : 1;
+        const bVal = b.attended === true ? 2 : b.attended === false ? 0 : 1;
+        return (aVal - bVal) * mult;
+      }
+      if (key === 'phone') {
+        return getPhone(a).localeCompare(getPhone(b)) * mult;
+      }
+      if (key === 'created_at') {
+        return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * mult;
+      }
+
+      // Dynamic question sorting
+      const aVal = String(a.answers?.[key] ?? '');
+      const bVal = String(b.answers?.[key] ?? '');
+      return aVal.localeCompare(bVal, 'he', { numeric: true }) * mult;
+    });
+
+  const setColumnFilter = (columnKey: string, value: string | null) => {
+    setColumnFilters(prev => {
+      const next = { ...prev };
+      if (!value) delete next[columnKey];
+      else next[columnKey] = value;
+      return next;
+    });
+    setActiveColumnMenu(null);
+  };
+
+  const toggleSort = (columnKey: string, direction?: 'asc' | 'desc') => {
+    if (direction) {
+      setSortConfig({ key: columnKey, direction });
+    } else {
+      setSortConfig(prev => {
+        if (prev.key === columnKey) {
+          return { key: columnKey, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+        }
+        return { key: columnKey, direction: 'asc' };
+      });
+    }
+    setActiveColumnMenu(null);
+  };
+
+  const clearAllFilters = () => {
+    setColumnFilters({});
+    setSearchQuery('');
+    setSortConfig({ key: 'created_at', direction: 'desc' });
+    setActiveColumnMenu(null);
+  };
+
+  const activeFilterCount = Object.keys(columnFilters).length + (searchQuery.trim() ? 1 : 0);
+
+  // 1. Export to CSV (Exports current filtered & sorted list)
   const exportToCSV = () => {
-    if (registrants.length === 0) {
-      toast.error('אין נרשמים לייצוא');
+    if (filteredRegistrants.length === 0) {
+      toast.error('אין נרשמים לייצוא בסינון הנוכחי');
       return;
     }
     const qHeaders = getQuestionHeaders();
     const headers = ['מספר', 'שם מלא', 'טלפון', 'סטטוס', 'נוכחות בפועל', ...qHeaders, 'הערת מנהל', 'תאריך הרשמה'];
 
-    const rows = registrants.map((reg, idx) => {
+    const rows = filteredRegistrants.map((reg, idx) => {
       const statusMap: Record<string, string> = { approved: 'מאושר', pending: 'ממתין', rejected: 'נדחה', rsvp: 'מגיע' };
       const statusText = statusMap[reg.status] || reg.status;
       const attendanceText = reg.attended === true ? 'הגיע' : reg.attended === false ? 'לא הגיע' : 'לא סומן';
@@ -364,20 +531,24 @@ const AdminRegistrants = () => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    toast.success('קובץ נרשמים הורד בהצלחה!');
+    toast.success(
+      activeFilterCount > 0 
+        ? `קובץ עם ${filteredRegistrants.length} נרשמים מסוננים הורד בהצלחה!` 
+        : 'קובץ נרשמים הורד בהצלחה!'
+    );
     setShowExportMenu(false);
   };
 
   // 2. Copy formatted table for instant paste in Google Sheets
   const copyForGoogleSheets = async () => {
-    if (registrants.length === 0) {
-      toast.error('אין נרשמים להעתקה');
+    if (filteredRegistrants.length === 0) {
+      toast.error('אין נרשמים להעתקה בסינון הנוכחי');
       return;
     }
     const qHeaders = getQuestionHeaders();
     const headers = ['מספר', 'שם מלא', 'טלפון', 'סטטוס', 'נוכחות בפועל', ...qHeaders, 'הערת מנהל', 'תאריך הרשמה'];
 
-    const rows = registrants.map((reg, idx) => {
+    const rows = filteredRegistrants.map((reg, idx) => {
       const statusMap: Record<string, string> = { approved: 'מאושר', pending: 'ממתין', rejected: 'נדחה', rsvp: 'מגיע' };
       const statusText = statusMap[reg.status] || reg.status;
       const attendanceText = reg.attended === true ? 'הגיע' : reg.attended === false ? 'לא הגיע' : 'לא סומן';
@@ -402,11 +573,162 @@ const AdminRegistrants = () => {
     const tsvContent = [headers.join('\t'), ...rows].join('\n');
     try {
       await navigator.clipboard.writeText(tsvContent);
-      toast.success('הנתונים הועתקו ללוח! לחץ/י Ctrl+V בגוגל שיטס');
+      toast.success(
+        activeFilterCount > 0 
+          ? `הועתקו ${filteredRegistrants.length} שורות מסוננות! לחצו Ctrl+V בגוגל שיטס` 
+          : 'הנתונים הועתקו ללוח! לחצו Ctrl+V בגוגל שיטס'
+      );
     } catch {
       toast.error('שגיאה בהעתקה ללוח');
     }
     setShowExportMenu(false);
+  };
+
+  // Reusable Column Header Renderer with dynamic Sort & Filter
+  const renderColumnHeader = (title: string, columnKey: string, allowFilter = true) => {
+    const isFiltered = Boolean(columnFilters[columnKey]);
+    const isSorted = sortConfig.key === columnKey;
+    const isMenuOpen = activeColumnMenu === columnKey;
+    const uniqueValues = allowFilter ? getColumnUniqueValues(columnKey) : [];
+
+    return (
+      <th key={columnKey} className={`col-th ${isFiltered ? 'th-filtered' : ''} ${isSorted ? 'th-sorted' : ''}`}>
+        <div className="th-header-inner">
+          <span 
+            className="th-label-clickable" 
+            onClick={() => toggleSort(columnKey)} 
+            title="לחצו למיון הטור"
+          >
+            {title}
+          </span>
+          <div className="th-btn-group">
+            {isSorted && (
+              <span className="th-sort-arrow" onClick={() => toggleSort(columnKey)} title={sortConfig.direction === 'asc' ? 'מיון עולה' : 'מיון יורד'}>
+                {sortConfig.direction === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+              </span>
+            )}
+            <button
+              type="button"
+              className={`th-filter-trigger ${isFiltered ? 'active' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveColumnMenu(isMenuOpen ? null : columnKey);
+              }}
+              title={`סינון ומיון לפי ${title}`}
+            >
+              <Filter size={12} />
+              {isFiltered && <span className="filter-dot" />}
+            </button>
+          </div>
+
+          {/* Filter & Sort Popover Dropdown */}
+          {isMenuOpen && (
+            <>
+              <div 
+                className="dropdown-backdrop" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveColumnMenu(null);
+                }} 
+              />
+              <div className="col-menu-popover glass animate-scale-up" onClick={(e) => e.stopPropagation()}>
+                <div className="col-menu-top">
+                  <div className="col-menu-title">
+                    <Filter size={14} color="var(--primary)" />
+                    <strong>{title}</strong>
+                  </div>
+                  <button 
+                    type="button" 
+                    className="close-popover-btn" 
+                    onClick={() => setActiveColumnMenu(null)}
+                  >
+                    <XIcon size={14} />
+                  </button>
+                </div>
+
+                {/* Sort options */}
+                <div className="col-menu-group">
+                  <div className="col-group-title">מיון הטור:</div>
+                  <div className="sort-pill-row">
+                    <button
+                      type="button"
+                      className={`sort-pill ${isSorted && sortConfig.direction === 'asc' ? 'active' : ''}`}
+                      onClick={() => toggleSort(columnKey, 'asc')}
+                    >
+                      <ArrowUp size={12} />
+                      <span>{columnKey === 'created_at' ? 'מהישן לחדש' : "א' עד ת'"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`sort-pill ${isSorted && sortConfig.direction === 'desc' ? 'active' : ''}`}
+                      onClick={() => toggleSort(columnKey, 'desc')}
+                    >
+                      <ArrowDown size={12} />
+                      <span>{columnKey === 'created_at' ? 'מהחדש לישן' : "ת' עד א'"}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Filter values */}
+                {allowFilter && (
+                  <div className="col-menu-group">
+                    <div className="col-group-title">
+                      <span>סינון לפי ערכים</span>
+                      <small>({uniqueValues.length} אפשרויות)</small>
+                    </div>
+                    <div className="unique-values-list">
+                      <button
+                        type="button"
+                        className={`val-item-btn ${!isFiltered ? 'selected' : ''}`}
+                        onClick={() => setColumnFilter(columnKey, null)}
+                      >
+                        <span className="val-text">הצג הכל (ללא סינון)</span>
+                        <span className="val-badge">{registrants.length}</span>
+                      </button>
+
+                      {uniqueValues.map(item => {
+                        const isSelected = columnFilters[columnKey] === item.value;
+                        return (
+                          <button
+                            key={item.value}
+                            type="button"
+                            className={`val-item-btn ${isSelected ? 'selected' : ''}`}
+                            onClick={() => setColumnFilter(columnKey, isSelected ? null : item.value)}
+                          >
+                            <span className="val-text">
+                              {isSelected && <Check size={12} style={{ display: 'inline', marginLeft: '4px' }} />}
+                              {item.label}
+                            </span>
+                            <span className="val-badge">{item.count}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Clear column filter/sort footer */}
+                {(isFiltered || isSorted) && (
+                  <div className="col-menu-footer">
+                    <button
+                      type="button"
+                      className="reset-col-btn"
+                      onClick={() => {
+                        setColumnFilter(columnKey, null);
+                        if (isSorted) setSortConfig({ key: 'created_at', direction: 'desc' });
+                      }}
+                    >
+                      <RotateCcw size={12} />
+                      <span>איפוס סינון ומיון לטור זה</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </th>
+    );
   };
   
 
@@ -517,9 +839,14 @@ const AdminRegistrants = () => {
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Stats Cards (Interactive Quick Filters) */}
       <div className="stats-row">
-        <div className="stat-card glass">
+        <div 
+          className={`stat-card glass interactive-stat ${activeFilterCount === 0 ? 'stat-active' : ''}`}
+          onClick={clearAllFilters}
+          title="לחצו להצגת כל הנרשמים"
+          style={{ cursor: 'pointer' }}
+        >
           <div className="stat-value">
             {registrants.length}{maxRegistrants ? ` / ${maxRegistrants}` : ''}
           </div>
@@ -528,26 +855,70 @@ const AdminRegistrants = () => {
             {maxRegistrants && registrants.filter(r => r.status !== 'rejected').length >= maxRegistrants ? ' (מלא 🔒)' : ''}
           </div>
         </div>
-        <div className="stat-card glass">
-          <div className="stat-value" style={{ color: '#2ecc71' }}>{registrants.filter(r => r.status === 'approved' || r.status === 'rsvp').length}</div>
-          <div className="stat-label">מאושרים</div>
+
+        <div 
+          className={`stat-card glass interactive-stat ${columnFilters['status'] === 'approved' ? 'stat-active' : ''}`}
+          onClick={() => setColumnFilter('status', columnFilters['status'] === 'approved' ? null : 'approved')}
+          title="לחצו לסינון מאושרים בלבד"
+          style={{ cursor: 'pointer' }}
+        >
+          <div className="stat-value" style={{ color: '#2ecc71' }}>
+            {registrants.filter(r => r.status === 'approved' || r.status === 'rsvp').length}
+          </div>
+          <div className="stat-label">
+            {columnFilters['status'] === 'approved' ? '✓ מאושרים (מסונן)' : 'מאושרים'}
+          </div>
         </div>
-        <div className="stat-card glass">
-          <div className="stat-value" style={{ color: '#f39c12' }}>{registrants.filter(r => r.status === 'pending').length}</div>
-          <div className="stat-label">ממתינים</div>
+
+        <div 
+          className={`stat-card glass interactive-stat ${columnFilters['status'] === 'pending' ? 'stat-active' : ''}`}
+          onClick={() => setColumnFilter('status', columnFilters['status'] === 'pending' ? null : 'pending')}
+          title="לחצו לסינון ממתינים בלבד"
+          style={{ cursor: 'pointer' }}
+        >
+          <div className="stat-value" style={{ color: '#f39c12' }}>
+            {registrants.filter(r => r.status === 'pending').length}
+          </div>
+          <div className="stat-label">
+            {columnFilters['status'] === 'pending' ? '✓ ממתינים (מסונן)' : 'ממתינים'}
+          </div>
         </div>
-        <div className="stat-card glass">
+
+        <div 
+          className={`stat-card glass interactive-stat ${columnFilters['attended'] === 'true' ? 'stat-active' : ''}`}
+          onClick={() => setColumnFilter('attended', columnFilters['attended'] === 'true' ? null : 'true')}
+          title="לחצו לסינון מי שהגיע בפועל"
+          style={{ cursor: 'pointer' }}
+        >
           <div className="stat-value" style={{ color: '#2ecc71' }}>{attended}</div>
-          <div className="stat-label">הגיעו בפועל</div>
+          <div className="stat-label">
+            {columnFilters['attended'] === 'true' ? '✓ הגיעו בפועל (מסונן)' : 'הגיעו בפועל'}
+          </div>
         </div>
-        <div className="stat-card glass">
+
+        <div 
+          className={`stat-card glass interactive-stat ${columnFilters['attended'] === 'false' ? 'stat-active' : ''}`}
+          onClick={() => setColumnFilter('attended', columnFilters['attended'] === 'false' ? null : 'false')}
+          title="לחצו לסינון מי שלא הגיע"
+          style={{ cursor: 'pointer' }}
+        >
           <div className="stat-value" style={{ color: '#e74c3c' }}>{absent}</div>
-          <div className="stat-label">לא הגיעו</div>
+          <div className="stat-label">
+            {columnFilters['attended'] === 'false' ? '✓ לא הגיעו (מסונן)' : 'לא הגיעו'}
+          </div>
         </div>
+
         {unmarked > 0 && (
-          <div className="stat-card glass">
+          <div 
+            className={`stat-card glass interactive-stat ${columnFilters['attended'] === 'null' ? 'stat-active' : ''}`}
+            onClick={() => setColumnFilter('attended', columnFilters['attended'] === 'null' ? null : 'null')}
+            title="לחצו לסינון מי שטרם סומן"
+            style={{ cursor: 'pointer' }}
+          >
             <div className="stat-value" style={{ color: '#aaa' }}>{unmarked}</div>
-            <div className="stat-label">לא סומנו</div>
+            <div className="stat-label">
+              {columnFilters['attended'] === 'null' ? '✓ לא סומנו (מסונן)' : 'לא סומנו'}
+            </div>
           </div>
         )}
       </div>
@@ -559,11 +930,97 @@ const AdminRegistrants = () => {
         </div>
       ) : (
         <div className="registrants-table-container glass">
-          <div style={{ padding: '1rem 1.5rem', background: 'rgba(73,38,145,0.05)', borderBottom: '1px solid var(--border)', fontSize: '0.9rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+          {/* Filter & Search Toolbar */}
+          <div className="registrants-toolbar glass">
+            <div className="toolbar-search-wrapper">
+              <Search size={18} className="search-icon" />
+              <input 
+                type="text" 
+                placeholder="חיפוש חופשי (שם, טלפון, הערה, תשובות...)"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="table-search-input"
+              />
+              {searchQuery && (
+                <button className="clear-search-btn" onClick={() => setSearchQuery('')} title="נקה חיפוש">
+                  <XIcon size={14} />
+                </button>
+              )}
+            </div>
+
+            <div className="toolbar-meta">
+              <span className="count-pill">
+                מוצגים <strong>{filteredRegistrants.length}</strong> מתוך {registrants.length}
+              </span>
+              {(activeFilterCount > 0 || isSortedNonDefault) && (
+                <button className="reset-all-pill-btn" onClick={clearAllFilters} title="איפוס כל הסינונים והמיונים">
+                  <RotateCcw size={12} />
+                  <span>איפוס סינונים</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Active Filter Chips */}
+          {(activeFilterCount > 0 || isSortedNonDefault) && (
+            <div className="active-filters-chips-bar">
+              <span className="chips-bar-title">סינונים פעילים:</span>
+              
+              {searchQuery.trim() && (
+                <span className="active-chip">
+                  <span className="chip-key">חיפוש:</span>
+                  <strong className="chip-val">"{searchQuery.trim()}"</strong>
+                  <button className="chip-del" onClick={() => setSearchQuery('')}><XIcon size={12} /></button>
+                </span>
+              )}
+
+              {Object.entries(columnFilters).map(([colKey, val]) => {
+                if (!val) return null;
+                let colTitle = colKey;
+                if (colKey === 'status') colTitle = 'סטטוס';
+                else if (colKey === 'attended') colTitle = 'נוכחות';
+
+                let displayVal = val;
+                if (colKey === 'status') {
+                  const map: Record<string, string> = { approved: 'מאושר', pending: 'ממתין', rejected: 'נדחה', rsvp: 'מגיע/ה' };
+                  displayVal = map[val] || val;
+                } else if (colKey === 'attended') {
+                  displayVal = val === 'true' ? 'הגיע בפועל' : val === 'false' ? 'לא הגיע' : 'טרם סומן';
+                } else if (val === '__EMPTY__') {
+                  displayVal = '(ללא מענה)';
+                }
+
+                return (
+                  <span key={colKey} className="active-chip">
+                    <span className="chip-key">{colTitle}:</span>
+                    <strong className="chip-val">{displayVal}</strong>
+                    <button className="chip-del" onClick={() => setColumnFilter(colKey, null)}><XIcon size={12} /></button>
+                  </span>
+                );
+              })}
+
+              {isSortedNonDefault && (
+                <span className="active-chip sort-chip">
+                  <span className="chip-key">מיון:</span>
+                  <strong className="chip-val">
+                    {sortConfig.key === 'name' ? 'שם' :
+                     sortConfig.key === 'status' ? 'סטטוס' :
+                     sortConfig.key === 'attended' ? 'נוכחות' :
+                     sortConfig.key === 'phone' ? 'טלפון' :
+                     sortConfig.key === 'created_at' ? 'תאריך הרשמה' :
+                     sortConfig.key} ({sortConfig.direction === 'asc' ? 'עולה ↑' : 'יורד ↓'})
+                  </strong>
+                  <button className="chip-del" onClick={() => setSortConfig({ key: 'created_at', direction: 'desc' })}><XIcon size={12} /></button>
+                </span>
+              )}
+            </div>
+          )}
+
+          <div style={{ padding: '0.75rem 1.25rem', background: 'rgba(73,38,145,0.03)', borderBottom: '1px solid var(--border)', fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
             <span>✅ סמן/י מי הגיע בפועל באמצעות כפתורי הנוכחות (היה / לא היה)</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <span className="scroll-note">💡 גלילה לרוחב לצפייה בכל עמודות השאלות</span>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>סה"כ {registrants.length} נרשמים</span>
+              <span className="scroll-note">💡 לחצו על כותרת או אייקון סינון בכל טור למיון וסינון מהיר</span>
+              <span className="scroll-note">↔ גלילה לרוחב לכל השאלות</span>
             </div>
           </div>
           
@@ -571,22 +1028,30 @@ const AdminRegistrants = () => {
             <table className="registrants-table">
               <thead>
                 <tr>
-                  <th>שם מלא</th>
-                  <th>סטטוס</th>
-                  <th>פעולות</th>
-                  <th>נוכחות</th>
-                  <th>טלפון</th>
+                  {renderColumnHeader('שם מלא', 'name', false)}
+                  {renderColumnHeader('סטטוס', 'status', true)}
+                  <th style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>פעולות</th>
+                  {renderColumnHeader('נוכחות', 'attended', true)}
+                  {renderColumnHeader('טלפון', 'phone', false)}
                   <th>הערה</th>
-                  {questionHeaders.map(qh => (
-                    <th key={qh} className="question-col-header" title={qh}>
-                      {qh}
-                    </th>
-                  ))}
-                  <th>הרשמה</th>
+                  {questionHeaders.map(qh => renderColumnHeader(qh, qh, true))}
+                  {renderColumnHeader('הרשמה', 'created_at', false)}
                 </tr>
               </thead>
               <tbody>
-                {registrants.map(reg => {
+                {filteredRegistrants.length === 0 ? (
+                  <tr>
+                    <td colSpan={7 + questionHeaders.length} style={{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-secondary)' }}>
+                      <Filter size={36} style={{ opacity: 0.3, margin: '0 auto 0.75rem', display: 'block', color: 'var(--primary)' }} />
+                      <h4 style={{ margin: '0 0 0.5rem', color: 'var(--text-primary)', fontSize: '1.1rem' }}>לא נמצאו נרשמים התואמים את הסינון הנוכחי</h4>
+                      <p style={{ margin: '0 0 1rem', fontSize: '0.88rem' }}>נסו להסיר את הסינון או ללחוץ על איפוס סינונים</p>
+                      <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '0.4rem 1rem' }} onClick={clearAllFilters}>
+                        <RotateCcw size={13} style={{ marginLeft: '6px' }} /> איפוס כל הסינונים
+                      </button>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredRegistrants.map(reg => {
                   const isDup = checkIsDuplicate(reg);
                   return (
                     <tr key={reg.id} style={{ background: reg.attended === false ? 'rgba(231,76,60,0.04)' : reg.attended === true ? 'rgba(46,204,113,0.04)' : undefined }}>
@@ -765,7 +1230,7 @@ const AdminRegistrants = () => {
                       <td style={{ whiteSpace: 'nowrap' }}>{formatDate(reg.created_at)}</td>
                     </tr>
                   );
-                })}
+                }))}
               </tbody>
             </table>
           </div>

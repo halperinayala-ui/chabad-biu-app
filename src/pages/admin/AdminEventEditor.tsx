@@ -60,6 +60,7 @@ const AdminEventEditor = () => {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [savedTemplates, setSavedTemplates] = useState<Record<string, any>>({});
+  const [savingTemplate, setSavingTemplate] = useState(false);
 
   useEffect(() => {
     // Legacy support: if there are templates in local storage and none in cloud, we could migrate them, 
@@ -279,31 +280,87 @@ const AdminEventEditor = () => {
 
   const saveAsTemplate = async () => {
     if (!templateName.trim()) { toast.error('הכניסי שם לתבנית'); return; }
-    const template = { title, category, location, description, requiresApproval, maxRegistrants, closedMessage, tags, registrationMode, fields, registrationDeadline };
-    const updated = { ...savedTemplates, [templateName.trim()]: template };
-    
+    setSavingTemplate(true);
     try {
+      let finalHeaderUrl = existingHeaderUrl;
+      let finalFlyerUrl = existingFlyerUrl;
+
+      // If a new header image was picked, upload it immediately so it gets a permanent cloud URL
+      if (headerImage) {
+        finalHeaderUrl = await uploadImage(headerImage, 'headers');
+        setExistingHeaderUrl(finalHeaderUrl);
+        setHeaderImage(null);
+      }
+
+      // If a new flyer image was picked, upload it as well
+      if (flyerImage) {
+        finalFlyerUrl = await uploadImage(flyerImage, 'flyers');
+        setExistingFlyerUrl(finalFlyerUrl);
+        setFlyerImage(null);
+      }
+
+      const template = {
+        title,
+        category,
+        location,
+        description,
+        requiresApproval,
+        maxRegistrants,
+        closedMessage,
+        tags,
+        registrationMode,
+        externalLink,
+        fields,
+        registrationStart,
+        registrationDeadline,
+        audience,
+        isFeatured,
+        header_image_url: finalHeaderUrl,
+        flyer_image_url: finalFlyerUrl
+      };
+
+      const updated = { ...savedTemplates, [templateName.trim()]: template };
       const { error } = await supabase.from('settings').update({ event_templates: updated }).eq('id', 1);
       if (error) throw error;
       setSavedTemplates(updated);
       setTemplateName('');
       setShowTemplateModal(false);
-      toast.success(`תבנית "${templateName.trim()}" נשמרה בענן!`);
-    } catch (err) {
+      toast.success(`תבנית "${templateName.trim()}" נשמרה בהצלחה עם התמונה!`);
+    } catch (err: any) {
       console.error(err);
-      toast.error('שגיאה בשמירת התבנית לענן');
+      toast.error('שגיאה בשמירת התבנית לענן: ' + (err.message || ''));
+    } finally {
+      setSavingTemplate(false);
     }
   };
 
   const loadTemplate = (name: string) => {
     const t = savedTemplates[name];
     if (!t) return;
-    setTitle(t.title || ''); setCategory(t.category || ''); setLocation(t.location || '');
-    setDescription(t.description || ''); setRequiresApproval(t.requiresApproval || false);
-    setMaxRegistrants(t.maxRegistrants || ''); setClosedMessage(t.closedMessage || '');
-    setTags(t.tags || []); setRegistrationMode(t.registrationMode || 'form');
+    setTitle(t.title || '');
+    setCategory(t.category || '');
+    setLocation(t.location || '');
+    setDescription(t.description || '');
+    setRequiresApproval(t.requiresApproval || false);
+    setMaxRegistrants(t.maxRegistrants || '');
+    setClosedMessage(t.closedMessage || '');
+    setTags(t.tags || []);
+    setRegistrationMode(t.registrationMode || 'form');
     setExternalLink(t.externalLink || '');
-    setFields(t.fields || []); setRegistrationDeadline(t.registrationDeadline || '');
+    setFields(t.fields || []);
+    setRegistrationStart(t.registrationStart || '');
+    setRegistrationDeadline(t.registrationDeadline || '');
+    setAudience(t.audience || []);
+    setIsFeatured(t.isFeatured || false);
+
+    const header = t.header_image_url || t.headerImageUrl || t.headerUrl || null;
+    setExistingHeaderUrl(header);
+    setHeaderImage(null);
+
+    const flyer = t.flyer_image_url || t.flyerImageUrl || t.flyerUrl || null;
+    setExistingFlyerUrl(flyer);
+    setFlyerImage(null);
+
     setShowTemplateModal(false);
     toast.success(`תבנית "${name}" נטענה! עדכני תאריך ושעה ושמרי.`);
   };
@@ -385,24 +442,54 @@ const AdminEventEditor = () => {
             
             {/* Save new template */}
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-              <input type="text" className="form-control" placeholder='שם התבנית, לדוגמה: "סעודת שבת"' value={templateName} onChange={e => setTemplateName(e.target.value)} onKeyDown={e => e.key === 'Enter' && saveAsTemplate()} />
-              <button className="btn btn-primary" onClick={saveAsTemplate} style={{ whiteSpace: 'nowrap' }}>שמור</button>
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder='שם התבנית, לדוגמה: "סעודת שבת"' 
+                value={templateName} 
+                onChange={e => setTemplateName(e.target.value)} 
+                onKeyDown={e => e.key === 'Enter' && !savingTemplate && saveAsTemplate()} 
+                disabled={savingTemplate}
+              />
+              <button 
+                className="btn btn-primary" 
+                onClick={saveAsTemplate} 
+                disabled={savingTemplate}
+                style={{ whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                {savingTemplate ? <Loader2 size={16} className="spinner" /> : 'שמור'}
+              </button>
             </div>
 
             {/* Existing templates */}
-            <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{ marginBottom: '1.5rem', maxHeight: '320px', overflowY: 'auto' }}>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>תבניות שמורות:</p>
               {Object.keys(savedTemplates).length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>אין תבניות שמורות עדיין.</p>}
-              {Object.keys(savedTemplates).map(name => (
-                <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(73,38,145,0.05)', borderRadius: '10px', marginBottom: '0.5rem' }}>
-                  <span style={{ fontWeight: '600' }}>{name}</span>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn btn-secondary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem' }} onClick={() => loadTemplate(name)}>טעינה</button>
-                    <button className="btn btn-outline" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem' }} onClick={() => { setTemplateName(name); }}>שנה שם</button>
-                    <button className="btn btn-outline" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem', color: '#e74c3c', borderColor: '#e74c3c' }} onClick={() => deleteTemplate(name)}>מחיקה</button>
+              {Object.keys(savedTemplates).map(name => {
+                const t = savedTemplates[name];
+                const thumb = t?.header_image_url || t?.headerImageUrl || t?.headerUrl;
+                return (
+                  <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(73,38,145,0.05)', borderRadius: '10px', marginBottom: '0.5rem', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                      {thumb ? (
+                        <img src={thumb} alt="" style={{ width: '42px', height: '42px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, border: '1px solid var(--border)' }} />
+                      ) : (
+                        <div style={{ width: '42px', height: '42px', borderRadius: '8px', background: 'rgba(73,38,145,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <ImageIcon size={20} color="var(--primary)" />
+                        </div>
+                      )}
+                      <div style={{ minWidth: 0 }}>
+                        <span style={{ fontWeight: '600', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+                        {t?.category && <small style={{ color: 'var(--text-secondary)', fontSize: '0.78rem' }}>{t.category}</small>}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
+                      <button className="btn btn-secondary" style={{ padding: '0.3rem 0.7rem', fontSize: '0.85rem' }} onClick={() => loadTemplate(name)}>טעינה</button>
+                      <button className="btn btn-outline" style={{ padding: '0.3rem 0.7rem', fontSize: '0.85rem', color: '#e74c3c', borderColor: '#e74c3c' }} onClick={() => deleteTemplate(name)}>מחיקה</button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <button className="btn btn-outline" onClick={() => setShowTemplateModal(false)} style={{ width: '100%' }}>סגירה</button>
