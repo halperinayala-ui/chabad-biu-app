@@ -488,6 +488,7 @@ const AdminRegistrants = () => {
   };
 
   const activeFilterCount = Object.keys(columnFilters).length + (searchQuery.trim() ? 1 : 0);
+  const isSortedNonDefault = sortConfig.key !== 'created_at' || sortConfig.direction !== 'desc';
 
   // 1. Export to CSV (Exports current filtered & sorted list)
   const exportToCSV = () => {
