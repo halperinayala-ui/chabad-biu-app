@@ -19,8 +19,43 @@ const AdminStudentProfile = () => {
     fetchData();
   }, [studentId]);
 
+  const normalizePhone = (phone?: string | null) => {
+    if (!phone) return '';
+    return phone.replace(/[\s\-()]/g, '').replace(/^(\+972|972)/, '0');
+  };
+
   const fetchData = async () => {
     try {
+      if (studentId?.startsWith('guest_')) {
+        const guestKey = decodeURIComponent(studentId.replace(/^guest_/, ''));
+        const { data: allGuestRegs } = await supabase
+          .from('registrations')
+          .select('*, events(title, event_date, category)')
+          .is('user_id', null)
+          .order('created_at', { ascending: false });
+
+        const matched = (allGuestRegs || []).filter((r: any) => {
+          const normPhone = normalizePhone(r.guest_phone);
+          const key = normPhone || `name:${(r.guest_name || 'אורח').trim().toLowerCase()}`;
+          return key === guestKey;
+        });
+
+        if (matched.length > 0) {
+          const latest = matched[0];
+          setProfile({
+            id: studentId,
+            full_name: latest.guest_name || 'אורח',
+            phone: latest.guest_phone || '',
+            gender: latest.guest_gender || 'm',
+            user_status: latest.answers?.['סטטוס'] === 'סטודנט/ית' ? 'student' : latest.answers?.['סטטוס'] === 'בוגר/ת' ? 'graduate' : undefined,
+            study_field: latest.answers?.['פירוט לימודים'] || latest.answers?.['מחלקה / תואר'] || undefined,
+            is_guest: true
+          });
+          setRegistrations(matched);
+        }
+        return;
+      }
+
       const { data: p } = await supabase.from('profiles').select('*').eq('id', studentId).single();
       setProfile(p);
       setAdminNotes(p?.admin_notes || '');
@@ -31,10 +66,23 @@ const AdminStudentProfile = () => {
         .eq('user_id', studentId)
         .order('created_at', { ascending: false });
 
-      setRegistrations(regs || []);
+      let combinedRegs = regs || [];
+      const normProfilePhone = normalizePhone(p?.phone);
+      if (normProfilePhone) {
+        const { data: guestRegs } = await supabase
+          .from('registrations')
+          .select('*, events(title, event_date, category)')
+          .is('user_id', null);
+        const matchingGuests = (guestRegs || []).filter((r: any) => normalizePhone(r.guest_phone) === normProfilePhone);
+        combinedRegs = [...combinedRegs, ...matchingGuests].sort(
+          (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      }
+
+      setRegistrations(combinedRegs);
 
       const { data: pushData } = await supabase.from('push_subscriptions').select('id').eq('user_id', studentId);
-      setHasPush(pushData && pushData.length > 0);
+      setHasPush(Boolean(pushData && pushData.length > 0));
     } catch (err) {
       console.error(err);
     } finally {
@@ -151,65 +199,69 @@ const AdminStudentProfile = () => {
             </a>
           )}
 
-          <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '1.5rem' }}>
-            <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>📝 פתק מנהלים אישי</h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>הערות אלו גלויות למנהלים בלבד.</p>
-            <textarea
-              className="form-control"
-              rows={4}
-              placeholder="רגישויות, התנדבויות, דברים שחשוב לזכור..."
-              value={adminNotes}
-              onChange={(e) => setAdminNotes(e.target.value)}
-              style={{ resize: 'vertical', width: '100%', marginBottom: '0.5rem' }}
-            />
-            <button 
-              className="btn btn-primary" 
-              style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}
-              onClick={handleSaveNotes}
-              disabled={savingNotes || adminNotes === profile.admin_notes}
-            >
-              {savingNotes ? <Loader2 size={18} className="spinner" /> : <CheckCircle2 size={18} />}
-              שמור הערות
-            </button>
-          </div>
+          {!profile.is_guest && (
+            <>
+              <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '1.5rem' }}>
+                <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>📝 פתק מנהלים אישי</h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>הערות אלו גלויות למנהלים בלבד.</p>
+                <textarea
+                  className="form-control"
+                  rows={4}
+                  placeholder="רגישויות, התנדבויות, דברים שחשוב לזכור..."
+                  value={adminNotes}
+                  onChange={(e) => setAdminNotes(e.target.value)}
+                  style={{ resize: 'vertical', width: '100%', marginBottom: '0.5rem' }}
+                />
+                <button 
+                  className="btn btn-primary" 
+                  style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}
+                  onClick={handleSaveNotes}
+                  disabled={savingNotes || adminNotes === profile.admin_notes}
+                >
+                  {savingNotes ? <Loader2 size={18} className="spinner" /> : <CheckCircle2 size={18} />}
+                  שמור הערות
+                </button>
+              </div>
 
-          <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <h3 style={{ fontSize: '1rem', marginBottom: '0', color: 'var(--text-primary)' }}><ShieldAlert size={18} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '0.3rem' }}/> פעולות ניהול מתקדמות</h3>
-            
-            <button 
-              onClick={toggleVip}
-              className="btn btn-outline"
-              style={{ 
-                width: '100%', 
-                display: 'flex', 
-                justifyContent: 'center', 
-                gap: '0.5rem',
-                borderColor: profile.is_vip ? '#f39c12' : undefined,
-                color: profile.is_vip ? '#f39c12' : undefined,
-                background: profile.is_vip ? 'rgba(243, 156, 18, 0.1)' : undefined
-              }}
-            >
-              <Star size={18} fill={profile.is_vip ? '#f39c12' : 'none'} />
-              {profile.is_vip ? 'בטל סטטוס VIP' : 'סמן כ-VIP'}
-            </button>
+              <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <h3 style={{ fontSize: '1rem', marginBottom: '0', color: 'var(--text-primary)' }}><ShieldAlert size={18} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '0.3rem' }}/> פעולות ניהול מתקדמות</h3>
+                
+                <button 
+                  onClick={toggleVip}
+                  className="btn btn-outline"
+                  style={{ 
+                    width: '100%', 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    gap: '0.5rem',
+                    borderColor: profile.is_vip ? '#f39c12' : undefined,
+                    color: profile.is_vip ? '#f39c12' : undefined,
+                    background: profile.is_vip ? 'rgba(243, 156, 18, 0.1)' : undefined
+                  }}
+                >
+                  <Star size={18} fill={profile.is_vip ? '#f39c12' : 'none'} />
+                  {profile.is_vip ? 'בטל סטטוס VIP' : 'סמן כ-VIP'}
+                </button>
 
-            <button 
-              onClick={toggleBlock}
-              className="btn btn-outline"
-              style={{ 
-                width: '100%', 
-                display: 'flex', 
-                justifyContent: 'center', 
-                gap: '0.5rem',
-                borderColor: profile.is_blocked ? '#e74c3c' : undefined,
-                color: profile.is_blocked ? '#e74c3c' : '#e74c3c',
-                background: profile.is_blocked ? 'rgba(231, 76, 60, 0.1)' : undefined
-              }}
-            >
-              <Ban size={18} />
-              {profile.is_blocked ? 'שחרר חסימה שקטה' : 'חסום משתמש (שקט)'}
-            </button>
-          </div>
+                <button 
+                  onClick={toggleBlock}
+                  className="btn btn-outline"
+                  style={{ 
+                    width: '100%', 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    gap: '0.5rem',
+                    borderColor: profile.is_blocked ? '#e74c3c' : undefined,
+                    color: profile.is_blocked ? '#e74c3c' : '#e74c3c',
+                    background: profile.is_blocked ? 'rgba(231, 76, 60, 0.1)' : undefined
+                  }}
+                >
+                  <Ban size={18} />
+                  {profile.is_blocked ? 'שחרר חסימה שקטה' : 'חסום משתמש (שקט)'}
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Events History */}

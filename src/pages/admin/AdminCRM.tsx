@@ -18,12 +18,19 @@ interface StudentSummary {
   is_admin: boolean;
   is_vip: boolean;
   is_blocked: boolean;
+  is_guest?: boolean;
   total_registrations: number;
   attended_count: number;
   absent_count: number;
   last_event: string;
+  all_events_text?: string;
   has_push: boolean;
 }
+
+const normalizePhone = (phone?: string | null) => {
+  if (!phone) return '';
+  return phone.replace(/[\s\-()]/g, '').replace(/^(\+972|972)/, '0');
+};
 
 const AdminCRM = () => {
   const navigate = useNavigate();
@@ -38,53 +45,124 @@ const AdminCRM = () => {
 
   const fetchStudents = async () => {
     try {
-      // Fetch all profiles that have at least one registration
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select(`
-          id, full_name, phone, gender, heb_birthday, user_status, study_field, degree_type, status_detail, is_admin, is_vip, is_blocked,
-          registrations (
-            id, attended, created_at,
+      // 1. Fetch all profiles (even if they have 0 event registrations)
+      const [profilesRes, allRegsRes, pushRes] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select(`
+            id, full_name, phone, gender, heb_birthday, user_status, study_field, degree_type, status_detail, is_admin, is_vip, is_blocked,
+            registrations (
+              id, attended, created_at, answers,
+              events (title, event_date)
+            )
+          `),
+        supabase
+          .from('registrations')
+          .select(`
+            id, user_id, guest_name, guest_phone, guest_gender, attended, created_at, answers,
             events (title, event_date)
-          )
-        `)
-        .not('registrations', 'is', null);
+          `),
+        supabase
+          .from('push_subscriptions')
+          .select('user_id')
+      ]);
 
-      if (error) throw error;
+      if (profilesRes.error) throw profilesRes.error;
 
-      // Fetch push subscriptions
-      const { data: pushSubs } = await supabase.from('push_subscriptions').select('user_id');
-      const pushUserIds = new Set(pushSubs?.map(p => p.user_id) || []);
+      const profiles = profilesRes.data || [];
+      const allRegs = allRegsRes.data || [];
+      const pushUserIds = new Set(pushRes.data?.map(p => p.user_id) || []);
 
-      const summary: StudentSummary[] = (profiles || [])
-        .filter((p: any) => p.registrations?.length > 0)
-        .map((p: any) => {
-          const regs = p.registrations || [];
-          const attended = regs.filter((r: any) => r.attended === true).length;
-          const absent = regs.filter((r: any) => r.attended === false).length;
-          const sorted = [...regs].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-          return {
-            id: p.id,
-            full_name: p.full_name || 'לא צוין',
-            phone: p.phone || '—',
-            gender: p.gender || 'm',
-            heb_birthday: p.heb_birthday || undefined,
-            user_status: p.user_status,
-            study_field: p.study_field,
-            degree_type: p.degree_type,
-            status_detail: p.status_detail,
-            is_admin: p.is_admin || false,
-            is_vip: p.is_vip || false,
-            is_blocked: p.is_blocked || false,
-            total_registrations: regs.length,
-            attended_count: attended,
-            absent_count: absent,
-            last_event: sorted[0]?.events?.title || '—',
-            has_push: pushUserIds.has(p.id)
-          };
-        });
+      // Map profiles by normalized phone so we can also link guest registrations of the same phone
+      const phoneToProfileId = new Map<string, string>();
+      profiles.forEach((p: any) => {
+        const norm = normalizePhone(p.phone);
+        if (norm) phoneToProfileId.set(norm, p.id);
+      });
 
-      setStudents(summary);
+      // Collect guest registrations (where user_id is null)
+      const extraRegsByProfileId = new Map<string, any[]>();
+      const guestGroups = new Map<string, any[]>();
+
+      allRegs.forEach((r: any) => {
+        if (r.user_id) return; // Already included in profile.registrations
+        const normPhone = normalizePhone(r.guest_phone);
+        const matchedProfileId = normPhone ? phoneToProfileId.get(normPhone) : undefined;
+
+        if (matchedProfileId) {
+          const list = extraRegsByProfileId.get(matchedProfileId) || [];
+          list.push(r);
+          extraRegsByProfileId.set(matchedProfileId, list);
+        } else {
+          const key = normPhone || `name:${(r.guest_name || 'אורח').trim().toLowerCase()}`;
+          const list = guestGroups.get(key) || [];
+          list.push(r);
+          guestGroups.set(key, list);
+        }
+      });
+
+      const profileSummaries: StudentSummary[] = profiles.map((p: any) => {
+        const directRegs = p.registrations || [];
+        const matchedGuestRegs = extraRegsByProfileId.get(p.id) || [];
+        const regs = [...directRegs, ...matchedGuestRegs];
+
+        const attended = regs.filter((r: any) => r.attended === true).length;
+        const absent = regs.filter((r: any) => r.attended === false).length;
+        const sorted = [...regs].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const eventsText = regs.map((r: any) => `${r.events?.title || ''} ${JSON.stringify(r.answers || {})}`).join(' ');
+
+        return {
+          id: p.id,
+          full_name: p.full_name || 'לא צוין',
+          phone: p.phone || '—',
+          gender: p.gender || 'm',
+          heb_birthday: p.heb_birthday || undefined,
+          user_status: p.user_status,
+          study_field: p.study_field,
+          degree_type: p.degree_type,
+          status_detail: p.status_detail,
+          is_admin: p.is_admin || false,
+          is_vip: p.is_vip || false,
+          is_blocked: p.is_blocked || false,
+          is_guest: false,
+          total_registrations: regs.length,
+          attended_count: attended,
+          absent_count: absent,
+          last_event: sorted[0]?.events?.title || 'טרם נרשם לאירוע',
+          all_events_text: eventsText,
+          has_push: pushUserIds.has(p.id)
+        };
+      });
+
+      const guestSummaries: StudentSummary[] = Array.from(guestGroups.entries()).map(([key, regs]) => {
+        const sorted = [...regs].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const latest = sorted[0];
+        const attended = regs.filter((r: any) => r.attended === true).length;
+        const absent = regs.filter((r: any) => r.attended === false).length;
+        const studyField = latest?.answers?.['פירוט לימודים'] || latest?.answers?.['מחלקה / תואר'] || undefined;
+        const eventsText = regs.map((r: any) => `${r.guest_name || ''} ${r.events?.title || ''} ${JSON.stringify(r.answers || {})}`).join(' ');
+
+        return {
+          id: `guest_${encodeURIComponent(key)}`,
+          full_name: latest?.guest_name || 'אורח ללא שם',
+          phone: latest?.guest_phone || '—',
+          gender: latest?.guest_gender || 'm',
+          user_status: latest?.answers?.['סטטוס'] === 'סטודנט/ית' ? 'student' : latest?.answers?.['סטטוס'] === 'בוגר/ת' ? 'graduate' : undefined,
+          study_field: studyField,
+          is_admin: false,
+          is_vip: false,
+          is_blocked: false,
+          is_guest: true,
+          total_registrations: regs.length,
+          attended_count: attended,
+          absent_count: absent,
+          last_event: latest?.events?.title || '—',
+          all_events_text: eventsText,
+          has_push: false
+        };
+      });
+
+      setStudents([...profileSummaries, ...guestSummaries]);
     } catch (err: any) {
       console.error(err);
     } finally {
@@ -92,8 +170,17 @@ const AdminCRM = () => {
     }
   };
 
+  const q = search.trim().toLowerCase();
   const filtered = students
-    .filter(s => s.full_name.includes(search) || s.phone.includes(search))
+    .filter(s => {
+      if (!q) return true;
+      return (
+        s.full_name.toLowerCase().includes(q) ||
+        s.phone.toLowerCase().includes(q) ||
+        (s.study_field && s.study_field.toLowerCase().includes(q)) ||
+        (s.all_events_text && s.all_events_text.toLowerCase().includes(q))
+      );
+    })
     .sort((a, b) => sortBy === 'activity' ? b.total_registrations - a.total_registrations : a.full_name.localeCompare(b.full_name, 'he'));
 
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '5rem' }}><Loader2 className="spinner" size={40} style={{ color: 'var(--primary)' }} /></div>;
@@ -155,6 +242,7 @@ const AdminCRM = () => {
                     {student.is_vip && <Star size={14} color="#f39c12" fill="#f39c12" title="משתמש VIP" />}
                     {student.is_blocked && <Ban size={14} color="#e74c3c" title="משתמש חסום (חסימה שקטה)" />}
                     {student.is_admin && <span style={{ fontSize: '0.7rem', background: '#34495e', color: 'white', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>מנהל</span>}
+                    {student.is_guest && <span style={{ fontSize: '0.7rem', background: 'rgba(127, 88, 194, 0.12)', color: '#7f58c2', padding: '0.1rem 0.45rem', borderRadius: '6px', fontWeight: 600 }}>נרשם בטופס (ללא חשבון)</span>}
                   </h3>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginTop: '0.2rem' }}>
                     <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }} dir="ltr">{student.phone}</p>
