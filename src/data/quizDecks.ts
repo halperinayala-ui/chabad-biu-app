@@ -65,16 +65,16 @@ export const OPTION_ACCENTS = [
 ] as const;
 
 export const PLAYER_AVATARS = [
-  'lion-yehuda',
-  'owl-wise',
-  'bear-biu',
-  'flame-buddy',
-  'fox-campus',
-  'penguin-scholar',
-  'panda-niggun',
-  'coffee-buddy',
-  'tanya-buddy',
-  'star-buddy'
+  'student-boy-kippah',
+  'student-girl-glasses',
+  'student-boy-headphones',
+  'student-girl-curly',
+  'student-boy-beard',
+  'student-girl-bun',
+  'student-boy-cap',
+  'student-girl-beret',
+  'student-grad',
+  'chabad-shliach'
 ] as const;
 
 const PARASHA_VAYETZEI_QUESTIONS: QuizQuestion[] = [

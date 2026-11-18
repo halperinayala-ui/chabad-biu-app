@@ -9,290 +9,291 @@ export interface QuizAvatarDef {
 
 export const QUIZ_AVATARS: QuizAvatarDef[] = [
   {
-    id: 'lion-yehuda',
-    label: 'אריה גיבור',
-    gradient: 'linear-gradient(135deg, #f59e0b, #ea580c)',
-    renderSvg: () => (
-      <svg viewBox="0 0 64 64" fill="none">
-        {/* Fluffy mane */}
-        <circle cx="32" cy="34" r="23" fill="#b45309" />
-        <circle cx="16" cy="20" r="7" fill="#d97706" />
-        <circle cx="48" cy="20" r="7" fill="#d97706" />
-        <circle cx="12" cy="35" r="7" fill="#d97706" />
-        <circle cx="52" cy="35" r="7" fill="#d97706" />
-        <circle cx="20" cy="50" r="7" fill="#d97706" />
-        <circle cx="44" cy="50" r="7" fill="#d97706" />
-        <circle cx="32" cy="14" r="7" fill="#d97706" />
-        {/* Ears */}
-        <circle cx="19" cy="22" r="5" fill="#fbbf24" />
-        <circle cx="45" cy="22" r="5" fill="#fbbf24" />
-        {/* Face */}
-        <circle cx="32" cy="35" r="16" fill="#fcd34d" />
-        {/* Eyes */}
-        <circle cx="26" cy="32" r="2.8" fill="#1f2937" />
-        <circle cx="38" cy="32" r="2.8" fill="#1f2937" />
-        <circle cx="25" cy="31" r="1" fill="#fff" />
-        <circle cx="37" cy="31" r="1" fill="#fff" />
-        {/* Cheeks */}
-        <ellipse cx="21" cy="37" rx="3" ry="1.8" fill="#fb7185" opacity="0.55" />
-        <ellipse cx="43" cy="37" rx="3" ry="1.8" fill="#fb7185" opacity="0.55" />
-        {/* Snout & smile */}
-        <ellipse cx="32" cy="39" rx="6" ry="4.5" fill="#fef3c7" />
-        <polygon points="29,36 35,36 32,39.5" fill="#78350f" />
-        <path d="M29 41.5 Q32 44 35 41.5" stroke="#78350f" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    )
-  },
-  {
-    id: 'owl-wise',
-    label: 'ינשוף חכם',
+    id: 'student-boy-kippah',
+    label: 'סטודנט בקמפוס',
     gradient: 'linear-gradient(135deg, #492691, #7c3aed)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
-        {/* Body */}
-        <ellipse cx="32" cy="37" rx="19" ry="20" fill="#6d28d9" />
-        {/* Ear tufts */}
-        <polygon points="16,22 21,12 27,21" fill="#5b21b6" />
-        <polygon points="48,22 43,12 37,21" fill="#5b21b6" />
-        {/* Belly */}
-        <ellipse cx="32" cy="45" rx="11" ry="10" fill="#ede9fe" />
-        {/* Eye circles */}
-        <circle cx="24.5" cy="29" r="8" fill="#fff" />
-        <circle cx="39.5" cy="29" r="8" fill="#fff" />
-        {/* Glasses rim */}
-        <circle cx="24.5" cy="29" r="8.2" stroke="#fbbf24" strokeWidth="2.2" />
-        <circle cx="39.5" cy="29" r="8.2" stroke="#fbbf24" strokeWidth="2.2" />
-        <line x1="32.5" y1="29" x2="31.5" y2="29" stroke="#fbbf24" strokeWidth="2.2" />
-        {/* Pupils */}
-        <circle cx="25" cy="29" r="3.4" fill="#1e1b4b" />
-        <circle cx="39" cy="29" r="3.4" fill="#1e1b4b" />
-        <circle cx="24" cy="27.8" r="1.2" fill="#fff" />
-        <circle cx="38" cy="27.8" r="1.2" fill="#fff" />
-        {/* Beak */}
-        <polygon points="29,34 35,34 32,40" fill="#f59e0b" />
-        {/* Mini graduation cap */}
-        <polygon points="32,8 46,13 32,18 18,13" fill="#1f2937" stroke="#fbbf24" strokeWidth="1.2" />
-        <line x1="44" y1="14" x2="46" y2="21" stroke="#fbbf24" strokeWidth="1.6" strokeLinecap="round" />
-      </svg>
-    )
-  },
-  {
-    id: 'bear-biu',
-    label: 'דובי בקמפוס',
-    gradient: 'linear-gradient(135deg, #0d9488, #0f766e)',
-    renderSvg: () => (
-      <svg viewBox="0 0 64 64" fill="none">
+        {/* Shoulders / Hoodie */}
+        <path d="M12 62 C12 48 20 44 32 44 C44 44 52 48 52 62 Z" fill="#312e81" />
+        <path d="M25 45 L32 52 L39 45" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" />
+        {/* Neck */}
+        <rect x="27" y="38" width="10" height="9" rx="4" fill="#f3c6a5" />
         {/* Ears */}
-        <circle cx="17" cy="20" r="8" fill="#92400e" />
-        <circle cx="47" cy="20" r="8" fill="#92400e" />
-        <circle cx="17" cy="20" r="4.5" fill="#fde68a" />
-        <circle cx="47" cy="20" r="4.5" fill="#fde68a" />
-        {/* Head */}
-        <circle cx="32" cy="36" r="19" fill="#b45309" />
-        {/* Cute Purple Kippah */}
-        <path d="M21 19 Q32 10 43 19 Z" fill="#492691" stroke="#fbbf24" strokeWidth="1.5" />
-        {/* Snout */}
-        <ellipse cx="32" cy="41" rx="8.5" ry="6.5" fill="#fef3c7" />
+        <circle cx="19" cy="30" r="3.5" fill="#eab693" />
+        <circle cx="45" cy="30" r="3.5" fill="#eab693" />
+        {/* Face */}
+        <circle cx="32" cy="29" r="13.5" fill="#f6cfb2" />
+        {/* Hair */}
+        <path d="M18.5 27 C18.5 16 25 13 32 13 C39 13 45.5 16 45.5 27 C43 21 39 19 32 19 C25 19 21 21 18.5 27 Z" fill="#3b2314" />
+        {/* Kippah */}
+        <path d="M23 15.5 Q32 9 41 15.5 Z" fill="#1e1b4b" stroke="#fbbf24" strokeWidth="1.2" />
+        {/* Glasses */}
+        <rect x="21.5" y="25.5" width="8.5" height="6.5" rx="2.2" stroke="#1f2937" strokeWidth="1.8" fill="rgba(255,255,255,0.18)" />
+        <rect x="34" y="25.5" width="8.5" height="6.5" rx="2.2" stroke="#1f2937" strokeWidth="1.8" fill="rgba(255,255,255,0.18)" />
+        <line x1="30" y1="28.5" x2="34" y2="28.5" stroke="#1f2937" strokeWidth="1.8" />
         {/* Eyes */}
-        <circle cx="25" cy="32" r="2.8" fill="#111827" />
-        <circle cx="39" cy="32" r="2.8" fill="#111827" />
-        <circle cx="24" cy="31" r="1" fill="#fff" />
-        <circle cx="38" cy="31" r="1" fill="#fff" />
-        {/* Cheeks */}
-        <ellipse cx="20" cy="37" rx="3" ry="1.8" fill="#f472b6" opacity="0.6" />
-        <ellipse cx="44" cy="37" rx="3" ry="1.8" fill="#f472b6" opacity="0.6" />
-        {/* Nose & Smile */}
-        <ellipse cx="32" cy="38.5" rx="3" ry="2" fill="#451a03" />
-        <path d="M28.5 43 Q32 46 35.5 43" stroke="#451a03" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    )
-  },
-  {
-    id: 'flame-buddy',
-    label: 'להבה שמחה',
-    gradient: 'linear-gradient(135deg, #dd6755, #f97316)',
-    renderSvg: () => (
-      <svg viewBox="0 0 64 64" fill="none">
-        {/* Outer Flame */}
-        <path
-          d="M32 7 C40 17 50 26 50 38 C50 49 42 56 32 56 C22 56 14 49 14 38 C14 27 24 20 26 14 C27 17 29 18 32 7 Z"
-          fill="#fbbf24"
-          stroke="#fff"
-          strokeWidth="1.8"
-        />
-        {/* Inner warm core */}
-        <path
-          d="M32 24 C37 30 43 35 43 42 C43 49 38 53 32 53 C26 53 21 49 21 42 C21 35 27 30 32 24 Z"
-          fill="#fef08a"
-        />
-        {/* Cute Eyes */}
-        <circle cx="26.5" cy="39" r="2.8" fill="#1f2937" />
-        <circle cx="37.5" cy="39" r="2.8" fill="#1f2937" />
-        <circle cx="25.7" cy="38" r="1" fill="#fff" />
-        <circle cx="36.7" cy="38" r="1" fill="#fff" />
-        {/* Rosy cheeks */}
-        <ellipse cx="22" cy="43" rx="2.6" ry="1.6" fill="#f43f5e" opacity="0.55" />
-        <ellipse cx="42" cy="43" rx="2.6" ry="1.6" fill="#f43f5e" opacity="0.55" />
-        {/* Big happy smile */}
-        <path d="M27.5 44.5 Q32 49.5 36.5 44.5" stroke="#9a3412" strokeWidth="2.2" strokeLinecap="round" />
-      </svg>
-    )
-  },
-  {
-    id: 'fox-campus',
-    label: 'שועל זריז',
-    gradient: 'linear-gradient(135deg, #ec4899, #be185d)',
-    renderSvg: () => (
-      <svg viewBox="0 0 64 64" fill="none">
-        {/* Ears */}
-        <polygon points="14,30 17,11 29,22" fill="#ea580c" />
-        <polygon points="50,30 47,11 35,22" fill="#ea580c" />
-        <polygon points="17,26 19,15 26,22" fill="#fed7aa" />
-        <polygon points="47,26 45,15 38,22" fill="#fed7aa" />
-        {/* Head */}
-        <ellipse cx="32" cy="37" rx="20" ry="16" fill="#f97316" />
-        {/* White cheek patches */}
-        <path d="M13 38 Q22 36 32 48 Q20 53 13 38 Z" fill="#fff7ed" />
-        <path d="M51 38 Q42 36 32 48 Q44 53 51 38 Z" fill="#fff7ed" />
-        {/* Cute winking eye & open eye */}
-        <circle cx="24" cy="34" r="2.8" fill="#1f2937" />
-        <circle cx="23" cy="33" r="1" fill="#fff" />
-        <path d="M36.5 34.5 Q40 31.5 43.5 34.5" stroke="#1f2937" strokeWidth="2.4" strokeLinecap="round" />
-        {/* Nose & smile */}
-        <circle cx="32" cy="43" r="2.8" fill="#1f2937" />
-        <path d="M28.5 47 Q32 50 35.5 47" stroke="#7c2d12" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    )
-  },
-  {
-    id: 'penguin-scholar',
-    label: 'פינגווין חמוד',
-    gradient: 'linear-gradient(135deg, #2563eb, #4338ca)',
-    renderSvg: () => (
-      <svg viewBox="0 0 64 64" fill="none">
-        {/* Body */}
-        <ellipse cx="32" cy="37" rx="19" ry="21" fill="#1e293b" />
-        {/* White face heart */}
-        <ellipse cx="26" cy="34" rx="8" ry="10" fill="#fff" />
-        <ellipse cx="38" cy="34" rx="8" ry="10" fill="#fff" />
-        <ellipse cx="32" cy="45" rx="12" ry="11" fill="#fff" />
-        {/* Eyes */}
-        <circle cx="25.5" cy="31" r="2.8" fill="#0f172a" />
-        <circle cx="38.5" cy="31" r="2.8" fill="#0f172a" />
-        <circle cx="24.5" cy="30" r="1" fill="#fff" />
-        <circle cx="37.5" cy="30" r="1" fill="#fff" />
-        {/* Cheeks */}
-        <ellipse cx="20" cy="36" rx="2.8" ry="1.8" fill="#fb7185" opacity="0.65" />
-        <ellipse cx="44" cy="36" rx="2.8" ry="1.8" fill="#fb7185" opacity="0.65" />
-        {/* Orange beak */}
-        <polygon points="28,36 36,36 32,42" fill="#f59e0b" />
-        {/* Cute Purple Bow-tie */}
-        <polygon points="24,47 32,50 24,53" fill="#7c3aed" />
-        <polygon points="40,47 32,50 40,53" fill="#7c3aed" />
-        <circle cx="32" cy="50" r="2" fill="#fbbf24" />
-      </svg>
-    )
-  },
-  {
-    id: 'panda-niggun',
-    label: 'פנדה מוזיקלי',
-    gradient: 'linear-gradient(135deg, #6366f1, #06b6d4)',
-    renderSvg: () => (
-      <svg viewBox="0 0 64 64" fill="none">
-        {/* Ears */}
-        <circle cx="17" cy="21" r="7.5" fill="#1f2937" />
-        <circle cx="47" cy="21" r="7.5" fill="#1f2937" />
-        {/* Headphone arc */}
-        <path d="M12 34 C12 16 52 16 52 34" stroke="#fbbf24" strokeWidth="3.5" strokeLinecap="round" />
-        {/* Head */}
-        <circle cx="32" cy="36" r="18.5" fill="#ffffff" />
-        {/* Headphone cups */}
-        <rect x="9" y="29" width="6.5" height="13" rx="3.2" fill="#492691" stroke="#fbbf24" strokeWidth="1.5" />
-        <rect x="48.5" y="29" width="6.5" height="13" rx="3.2" fill="#492691" stroke="#fbbf24" strokeWidth="1.5" />
-        {/* Eye patches */}
-        <ellipse cx="24.5" cy="34" rx="5.2" ry="6.2" transform="rotate(-15 24.5 34)" fill="#1f2937" />
-        <ellipse cx="39.5" cy="34" rx="5.2" ry="6.2" transform="rotate(15 39.5 34)" fill="#1f2937" />
-        {/* Eye shine */}
-        <circle cx="25" cy="33" r="1.8" fill="#fff" />
-        <circle cx="39" cy="33" r="1.8" fill="#fff" />
-        {/* Nose & smile */}
-        <ellipse cx="32" cy="41" rx="3.2" ry="2" fill="#1f2937" />
-        <path d="M28 45 Q32 48.5 36 45" stroke="#1f2937" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    )
-  },
-  {
-    id: 'coffee-buddy',
-    label: 'קפה של רביעי',
-    gradient: 'linear-gradient(135deg, #9333ea, #db2777)',
-    renderSvg: () => (
-      <svg viewBox="0 0 64 64" fill="none">
-        {/* Steam */}
-        <path d="M24 17 Q22 12 26 9" stroke="#fde68a" strokeWidth="2.4" strokeLinecap="round" />
-        <path d="M33 15 Q31 10 35 7" stroke="#fde68a" strokeWidth="2.4" strokeLinecap="round" />
-        <path d="M41 17 Q39 12 43 9" stroke="#fde68a" strokeWidth="2.4" strokeLinecap="round" />
-        {/* Handle */}
-        <path d="M45 29 C53 29 53 43 45 43" stroke="#fff" strokeWidth="4" strokeLinecap="round" />
-        {/* Cup Body */}
-        <path d="M16 23 H46 L43 49 C42.5 53 39 55 31 55 C23 55 19.5 53 19 49 Z" fill="#fff7ed" />
-        {/* Purple sleeve */}
-        <rect x="17.5" y="31" width="27" height="16" rx="4" fill="#492691" />
-        {/* Cute Face on sleeve */}
-        <circle cx="25.5" cy="37.5" r="2.3" fill="#fff" />
-        <circle cx="36.5" cy="37.5" r="2.3" fill="#fff" />
-        <ellipse cx="22" cy="41" rx="2.2" ry="1.4" fill="#fb7185" opacity="0.8" />
-        <ellipse cx="40" cy="41" rx="2.2" ry="1.4" fill="#fb7185" opacity="0.8" />
-        <path d="M28 41.5 Q31 44.5 34 41.5" stroke="#fde68a" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    )
-  },
-  {
-    id: 'tanya-buddy',
-    label: 'ספר תניא חי',
-    gradient: 'linear-gradient(135deg, #7f1d1d, #dc2626)',
-    renderSvg: () => (
-      <svg viewBox="0 0 64 64" fill="none">
-        {/* Book cover */}
-        <rect x="14" y="13" width="36" height="40" rx="6" fill="#7c2d12" stroke="#fbbf24" strokeWidth="2.4" />
-        {/* Spine */}
-        <rect x="14" y="13" width="8" height="40" rx="4" fill="#451a03" stroke="#fbbf24" strokeWidth="1.8" />
-        {/* Gold decorative frame */}
-        <rect x="25" y="19" width="20" height="28" rx="3" fill="#9a3412" stroke="#fde68a" strokeWidth="1.4" />
-        {/* Cute Eyes & Smile */}
-        <circle cx="31" cy="31" r="2.5" fill="#fff" />
-        <circle cx="40" cy="31" r="2.5" fill="#fff" />
-        <circle cx="31.3" cy="31" r="1.2" fill="#1f2937" />
-        <circle cx="39.7" cy="31" r="1.2" fill="#1f2937" />
-        <path d="M31.5 37.5 Q35.5 41.5 39.5 37.5" stroke="#fde68a" strokeWidth="2.1" strokeLinecap="round" />
-        {/* Bookmark */}
-        <polygon points="33,53 38,53 38,60 35.5,58 33,60" fill="#fbbf24" />
-      </svg>
-    )
-  },
-  {
-    id: 'star-buddy',
-    label: 'כוכב מאיר',
-    gradient: 'linear-gradient(135deg, #eab308, #ca8a04)',
-    renderSvg: () => (
-      <svg viewBox="0 0 64 64" fill="none">
-        {/* Star body */}
-        <path
-          d="M32 7 L39.2 21.8 L55.5 24.2 L43.7 35.6 L46.5 51.8 L32 44.1 L17.5 51.8 L20.3 35.6 L8.5 24.2 L24.8 21.8 Z"
-          fill="#fde047"
-          stroke="#fff"
-          strokeWidth="2.2"
-          strokeLinejoin="round"
-        />
-        {/* Cute Eyes */}
-        <circle cx="27" cy="31" r="2.6" fill="#1f2937" />
-        <circle cx="37" cy="31" r="2.6" fill="#1f2937" />
-        <circle cx="26.2" cy="30" r="1" fill="#fff" />
-        <circle cx="36.2" cy="30" r="1" fill="#fff" />
-        {/* Cheeks */}
-        <ellipse cx="22.5" cy="35" rx="2.4" ry="1.5" fill="#fb7185" opacity="0.65" />
-        <ellipse cx="41.5" cy="35" rx="2.4" ry="1.5" fill="#fb7185" opacity="0.65" />
+        <circle cx="25.8" cy="28.8" r="1.6" fill="#1f2937" />
+        <circle cx="38.2" cy="28.8" r="1.6" fill="#1f2937" />
         {/* Smile */}
-        <path d="M28 36.5 Q32 40.5 36 36.5" stroke="#854d0e" strokeWidth="2.1" strokeLinecap="round" />
+        <path d="M27.5 35.5 Q32 39 36.5 35.5" stroke="#9a4e32" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    )
+  },
+  {
+    id: 'student-girl-glasses',
+    label: 'סטודנטית משקיענית',
+    gradient: 'linear-gradient(135deg, #db2777, #9333ea)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* Back Hair */}
+        <path d="M14 30 C13 15 22 10 32 10 C42 10 51 15 50 30 L52 48 C48 50 44 48 44 48 L20 48 C20 48 16 50 12 48 Z" fill="#4a2511" />
+        {/* Top */}
+        <path d="M13 62 C13 48 21 44 32 44 C43 44 51 48 51 62 Z" fill="#be185d" />
+        {/* Neck */}
+        <rect x="27.5" y="38" width="9" height="8" rx="4" fill="#f7d3b8" />
+        {/* Face */}
+        <circle cx="32" cy="29" r="13" fill="#fad9c1" />
+        {/* Front Hair part */}
+        <path d="M19 27 C20 17 27 14 32 14 C37 14 44 17 45 27 C41 20 35 19 32 21 C29 19 23 20 19 27 Z" fill="#4a2511" />
+        {/* Round Stylish Glasses */}
+        <circle cx="26" cy="29" r="4.4" stroke="#f59e0b" strokeWidth="1.7" fill="rgba(255,255,255,0.2)" />
+        <circle cx="38" cy="29" r="4.4" stroke="#f59e0b" strokeWidth="1.7" fill="rgba(255,255,255,0.2)" />
+        <line x1="30.4" y1="29" x2="33.6" y2="29" stroke="#f59e0b" strokeWidth="1.7" />
+        {/* Eyes */}
+        <circle cx="26" cy="29" r="1.6" fill="#1f2937" />
+        <circle cx="38" cy="29" r="1.6" fill="#1f2937" />
+        {/* Cheeks & Smile */}
+        <ellipse cx="22.5" cy="33.5" rx="2.3" ry="1.3" fill="#fb7185" opacity="0.5" />
+        <ellipse cx="41.5" cy="33.5" rx="2.3" ry="1.3" fill="#fb7185" opacity="0.5" />
+        <path d="M28 36 Q32 39.2 36 36" stroke="#a64b3b" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    )
+  },
+  {
+    id: 'student-boy-headphones',
+    label: 'חובב מוזיקה',
+    gradient: 'linear-gradient(135deg, #0d9488, #2563eb)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* Jacket */}
+        <path d="M12 62 C12 48 20 44 32 44 C44 44 52 48 52 62 Z" fill="#0f766e" />
+        <path d="M27 44 L32 54 L37 44" fill="#ffffff" />
+        {/* Neck */}
+        <rect x="27" y="38" width="10" height="8" rx="4" fill="#e6b08a" />
+        {/* Head */}
+        <circle cx="32" cy="29" r="13.5" fill="#ecc09e" />
+        {/* Stylish Hair */}
+        <path d="M18.5 27 C18 14 27 11 35 12 C42 13 46 18 45.5 27 C43 21 37 19 30 20 C24 21 20 22 18.5 27 Z" fill="#1f2937" />
+        {/* Headphones */}
+        <path d="M17 29 C17 14 47 14 47 29" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round" />
+        <rect x="14" y="25" width="5" height="10" rx="2.5" fill="#492691" stroke="#fbbf24" strokeWidth="1.3" />
+        <rect x="45" y="25" width="5" height="10" rx="2.5" fill="#492691" stroke="#fbbf24" strokeWidth="1.3" />
+        {/* Eyes & Eyebrows */}
+        <circle cx="26.5" cy="29" r="1.8" fill="#111827" />
+        <circle cx="37.5" cy="29" r="1.8" fill="#111827" />
+        <path d="M23.5 25.5 Q26.5 24 29 25.5" stroke="#1f2937" strokeWidth="1.4" strokeLinecap="round" />
+        <path d="M35 25.5 Q37.5 24 40.5 25.5" stroke="#1f2937" strokeWidth="1.4" strokeLinecap="round" />
+        {/* Big grin */}
+        <path d="M27 35.5 Q32 39.5 37 35.5" stroke="#8c4427" strokeWidth="1.9" strokeLinecap="round" />
+      </svg>
+    )
+  },
+  {
+    id: 'student-girl-curly',
+    label: 'סטודנטית חייכנית',
+    gradient: 'linear-gradient(135deg, #ea580c, #f59e0b)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* Curly Hair Halo */}
+        <circle cx="20" cy="22" r="7.5" fill="#2c1608" />
+        <circle cx="44" cy="22" r="7.5" fill="#2c1608" />
+        <circle cx="17" cy="32" r="7.5" fill="#2c1608" />
+        <circle cx="47" cy="32" r="7.5" fill="#2c1608" />
+        <circle cx="19" cy="41" r="6.5" fill="#2c1608" />
+        <circle cx="45" cy="41" r="6.5" fill="#2c1608" />
+        <circle cx="26" cy="15" r="7" fill="#2c1608" />
+        <circle cx="38" cy="15" r="7" fill="#2c1608" />
+        <circle cx="32" cy="13" r="7" fill="#2c1608" />
+        {/* Shirt */}
+        <path d="M13 62 C13 48 21 44 32 44 C43 44 51 48 51 62 Z" fill="#492691" />
+        {/* Neck */}
+        <rect x="27.5" y="38" width="9" height="8" rx="4" fill="#d99b72" />
+        {/* Face */}
+        <circle cx="32" cy="29.5" r="12.5" fill="#e6aa82" />
+        {/* Eyes */}
+        <circle cx="26.5" cy="29" r="1.8" fill="#1f2937" />
+        <circle cx="37.5" cy="29" r="1.8" fill="#1f2937" />
+        <circle cx="26" cy="28.3" r="0.6" fill="#fff" />
+        <circle cx="37" cy="28.3" r="0.6" fill="#fff" />
+        {/* Cheeks */}
+        <ellipse cx="22.5" cy="33.5" rx="2.3" ry="1.3" fill="#fb7185" opacity="0.5" />
+        <ellipse cx="41.5" cy="33.5" rx="2.3" ry="1.3" fill="#fb7185" opacity="0.5" />
+        {/* Bright Smile */}
+        <path d="M27 35.5 Q32 40 37 35.5 Z" fill="#fff" />
+      </svg>
+    )
+  },
+  {
+    id: 'student-boy-beard',
+    label: 'סטודנט מזוקן',
+    gradient: 'linear-gradient(135deg, #4338ca, #0284c7)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* Shirt */}
+        <path d="M12 62 C12 48 20 44 32 44 C44 44 52 48 52 62 Z" fill="#1e293b" />
+        <polygon points="26,44 32,52 38,44" fill="#e2e8f0" />
+        {/* Neck */}
+        <rect x="27" y="38" width="10" height="8" rx="4" fill="#eec3a1" />
+        {/* Ears */}
+        <circle cx="19" cy="30" r="3.3" fill="#e5b38c" />
+        <circle cx="45" cy="30" r="3.3" fill="#e5b38c" />
+        {/* Face */}
+        <circle cx="32" cy="29" r="13.5" fill="#f4cbb0" />
+        {/* Hair & Kippah */}
+        <path d="M18.5 27 C19 16 25 13 32 13 C39 13 45 16 45.5 27 C42 20 38 19 32 19 C26 19 22 20 18.5 27 Z" fill="#1f2937" />
+        <path d="M23 15 Q32 9.5 41 15 Z" fill="#492691" stroke="#e2e8f0" strokeWidth="1" />
+        {/* Neat Beard */}
+        <path d="M19 30 C19.5 39 24.5 43.5 32 43.5 C39.5 43.5 44.5 39 45 30 C42.5 34 38 35.5 32 35.5 C26 35.5 21.5 34 19 30 Z" fill="#292524" />
+        {/* Mouth */}
+        <path d="M28 36.5 Q32 39 36 36.5" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" />
+        {/* Eyes */}
+        <circle cx="26.5" cy="28" r="1.8" fill="#111827" />
+        <circle cx="37.5" cy="28" r="1.8" fill="#111827" />
+      </svg>
+    )
+  },
+  {
+    id: 'student-girl-bun',
+    label: 'סטודנטית באסוף',
+    gradient: 'linear-gradient(135deg, #059669, #14b8a6)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* Top Hair Bun */}
+        <circle cx="32" cy="11" r="7" fill="#6b3e26" />
+        {/* Top */}
+        <path d="M13 62 C13 48 21 44 32 44 C43 44 51 48 51 62 Z" fill="#dd6755" />
+        {/* Neck */}
+        <rect x="27.5" y="38" width="9" height="8" rx="4" fill="#f7d3b8" />
+        {/* Ears + Gold Studs */}
+        <circle cx="19" cy="30" r="3.2" fill="#ecc09e" />
+        <circle cx="45" cy="30" r="3.2" fill="#ecc09e" />
+        <circle cx="19" cy="32.5" r="1.4" fill="#fbbf24" />
+        <circle cx="45" cy="32.5" r="1.4" fill="#fbbf24" />
+        {/* Face */}
+        <circle cx="32" cy="29.5" r="13" fill="#fad9c1" />
+        {/* Sleek Hair + Headband */}
+        <path d="M19 28 C19 17 26 14 32 14 C38 14 45 17 45 28 C41 21 36 20 32 20 C28 20 23 21 19 28 Z" fill="#6b3e26" />
+        <path d="M21 22 Q32 15 43 22" stroke="#fbbf24" strokeWidth="2.8" strokeLinecap="round" />
+        {/* Eyes */}
+        <circle cx="26.5" cy="29.5" r="1.8" fill="#1f2937" />
+        <circle cx="37.5" cy="29.5" r="1.8" fill="#1f2937" />
+        {/* Smile */}
+        <path d="M27.5 36 Q32 39.5 36.5 36" stroke="#a64b3b" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    )
+  },
+  {
+    id: 'student-boy-cap',
+    label: 'סטודנט ספורטיבי',
+    gradient: 'linear-gradient(135deg, #f97316, #dc2626)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* T-shirt */}
+        <path d="M12 62 C12 48 20 44 32 44 C44 44 52 48 52 62 Z" fill="#492691" />
+        {/* Neck */}
+        <rect x="27" y="38" width="10" height="8" rx="4" fill="#e5b38c" />
+        {/* Ears */}
+        <circle cx="19" cy="31" r="3.2" fill="#dc9f76" />
+        <circle cx="45" cy="31" r="3.2" fill="#dc9f76" />
+        {/* Face */}
+        <circle cx="32" cy="30" r="13.5" fill="#f0c3a0" />
+        {/* Baseball Cap */}
+        <path d="M18 24 C18 14 46 14 46 24 Z" fill="#f59e0b" />
+        <path d="M16 24 Q34 21 52 25.5 Q34 27 16 24 Z" fill="#b45309" />
+        {/* Eyes */}
+        <circle cx="26.5" cy="30" r="1.8" fill="#111827" />
+        <circle cx="37.5" cy="30" r="1.8" fill="#111827" />
+        {/* Confident Grin */}
+        <path d="M27 36.5 Q32 40.5 37 36.5" stroke="#7c2d12" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    )
+  },
+  {
+    id: 'student-girl-beret',
+    label: 'סטודנטית עם ברט',
+    gradient: 'linear-gradient(135deg, #7c3aed, #ec4899)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* Long Blonde/Light-Brown Hair */}
+        <path d="M14 29 C14 14 23 11 32 11 C41 11 50 14 50 29 L51 50 L13 50 Z" fill="#a16207" />
+        {/* Sweater */}
+        <path d="M13 62 C13 48 21 44 32 44 C43 44 51 48 51 62 Z" fill="#0f766e" />
+        {/* Neck */}
+        <rect x="27.5" y="38" width="9" height="8" rx="4" fill="#f7d3b8" />
+        {/* Face */}
+        <circle cx="32" cy="29.5" r="12.5" fill="#fad9c1" />
+        {/* Front Hair */}
+        <path d="M19.5 27 C21 19 28 17 32 19 C36 17 43 19 44.5 27 C41 22 36 21 32 22 C28 21 23 22 19.5 27 Z" fill="#a16207" />
+        {/* Stylish Beret */}
+        <path d="M17 20 C19 10 38 7 47 16 C42 20 25 21 17 20 Z" fill="#492691" stroke="#fbbf24" strokeWidth="1.2" />
+        {/* Eyes */}
+        <circle cx="26.5" cy="29.5" r="1.8" fill="#1f2937" />
+        <circle cx="37.5" cy="29.5" r="1.8" fill="#1f2937" />
+        {/* Smile */}
+        <path d="M27.5 35.5 Q32 39 36.5 35.5" stroke="#a64b3b" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    )
+  },
+  {
+    id: 'student-grad',
+    label: 'מצטיין הדיקן',
+    gradient: 'linear-gradient(135deg, #1d4ed8, #492691)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* Gown */}
+        <path d="M12 62 C12 48 20 44 32 44 C44 44 52 48 52 62 Z" fill="#1e1b4b" />
+        <path d="M24 45 L32 58 L40 45" fill="#fbbf24" />
+        {/* Neck */}
+        <rect x="27" y="38" width="10" height="8" rx="4" fill="#f4cbb0" />
+        {/* Face */}
+        <circle cx="32" cy="30" r="13" fill="#f7d3b8" />
+        {/* Hair */}
+        <path d="M19 28 C19 20 25 18 32 18 C39 18 45 20 45 28 C42 22 36 21 32 21 C28 21 22 22 19 28 Z" fill="#3b2314" />
+        {/* Graduation Cap */}
+        <polygon points="32,7 50,15 32,22 14,15" fill="#0f172a" stroke="#fbbf24" strokeWidth="1.4" />
+        <line x1="48" y1="16" x2="49" y2="27" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="49" cy="27.5" r="2" fill="#fbbf24" />
+        {/* Eyes & Smile */}
+        <circle cx="26.5" cy="30" r="1.8" fill="#111827" />
+        <circle cx="37.5" cy="30" r="1.8" fill="#111827" />
+        <path d="M27.5 36.5 Q32 39.8 36.5 36.5" stroke="#9a4e32" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    )
+  },
+  {
+    id: 'chabad-shliach',
+    label: 'חסיד בקמפוס',
+    gradient: 'linear-gradient(135deg, #b45309, #492691)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* Suit */}
+        <path d="M12 62 C12 48 20 44 32 44 C44 44 52 48 52 62 Z" fill="#111827" />
+        <polygon points="27,44 32,54 37,44" fill="#ffffff" />
+        {/* Neck */}
+        <rect x="27.5" y="38" width="9" height="8" rx="4" fill="#f3c6a5" />
+        {/* Face */}
+        <circle cx="32" cy="30" r="13" fill="#f6cfb2" />
+        {/* Beard */}
+        <path d="M20 31 C20.5 40 25 45 32 45 C39 45 43.5 40 44 31 C41.5 34.5 37.5 36 32 36 C26.5 36 22.5 34.5 20 31 Z" fill="#292524" />
+        {/* Classic Fedora Hat */}
+        <path d="M20 21 L23 11 Q32 9 41 11 L44 21 Z" fill="#1e1b4b" />
+        <rect x="20.5" y="18.5" width="23" height="2.6" fill="#492691" />
+        <ellipse cx="32" cy="21.5" rx="18" ry="3.2" fill="#0f172a" stroke="#fbbf24" strokeWidth="0.9" />
+        {/* Eyes & Warm Smile */}
+        <circle cx="26.5" cy="29" r="1.8" fill="#111827" />
+        <circle cx="37.5" cy="29" r="1.8" fill="#111827" />
+        <path d="M28 37 Q32 39.5 36 37" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" />
       </svg>
     )
   }
@@ -327,21 +328,20 @@ export const QuizAvatar: React.FC<QuizAvatarProps> = ({ avatar, size = 32 }) => 
     );
   }
 
-  const iconPad = Math.max(2, Math.round(size * 0.08));
-
   return (
     <span
       title={def.label}
       style={{
         width: size,
         height: size,
-        padding: iconPad,
+        padding: 2,
         borderRadius: Math.round(size * 0.34),
         background: def.gradient,
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
+        overflow: 'hidden',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
         border: '1.5px solid rgba(255, 255, 255, 0.38)'
       }}
