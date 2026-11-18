@@ -74,7 +74,12 @@ export const PLAYER_AVATARS = [
   'student-boy-cap',
   'student-girl-beret',
   'student-grad',
-  'chabad-shliach'
+  'chabad-shliach',
+  'student-girl-headphones',
+  'student-boy-curly',
+  'student-girl-coffee',
+  'student-boy-scholar',
+  'student-girl-sunnies'
 ] as const;
 
 const PARASHA_VAYETZEI_QUESTIONS: QuizQuestion[] = [

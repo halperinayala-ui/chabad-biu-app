@@ -221,7 +221,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'student-girl-beret',
-    label: 'סטודנטית עם ברט',
+    label: 'סטודנטית בסטייל',
     gradient: 'linear-gradient(135deg, #7c3aed, #ec4899)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
@@ -294,6 +294,138 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
         <circle cx="26.5" cy="29" r="1.8" fill="#111827" />
         <circle cx="37.5" cy="29" r="1.8" fill="#111827" />
         <path d="M28 37 Q32 39.5 36 37" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" />
+      </svg>
+    )
+  },
+  {
+    id: 'student-girl-headphones',
+    label: 'חובבת מוזיקה',
+    gradient: 'linear-gradient(135deg, #ec4899, #6366f1)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* Long dark hair */}
+        <path d="M14 29 C13 14 22 10 32 10 C42 10 51 14 50 29 L52 49 L12 49 Z" fill="#1f2937" />
+        {/* Jacket */}
+        <path d="M13 62 C13 48 21 44 32 44 C43 44 51 48 51 62 Z" fill="#7c3aed" />
+        {/* Neck */}
+        <rect x="27.5" y="38" width="9" height="8" rx="4" fill="#eec3a1" />
+        {/* Face */}
+        <circle cx="32" cy="29.5" r="12.5" fill="#f4cbb0" />
+        {/* Front Hair */}
+        <path d="M19.5 26 C21 17 27 14 32 14 C37 14 43 17 44.5 26 C40 20 35 19 32 21 C29 19 24 20 19.5 26 Z" fill="#1f2937" />
+        {/* Sleek Headphones */}
+        <path d="M16.5 29 C16.5 13 47.5 13 47.5 29" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round" />
+        <rect x="13.5" y="25" width="5" height="10" rx="2.5" fill="#ec4899" stroke="#fbbf24" strokeWidth="1.2" />
+        <rect x="45.5" y="25" width="5" height="10" rx="2.5" fill="#ec4899" stroke="#fbbf24" strokeWidth="1.2" />
+        {/* Eyes & Smile */}
+        <circle cx="26.5" cy="29.5" r="1.8" fill="#111827" />
+        <circle cx="37.5" cy="29.5" r="1.8" fill="#111827" />
+        <path d="M27.5 35.5 Q32 39 36.5 35.5" stroke="#9a4e32" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    )
+  },
+  {
+    id: 'student-boy-curly',
+    label: 'אנרגיות טובות',
+    gradient: 'linear-gradient(135deg, #16a34a, #0d9488)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* Hoodie */}
+        <path d="M12 62 C12 48 20 44 32 44 C44 44 52 48 52 62 Z" fill="#065f46" />
+        {/* Neck */}
+        <rect x="27" y="38" width="10" height="8" rx="4" fill="#d99b72" />
+        {/* Fluffy Curly Hair */}
+        <circle cx="22" cy="18" r="6.5" fill="#2c1608" />
+        <circle cx="32" cy="14" r="7" fill="#2c1608" />
+        <circle cx="42" cy="18" r="6.5" fill="#2c1608" />
+        <circle cx="18" cy="25" r="5.5" fill="#2c1608" />
+        <circle cx="46" cy="25" r="5.5" fill="#2c1608" />
+        {/* Face */}
+        <circle cx="32" cy="30" r="13" fill="#e6aa82" />
+        {/* Eyes & Big Happy Smile */}
+        <circle cx="26.5" cy="29.5" r="1.8" fill="#111827" />
+        <circle cx="37.5" cy="29.5" r="1.8" fill="#111827" />
+        <path d="M26.5 35.5 Q32 40.5 37.5 35.5 Z" fill="#fff" />
+      </svg>
+    )
+  },
+  {
+    id: 'student-girl-coffee',
+    label: 'אחרי קפה של בוקר',
+    gradient: 'linear-gradient(135deg, #c2410c, #f59e0b)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* Bob Hair */}
+        <path d="M15 29 C15 14 23 11 32 11 C41 11 49 14 49 29 L50 42 L14 42 Z" fill="#5c2d16" />
+        {/* Sweater */}
+        <path d="M13 62 C13 48 21 44 32 44 C43 44 51 48 51 62 Z" fill="#b45309" />
+        {/* Neck */}
+        <rect x="27.5" y="38" width="9" height="8" rx="4" fill="#f7d3b8" />
+        {/* Face */}
+        <circle cx="32" cy="29.5" r="12.5" fill="#fad9c1" />
+        {/* Front Hair */}
+        <path d="M19.5 27 C21 17 28 15 35 16 C40 17 43 20 44.5 27 C40 21 34 20 27 21 C23 22 21 24 19.5 27 Z" fill="#5c2d16" />
+        {/* Eyes */}
+        <circle cx="26.5" cy="29.5" r="1.8" fill="#1f2937" />
+        <circle cx="37.5" cy="29.5" r="1.8" fill="#1f2937" />
+        <path d="M27.5 35.5 Q32 39 36.5 35.5" stroke="#a64b3b" strokeWidth="1.8" strokeLinecap="round" />
+        {/* Little Coffee Cup in Corner */}
+        <rect x="38" y="47" width="11" height="12" rx="2.5" fill="#fff" />
+        <path d="M49 50 C53 50 53 56 49 56" stroke="#fff" strokeWidth="2" />
+        <path d="M42 45 Q41 42 43 40" stroke="#fde68a" strokeWidth="1.6" strokeLinecap="round" />
+      </svg>
+    )
+  },
+  {
+    id: 'student-boy-scholar',
+    label: 'מתמיד בשיעור',
+    gradient: 'linear-gradient(135deg, #3730a3, #492691)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* Sweater */}
+        <path d="M12 62 C12 48 20 44 32 44 C44 44 52 48 52 62 Z" fill="#4338ca" />
+        {/* White collar */}
+        <polygon points="27,44 32,50 37,44" fill="#fff" />
+        {/* Neck */}
+        <rect x="27" y="38" width="10" height="8" rx="4" fill="#f3c6a5" />
+        {/* Face */}
+        <circle cx="32" cy="29.5" r="13" fill="#f6cfb2" />
+        {/* Reddish-Brown Hair & Kippah */}
+        <path d="M19 27 C19.5 16 25.5 13 32 13 C38.5 13 44.5 16 45 27 C42 20 37 19 32 19 C27 19 22 20 19 27 Z" fill="#7c2d12" />
+        <path d="M23 15 Q32 9 41 15 Z" fill="#0f172a" />
+        {/* Round Glasses */}
+        <circle cx="26" cy="29" r="4.3" stroke="#fbbf24" strokeWidth="1.8" fill="rgba(255,255,255,0.16)" />
+        <circle cx="38" cy="29" r="4.3" stroke="#fbbf24" strokeWidth="1.8" fill="rgba(255,255,255,0.16)" />
+        <line x1="30.3" y1="29" x2="33.7" y2="29" stroke="#fbbf24" strokeWidth="1.8" />
+        {/* Eyes & Smile */}
+        <circle cx="26" cy="29" r="1.6" fill="#111827" />
+        <circle cx="38" cy="29" r="1.6" fill="#111827" />
+        <path d="M27.5 36 Q32 39 36.5 36" stroke="#9a4e32" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    )
+  },
+  {
+    id: 'student-girl-sunnies',
+    label: 'הכי קולית בקמפוס',
+    gradient: 'linear-gradient(135deg, #0ea5e9, #6366f1)',
+    renderSvg: () => (
+      <svg viewBox="0 0 64 64" fill="none">
+        {/* Long Dark-Brown Hair */}
+        <path d="M14 29 C13 14 22 10 32 10 C42 10 51 14 50 29 L52 50 L12 50 Z" fill="#3b2314" />
+        {/* Denim / Teal Jacket */}
+        <path d="M13 62 C13 48 21 44 32 44 C43 44 51 48 51 62 Z" fill="#0284c7" />
+        {/* Neck */}
+        <rect x="27.5" y="38" width="9" height="8" rx="4" fill="#f0c3a0" />
+        {/* Face */}
+        <circle cx="32" cy="29.5" r="12.5" fill="#f4cbb0" />
+        {/* Cool Sunglasses on forehead */}
+        <rect x="21" y="15" width="9.5" height="6" rx="2.5" fill="#1e1b4b" stroke="#fbbf24" strokeWidth="1.3" />
+        <rect x="33.5" y="15" width="9.5" height="6" rx="2.5" fill="#1e1b4b" stroke="#fbbf24" strokeWidth="1.3" />
+        <line x1="30.5" y1="17.5" x2="33.5" y2="17.5" stroke="#fbbf24" strokeWidth="1.4" />
+        {/* Eyes & Confident Smile */}
+        <circle cx="26.5" cy="30" r="1.8" fill="#111827" />
+        <circle cx="37.5" cy="30" r="1.8" fill="#111827" />
+        <path d="M27.5 36 Q32 39.5 36.5 35.5" stroke="#9a4e32" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     )
   }
