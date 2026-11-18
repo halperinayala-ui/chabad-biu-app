@@ -445,7 +445,7 @@ const QuizPlay = () => {
                       className={`quiz-avatar-btn ${avatar === avId ? 'active' : ''}`}
                       onClick={() => setAvatar(avId)}
                     >
-                      <QuizAvatar avatar={avId} size={36} />
+                      <QuizAvatar avatar={avId} size={42} />
                     </button>
                   ))}
                 </div>

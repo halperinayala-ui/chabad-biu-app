@@ -65,16 +65,16 @@ export const OPTION_ACCENTS = [
 ] as const;
 
 export const PLAYER_AVATARS = [
-  'chabad-flame',
-  'star-david',
-  'torah-book',
-  'campus-cap',
-  'menorah',
-  'shabbat-candles',
-  'kiddush-cup',
-  'campus-coffee',
-  'crown-torah',
-  'niggun-note'
+  'lion-yehuda',
+  'owl-wise',
+  'bear-biu',
+  'flame-buddy',
+  'fox-campus',
+  'penguin-scholar',
+  'panda-niggun',
+  'coffee-buddy',
+  'tanya-buddy',
+  'star-buddy'
 ] as const;
 
 const PARASHA_VAYETZEI_QUESTIONS: QuizQuestion[] = [

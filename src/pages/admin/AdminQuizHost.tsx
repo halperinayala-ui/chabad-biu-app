@@ -495,7 +495,7 @@ const AdminQuizHost = () => {
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.7, opacity: 0 }}
                     >
-                      <QuizAvatar avatar={p.avatar} size={30} />
+                      <QuizAvatar avatar={p.avatar} size={36} />
                       <span>{p.nickname}</span>
                     </motion.div>
                   ))
