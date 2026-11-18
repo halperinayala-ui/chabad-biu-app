@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Plus, Users, Settings, BarChart2, Archive, CalendarDays, CalendarCheck, ChevronLeft, Edit, Megaphone, Scroll, ClipboardList } from 'lucide-react';
+import { Plus, Users, Settings, BarChart2, Archive, CalendarDays, CalendarCheck, ChevronLeft, Edit, Megaphone, Scroll, ClipboardList, Zap } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatHebrewDate } from '../../utils/dateUtils';
 import toast from 'react-hot-toast';
@@ -116,6 +116,7 @@ const AdminDashboard = () => {
   const displayed = showArchived ? archivedEvents : activeEvents;
 
   const cards = [
+    { icon: <Zap size={28} />, label: 'חידון לייב לשיעור ⚡', desc: 'משחק אינטראקטיבי עם ברקוד, ניקוד בזמן אמת ומחיקת סבבים', color: '#8b5cf6', action: () => navigate('/admin/quiz') },
     { icon: <ClipboardList size={28} />, label: 'מרכז טפסים מיוחדים 📋', desc: 'פדיון כפרות, פ״נ לציון הרבי וטפסים מיוחדים', color: '#d35400', action: () => navigate('/admin/special-forms') },
     { icon: <Plus size={28} />, label: 'אירוע חדש', desc: 'הקמת אירוע חדש עם טופס הרשמה', color: '#492691', action: () => navigate('/admin/events/new') },
     { icon: <CalendarCheck size={28} />, label: 'לוח שנה עברי', desc: 'תכנון שנתי, אירועים מתוכננים וחגים', color: '#7f58c2', action: () => navigate('/admin/calendar') },

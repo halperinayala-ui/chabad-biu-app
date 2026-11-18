@@ -25,6 +25,9 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import Accessibility from './pages/Accessibility';
 import Kaparot from './pages/Kaparot';
 import NewYearHub from './pages/NewYearHub';
+import QuizPlay from './pages/QuizPlay';
+import AdminQuizHub from './pages/admin/AdminQuizHub';
+import AdminQuizHost from './pages/admin/AdminQuizHost';
 import InstallBanner from './components/InstallBanner';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -45,7 +48,8 @@ function OnboardingGuard({ children }: { children: React.ReactNode }) {
         location.pathname !== '/profile' && 
         location.pathname !== '/auth' &&
         !location.pathname.startsWith('/new-year') &&
-        !location.pathname.startsWith('/newyear')
+        !location.pathname.startsWith('/newyear') &&
+        !location.pathname.startsWith('/play')
       ) {
         navigate('/profile', { replace: true, state: { requireOnboarding: true } });
       }
@@ -55,98 +59,128 @@ function OnboardingGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function AppShell() {
+  const location = useLocation();
+  const isImmersiveQuiz =
+    location.pathname.startsWith('/play') ||
+    location.pathname.startsWith('/admin/quiz/host');
+
+  return (
+    <div className="app-container">
+      {!isImmersiveQuiz && <InstallBanner />}
+      {/* Global Animated Background */}
+      {!isImmersiveQuiz && (
+        <div className="global-bg">
+          <div className="blob blob-1"></div>
+          <div className="blob blob-2"></div>
+        </div>
+      )}
+
+      {!isImmersiveQuiz && <Navbar />}
+      <main
+        className={isImmersiveQuiz ? '' : 'container'}
+        style={
+          isImmersiveQuiz
+            ? { minHeight: '100vh', position: 'relative', zIndex: 1 }
+            : { marginTop: '60px', minHeight: 'calc(100vh - 60px)', paddingBottom: '80px', paddingTop: '1.25rem', position: 'relative', zIndex: 1 }
+        }
+      >
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/community" element={<Community />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/accessibility" element={<Accessibility />} />
+          <Route path="/events/:id" element={<EventDetails />} />
+          <Route path="/event/view/:id" element={<EventDetails />} />
+          
+          {/* Public Live Quiz Player Routes */}
+          <Route path="/play" element={<QuizPlay />} />
+          <Route path="/play/:code" element={<QuizPlay />} />
+
+          {/* Public Blessing Request Routes (פ"נ) */}
+          <Route path="/pan" element={<BlessingRequest />} />
+          <Route path="/blessing-request" element={<BlessingRequest />} />
+          
+          {/* Public New Year / QR Hub Route */}
+          <Route path="/new-year" element={<NewYearHub />} />
+          <Route path="/newyear" element={<Navigate to="/new-year" replace />} />
+          
+          {/* Public Kaparot Routes (פדיון כפרות - מועבר לדף הבית לאחר יום כיפור) */}
+          <Route path="/kaparot" element={<Navigate to="/" replace />} />
+          <Route path="/kapparot" element={<Navigate to="/" replace />} />
+          <Route path="/kaparot-view" element={<Navigate to="/" replace />} />
+          
+          {/* Protected User Routes */}
+          <Route path="/profile" element={
+            <ProtectedRoute showGuestView><ProfileSettings /></ProtectedRoute>
+          } />
+          
+          {/* Protected Admin Routes */}
+          <Route path="/admin" element={
+            <ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>
+          } />
+          <Route path="/admin/quiz" element={
+            <ProtectedRoute requireAdmin><AdminQuizHub /></ProtectedRoute>
+          } />
+          <Route path="/admin/quiz/host/:sessionId" element={
+            <ProtectedRoute requireAdmin><AdminQuizHost /></ProtectedRoute>
+          } />
+          <Route path="/admin/events/new" element={
+            <ProtectedRoute requireAdmin><AdminEventEditor /></ProtectedRoute>
+          } />
+          <Route path="/admin/events/edit/:id" element={
+            <ProtectedRoute requireAdmin><AdminEventEditor /></ProtectedRoute>
+          } />
+          <Route path="/admin/events/:id/registrants" element={
+            <ProtectedRoute requireAdmin><AdminRegistrants /></ProtectedRoute>
+          } />
+          <Route path="/admin/media" element={
+            <ProtectedRoute requireAdmin><AdminMediaManager /></ProtectedRoute>
+          } />
+          <Route path="/admin/settings" element={
+            <ProtectedRoute requireAdmin><AdminSettings /></ProtectedRoute>
+          } />
+          <Route path="/admin/announcements" element={
+            <ProtectedRoute requireAdmin><AdminAnnouncements /></ProtectedRoute>
+          } />
+          <Route path="/admin/calendar" element={
+            <ProtectedRoute requireAdmin><AdminCalendar /></ProtectedRoute>
+          } />
+          <Route path="/admin/crm" element={
+            <ProtectedRoute requireAdmin><AdminCRM /></ProtectedRoute>
+          } />
+          <Route path="/admin/crm/:studentId" element={
+            <ProtectedRoute requireAdmin><AdminStudentProfile /></ProtectedRoute>
+          } />
+          {/* Special Forms Management (פדיון כפרות, פ"נ וטפסים מיוחדים) */}
+          <Route path="/admin/special-forms" element={
+            <ProtectedRoute requireAdmin><AdminSpecialForms /></ProtectedRoute>
+          } />
+          <Route path="/admin/kaparot" element={
+            <ProtectedRoute requireAdmin><AdminSpecialForms defaultTab="kaparot" /></ProtectedRoute>
+          } />
+          <Route path="/admin/blessings" element={
+            <ProtectedRoute requireAdmin><AdminSpecialForms defaultTab="pan" /></ProtectedRoute>
+          } />
+          <Route path="/admin/pan" element={
+            <ProtectedRoute requireAdmin><AdminSpecialForms defaultTab="pan" /></ProtectedRoute>
+          } />
+        </Routes>
+      </main>
+      {!isImmersiveQuiz && <BottomTabBar />}
+    </div>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
       <OnboardingGuard>
         <Toaster position="top-center" toastOptions={{ style: { fontFamily: 'Rubik, sans-serif' } }} />
-        <div className="app-container">
-          <InstallBanner />
-        {/* Global Animated Background */}
-        <div className="global-bg">
-          <div className="blob blob-1"></div>
-          <div className="blob blob-2"></div>
-        </div>
-
-        <Navbar />
-        <main className="container" style={{ marginTop: '60px', minHeight: 'calc(100vh - 60px)', paddingBottom: '80px', paddingTop: '1.25rem', position: 'relative', zIndex: 1 }}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/accessibility" element={<Accessibility />} />
-            <Route path="/events/:id" element={<EventDetails />} />
-            <Route path="/event/view/:id" element={<EventDetails />} />
-            
-            {/* Public Blessing Request Routes (פ"נ) */}
-            <Route path="/pan" element={<BlessingRequest />} />
-            <Route path="/blessing-request" element={<BlessingRequest />} />
-            
-            {/* Public New Year / QR Hub Route */}
-            <Route path="/new-year" element={<NewYearHub />} />
-            <Route path="/newyear" element={<Navigate to="/new-year" replace />} />
-            
-            {/* Public Kaparot Routes (פדיון כפרות - מועבר לדף הבית לאחר יום כיפור) */}
-            <Route path="/kaparot" element={<Navigate to="/" replace />} />
-            <Route path="/kapparot" element={<Navigate to="/" replace />} />
-            <Route path="/kaparot-view" element={<Navigate to="/" replace />} />
-            
-            {/* Protected User Routes */}
-            <Route path="/profile" element={
-              <ProtectedRoute showGuestView><ProfileSettings /></ProtectedRoute>
-            } />
-            
-            {/* Protected Admin Routes */}
-            <Route path="/admin" element={
-              <ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>
-            } />
-            <Route path="/admin/events/new" element={
-              <ProtectedRoute requireAdmin><AdminEventEditor /></ProtectedRoute>
-            } />
-            <Route path="/admin/events/edit/:id" element={
-              <ProtectedRoute requireAdmin><AdminEventEditor /></ProtectedRoute>
-            } />
-            <Route path="/admin/events/:id/registrants" element={
-              <ProtectedRoute requireAdmin><AdminRegistrants /></ProtectedRoute>
-            } />
-            <Route path="/admin/media" element={
-              <ProtectedRoute requireAdmin><AdminMediaManager /></ProtectedRoute>
-            } />
-            <Route path="/admin/settings" element={
-              <ProtectedRoute requireAdmin><AdminSettings /></ProtectedRoute>
-            } />
-            <Route path="/admin/announcements" element={
-              <ProtectedRoute requireAdmin><AdminAnnouncements /></ProtectedRoute>
-            } />
-            <Route path="/admin/calendar" element={
-              <ProtectedRoute requireAdmin><AdminCalendar /></ProtectedRoute>
-            } />
-            <Route path="/admin/crm" element={
-              <ProtectedRoute requireAdmin><AdminCRM /></ProtectedRoute>
-            } />
-            <Route path="/admin/crm/:studentId" element={
-              <ProtectedRoute requireAdmin><AdminStudentProfile /></ProtectedRoute>
-            } />
-            {/* Special Forms Management (פדיון כפרות, פ"נ וטפסים מיוחדים) */}
-            <Route path="/admin/special-forms" element={
-              <ProtectedRoute requireAdmin><AdminSpecialForms /></ProtectedRoute>
-            } />
-            <Route path="/admin/kaparot" element={
-              <ProtectedRoute requireAdmin><AdminSpecialForms defaultTab="kaparot" /></ProtectedRoute>
-            } />
-            <Route path="/admin/blessings" element={
-              <ProtectedRoute requireAdmin><AdminSpecialForms defaultTab="pan" /></ProtectedRoute>
-            } />
-            <Route path="/admin/pan" element={
-              <ProtectedRoute requireAdmin><AdminSpecialForms defaultTab="pan" /></ProtectedRoute>
-            } />
-          </Routes>
-        </main>
-        <BottomTabBar />
-      </div>
+        <AppShell />
       </OnboardingGuard>
     </AuthProvider>
   );
