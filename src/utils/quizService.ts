@@ -7,7 +7,7 @@ import {
   type QuizQuestion,
   type QuizSession
 } from '../data/quizDecks';
-import { shuffleQuestions } from './quizParser';
+import { shuffleQuestionOptions, shuffleQuestions } from './quizParser';
 
 export interface QuizSessionWithStats extends QuizSession {
   players: QuizPlayer[];
@@ -54,7 +54,7 @@ export async function createQuizSession(
 
   let sessionQuestions = shouldShuffle
     ? shuffleQuestions(deck.questions)
-    : [...deck.questions];
+    : deck.questions.map((q) => shuffleQuestionOptions(q));
 
   if (options?.limitCount && options.limitCount > 0 && options.limitCount < sessionQuestions.length) {
     sessionQuestions = sessionQuestions.slice(0, options.limitCount);

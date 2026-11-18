@@ -13,7 +13,7 @@ export const AI_PROMPT_TEMPLATE = `הכן לי חידון של [כתבי כאן 
 
 סדר את השאלות בצורה מסודרת לפי הנושאים (קודם פרשת השבוע, אחר כך יהדות, ובסוף ידע כללי מהעולם) כדי שיהיה נוח לעבור עליהן — המערכת שלנו תערבב את הסדר אוטומטית בזמן המשחק.
 
-החזר את כל השאלות בפורמט המדויק הבא בלבד (ללא הקדמות או סיכומים), וסמן כוכבית (*) בסוף התשובה הנכונה:
+החזר את כל השאלות בפורמט המדויק הבא בלבד (ללא הקדמות או סיכומים), פזר את התשובה הנכונה בין א׳, ב׳, ג׳ ו-ד׳ (ואל תשתמש באפשרויות כמו "כל התשובות נכונות"), וסמן כוכבית (*) בסוף התשובה הנכונה:
 
 שאלה: טקסט השאלה כאן?
 א. אפשרות ראשונה
@@ -271,8 +271,33 @@ export function parseQuizText(rawInput: string): ParsedQuizResult {
   return { questions, warnings };
 }
 
+export function shuffleQuestionOptions(q: QuizQuestion): QuizQuestion {
+  const hasOrderDependent = q.options.some((opt) =>
+    /כל התשובות|אף תשובה|אף אחת|שתיהן|שניהם|תשובות [אבגד]/.test(opt)
+  );
+  if (hasOrderDependent) return q;
+
+  const tagged = q.options.map((text, idx) => ({
+    text,
+    isCorrect: idx === q.correctIndex
+  }));
+
+  for (let i = tagged.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [tagged[i], tagged[j]] = [tagged[j], tagged[i]];
+  }
+
+  const newCorrectIndex = tagged.findIndex((item) => item.isCorrect) as 0 | 1 | 2 | 3;
+
+  return {
+    ...q,
+    options: [tagged[0].text, tagged[1].text, tagged[2].text, tagged[3].text],
+    correctIndex: newCorrectIndex
+  };
+}
+
 export function shuffleQuestions(questions: QuizQuestion[]): QuizQuestion[] {
-  const copy = [...questions];
+  const copy = questions.map((q) => shuffleQuestionOptions(q));
   for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [copy[i], copy[j]] = [copy[j], copy[i]];
