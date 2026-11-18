@@ -273,7 +273,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'chabad-shliach',
-    label: 'רוח חב״דית',
+    label: 'חסיד בקמפוס',
     gradient: 'linear-gradient(135deg, #b45309, #492691)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
