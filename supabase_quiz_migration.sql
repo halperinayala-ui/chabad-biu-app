@@ -303,3 +303,25 @@ BEGIN
     EXCEPTION WHEN duplicate_object THEN NULL;
     END;
 END $$;
+
+-- 4. Custom Saved Quiz Decks (Optional - for saving pasted quizzes in Supabase)
+CREATE TABLE IF NOT EXISTS public.quiz_decks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title TEXT NOT NULL,
+    questions JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.quiz_decks ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admins can manage custom quiz decks" ON public.quiz_decks;
+CREATE POLICY "Admins can manage custom quiz decks"
+ON public.quiz_decks FOR ALL
+USING (
+  EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
+)
+WITH CHECK (
+  EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
+);
+

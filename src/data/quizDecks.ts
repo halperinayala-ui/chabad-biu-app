@@ -348,30 +348,18 @@ const JUDAISM_GENERAL_QUESTIONS: QuizQuestion[] = [
   }
 ];
 
+const INTERLEAVED_SAMPLE_QUESTIONS: QuizQuestion[] = PARASHA_VAYETZEI_QUESTIONS.flatMap((q, i) =>
+  JUDAISM_GENERAL_QUESTIONS[i] ? [q, JUDAISM_GENERAL_QUESTIONS[i]] : [q]
+);
+
 export const QUIZ_DECKS: QuizDeck[] = [
   {
-    id: 'parasha-vayetzei',
-    title: 'פרשת השבוע — פרשת ויצא',
-    subtitle: '10 שאלות קצביות ומעוררות מחשבה על פרשת השבוע',
-    badge: 'פרשת השבוע • 10 שאלות',
+    id: 'wednesday-sample',
+    title: 'חידון יום רביעי לדוגמה — פרשת ויצא ויהדות',
+    subtitle: '20 שאלות מגוונות (פרשת השבוע + ידע כללי ביהדות) המתערבבות אוטומטית בכל משחק',
+    badge: 'דוגמה מוכנה • 20 שאלות',
     accentColor: '#492691',
-    questions: PARASHA_VAYETZEI_QUESTIONS
-  },
-  {
-    id: 'judaism-general',
-    title: 'ידע כללי ביהדות',
-    subtitle: '10 שאלות במגוון נושאים — חגים, מצוות, חסידות ומסורת',
-    badge: 'יהדות • 10 שאלות',
-    accentColor: '#dd6755',
-    questions: JUDAISM_GENERAL_QUESTIONS
-  },
-  {
-    id: 'wednesday-combo',
-    title: 'אתגר יום רביעי המלא (פרשה + יהדות)',
-    subtitle: 'כל 20 השאלות ברצף: חצי פרשת ויצא וחצי ידע כללי ביהדות',
-    badge: 'מרתון מלא • 20 שאלות',
-    accentColor: '#0f766e',
-    questions: [...PARASHA_VAYETZEI_QUESTIONS, ...JUDAISM_GENERAL_QUESTIONS]
+    questions: INTERLEAVED_SAMPLE_QUESTIONS
   }
 ];
 

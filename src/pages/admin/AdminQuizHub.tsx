@@ -1,31 +1,44 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
   BarChart3,
   CheckCircle2,
+  ClipboardPaste,
   Copy,
   Database,
   Eye,
   Play,
+  Plus,
   QrCode,
   RefreshCw,
+  Shuffle,
   Sparkles,
   Trash2,
   Trophy,
   Users,
+  Wand2,
   X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { QuizAvatar } from '../../components/QuizAvatar';
 import { useAuth } from '../../contexts/AuthContext';
-import { OPTION_LETTERS, QUIZ_DECKS, type QuizDeck } from '../../data/quizDecks';
 import {
+  OPTION_LETTERS,
+  QUIZ_DECKS,
+  type QuizDeck,
+  type QuizQuestion
+} from '../../data/quizDecks';
+import { AI_PROMPT_TEMPLATE, parseQuizText } from '../../utils/quizParser';
+import {
+  createCustomQuizDeck,
   createQuizSession,
+  deleteCustomQuizDeck,
   deleteMultipleQuizSessions,
   deleteQuizSession,
   fetchAllQuizSessions,
+  fetchCustomQuizDecks,
   isMissingQuizTablesError,
   type QuizSessionWithStats
 } from '../../utils/quizService';
@@ -44,24 +57,45 @@ const AdminQuizHub = () => {
   const { user } = useAuth();
 
   const [sessions, setSessions] = useState<QuizSessionWithStats[]>([]);
+  const [customDecks, setCustomDecks] = useState<QuizDeck[]>([]);
+  const [usingLocalDeckFallback, setUsingLocalDeckFallback] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [missingTables, setMissingTables] = useState(false);
   const [launchingDeckId, setLaunchingDeckId] = useState<string | null>(null);
+
+  // Round config
   const [customTitle, setCustomTitle] = useState('');
   const [durationSec, setDurationSec] = useState<number>(20);
+  const [shuffleOrder, setShuffleOrder] = useState<boolean>(true);
+  const [limitTenQuestions, setLimitTenQuestions] = useState<boolean>(false);
+
+  // Smart-paste custom quiz builder
+  const [showBuilder, setShowBuilder] = useState(false);
+  const [builderTitle, setBuilderTitle] = useState('');
+  const [builderRawText, setBuilderRawText] = useState('');
+  const [parsedQuestions, setParsedQuestions] = useState<QuizQuestion[]>([]);
+  const [parseWarnings, setParseWarnings] = useState<string[]>([]);
+  const [savingDeck, setSavingDeck] = useState(false);
 
   // Modals (Zero browser alert/confirm)
   const [previewDeck, setPreviewDeck] = useState<QuizDeck | null>(null);
   const [resultsSession, setResultsSession] = useState<QuizSessionWithStats | null>(null);
   const [confirmDeleteSession, setConfirmDeleteSession] = useState<QuizSessionWithStats | null>(null);
+  const [confirmDeleteDeck, setConfirmDeleteDeck] = useState<QuizDeck | null>(null);
   const [confirmDeleteAllMode, setConfirmDeleteAllMode] = useState<'finished' | 'all' | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const loadSessions = async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-      const data = await fetchAllQuizSessions();
-      setSessions(data);
+      const [sessionsData, customDeckRes] = await Promise.all([
+        fetchAllQuizSessions(),
+        fetchCustomQuizDecks()
+      ]);
+      setSessions(sessionsData);
+      setCustomDecks(customDeckRes.decks);
+      setUsingLocalDeckFallback(customDeckRes.usingLocalFallback);
       setMissingTables(false);
     } catch (err) {
       if (isMissingQuizTablesError(err)) {
@@ -76,13 +110,36 @@ const AdminQuizHub = () => {
   };
 
   useEffect(() => {
-    loadSessions();
+    loadData();
   }, []);
+
+  // Parse pasted questions in real time
+  useEffect(() => {
+    if (!builderRawText.trim()) {
+      setParsedQuestions([]);
+      setParseWarnings([]);
+      return;
+    }
+    const { questions, warnings } = parseQuizText(builderRawText);
+    setParsedQuestions(questions);
+    setParseWarnings(warnings);
+  }, [builderRawText]);
+
+  const allDecks = useMemo(() => [...customDecks, ...QUIZ_DECKS], [customDecks]);
 
   const handleCopySql = async () => {
     try {
       await navigator.clipboard.writeText(quizMigrationSql);
       toast.success('קוד ה-SQL הועתק! הדביקי והריצי ב-Supabase SQL Editor');
+    } catch {
+      toast.error('לא ניתן להעתיק אוטומטית מהדפדפן');
+    }
+  };
+
+  const handleCopyPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(AI_PROMPT_TEMPLATE);
+      toast.success('ההנחיה הועתקה! הדביקי בצ׳אט ה-AI ובקשי ממנו את השאלות');
     } catch {
       toast.error('לא ניתן להעתיק אוטומטית מהדפדפן');
     }
@@ -94,7 +151,9 @@ const AdminQuizHub = () => {
       const session = await createQuizSession(deck, {
         customTitle,
         durationSec,
-        createdBy: user?.id ?? null
+        createdBy: user?.id ?? null,
+        shuffle: shuffleOrder,
+        limitCount: limitTenQuestions ? 10 : null
       });
       toast.success(`סבב חדש נפתח! קוד: ${session.code}`);
       navigate(`/admin/quiz/host/${session.id}`);
@@ -108,6 +167,71 @@ const AdminQuizHub = () => {
       }
     } finally {
       setLaunchingDeckId(null);
+    }
+  };
+
+  const handleSaveCustomDeck = async (andLaunch: boolean) => {
+    if (parsedQuestions.length === 0) {
+      toast.error('יש להדביק לפחות שאלה תקינה אחת עם 4 אפשרויות');
+      return;
+    }
+    setSavingDeck(true);
+    try {
+      const { deck, savedToCloud } = await createCustomQuizDeck(
+        builderTitle,
+        parsedQuestions,
+        user?.id ?? null
+      );
+      setCustomDecks((prev) => [deck, ...prev]);
+      if (!savedToCloud) {
+        setUsingLocalDeckFallback(true);
+      }
+
+      toast.success(
+        savedToCloud
+          ? 'החידון נשמר בהצלחה בענן!'
+          : 'החידון נשמר ומוכן למשחק!'
+      );
+
+      setBuilderTitle('');
+      setBuilderRawText('');
+      setParsedQuestions([]);
+      setShowBuilder(false);
+
+      if (andLaunch) {
+        await handleLaunchDeck(deck);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('שגיאה בשמירת החידון');
+    } finally {
+      setSavingDeck(false);
+    }
+  };
+
+  const handleSetParsedCorrect = (qIdx: number, optIdx: 0 | 1 | 2 | 3) => {
+    setParsedQuestions((prev) =>
+      prev.map((q, i) => (i === qIdx ? { ...q, correctIndex: optIdx } : q))
+    );
+  };
+
+  const handleRemoveParsedQuestion = (qIdx: number) => {
+    setParsedQuestions((prev) => prev.filter((_, i) => i !== qIdx));
+  };
+
+  const handleConfirmDeleteDeck = async () => {
+    if (!confirmDeleteDeck) return;
+    setDeleting(true);
+    try {
+      await deleteCustomQuizDeck(confirmDeleteDeck.id);
+      setCustomDecks((prev) => prev.filter((d) => d.id !== confirmDeleteDeck.id));
+      toast.success('החידון נמחק');
+      setConfirmDeleteDeck(null);
+    } catch (err) {
+      console.error(err);
+      toast.error('שגיאה במחיקת החידון');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -172,12 +296,20 @@ const AdminQuizHub = () => {
           <div>
             <h1>חידון לייב לשיעור</h1>
             <p className="quiz-hub-subtitle">
-              מציגים ברקוד על המסך, הסטודנטים סורקים מהנייד ומשחקים ביחד בזמן אמת
+              מכינים שאלון בהדבקה אחת מכל צ׳אט, מקרינים ברקוד ומשחקים בזמן אמת
             </p>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-primary"
+            style={{ fontSize: '0.9rem', padding: '0.6rem 1.15rem' }}
+            onClick={() => setShowBuilder((prev) => !prev)}
+          >
+            <Plus size={17} />
+            {showBuilder ? 'סגירת יצירת חידון' : 'צור חידון חדש (הדבקה מהירה)'}
+          </button>
           <button
             className="btn btn-outline"
             style={{ fontSize: '0.88rem', padding: '0.55rem 1rem' }}
@@ -189,7 +321,7 @@ const AdminQuizHub = () => {
           <button
             className="btn btn-outline"
             style={{ fontSize: '0.88rem', padding: '0.55rem 1rem' }}
-            onClick={loadSessions}
+            onClick={loadData}
           >
             <RefreshCw size={16} />
             רענון
@@ -217,12 +349,202 @@ const AdminQuizHub = () => {
               <Copy size={17} />
               העתק קוד SQL להקמה
             </button>
-            <button className="btn btn-outline" onClick={loadSessions}>
+            <button className="btn btn-outline" onClick={loadData}>
               <RefreshCw size={17} />
               בדוק שוב לאחר ההרצה
             </button>
           </div>
         </div>
+      )}
+
+      {/* Optional cloud-deck sync note if quiz_decks table hasn't been added yet */}
+      {!missingTables && usingLocalDeckFallback && customDecks.length > 0 && (
+        <div
+          style={{
+            background: 'rgba(73, 38, 145, 0.06)',
+            border: '1px solid rgba(73, 38, 145, 0.2)',
+            borderRadius: '14px',
+            padding: '0.8rem 1.1rem',
+            marginBottom: '1.25rem',
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '0.75rem',
+            fontSize: '0.86rem'
+          }}
+        >
+          <span>
+            החידונים שיצרת שמורים כרגע בדפדפן הזה. כדי שיישמרו גם בענן של Supabase בכל מכשיר, אפשר להריץ את עדכון ה-SQL החד-פעמי.
+          </span>
+          <button
+            className="btn btn-outline"
+            style={{ fontSize: '0.8rem', padding: '0.35rem 0.8rem' }}
+            onClick={handleCopySql}
+          >
+            <Copy size={14} />
+            העתק SQL מעודכן
+          </button>
+        </div>
+      )}
+
+      {/* ─── SMART PASTE QUIZ BUILDER ─── */}
+      {showBuilder && (
+        <motion.div
+          className="quiz-builder-card"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="quiz-builder-header">
+            <div>
+              <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <Wand2 size={20} style={{ color: 'var(--primary)' }} />
+                יצירת חידון חדש בהדבקה אחת
+              </h2>
+              <p style={{ margin: '0.2rem 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                הכיני שאלות מגוונות בצ׳אט (לדוגמה ChatGPT או Gemini), הדביקי את הכל כאן בבת אחת — והמערכת תבנה את החידון אוטומטית.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-outline"
+              style={{ fontSize: '0.86rem', padding: '0.5rem 0.95rem' }}
+              onClick={handleCopyPrompt}
+            >
+              <Copy size={15} />
+              העתק הנחיה מוכנה לצ׳אט (פרומפט)
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div>
+              <label
+                htmlFor="builder-deck-title"
+                style={{ display: 'block', fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}
+              >
+                שם החידון
+              </label>
+              <input
+                id="builder-deck-title"
+                className="quiz-config-input"
+                style={{ width: '100%' }}
+                type="text"
+                value={builderTitle}
+                onChange={(e) => setBuilderTitle(e.target.value)}
+                placeholder="לדוגמה: חידון יום רביעי — פרשת וישלח"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="builder-raw-text"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}
+              >
+                <ClipboardPaste size={15} />
+                הדביקי כאן את השאלות מהצ׳אט (כל פורמט של שאלה + 4 אפשרויות + סימון * ליד הנכונה)
+              </label>
+              <textarea
+                id="builder-raw-text"
+                className="quiz-builder-textarea"
+                value={builderRawText}
+                onChange={(e) => setBuilderRawText(e.target.value)}
+                placeholder={`דוגמה:\nשאלה: מה ראה יעקב בחלומו?\nא. כוכבים\nב. סולם ומלאכים *\nג. עץ זית\nד. נהר מים\nהסבר: חלום הסולם מסמל את התפילה והחיבור בין שמיים לארץ.`}
+              />
+            </div>
+
+            {parseWarnings.length > 0 && (
+              <div
+                style={{
+                  background: 'rgba(245, 158, 11, 0.12)',
+                  border: '1px solid rgba(245, 158, 11, 0.35)',
+                  borderRadius: '12px',
+                  padding: '0.7rem 0.9rem',
+                  fontSize: '0.84rem',
+                  color: '#92400e'
+                }}
+              >
+                {parseWarnings.map((w, i) => (
+                  <div key={i}>• {w}</div>
+                ))}
+              </div>
+            )}
+
+            {parsedQuestions.length > 0 && (
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '0.94rem', color: '#047857', marginBottom: '0.45rem' }}>
+                  זוהו {parsedQuestions.length} שאלות מוכנות! (אפשר ללחוץ על תשובה כדי לשנות איזו נכונה)
+                </div>
+                <div className="quiz-parsed-list">
+                  {parsedQuestions.map((q, qIdx) => (
+                    <div key={q.id} className="quiz-preview-item" style={{ marginBottom: 0 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                        <div style={{ fontWeight: 800, fontSize: '0.92rem' }}>
+                          {qIdx + 1}. {q.question}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveParsedQuestion(qIdx)}
+                          style={{ color: '#dc2626', flexShrink: 0 }}
+                          title="הסר שאלה"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                      <div className="quiz-preview-options">
+                        {q.options.map((opt, optIdx) => (
+                          <button
+                            type="button"
+                            key={optIdx}
+                            className={`quiz-parsed-opt-btn ${q.correctIndex === optIdx ? 'correct' : ''}`}
+                            onClick={() => handleSetParsedCorrect(qIdx, optIdx as 0 | 1 | 2 | 3)}
+                          >
+                            <span>
+                              <strong>{OPTION_LETTERS[optIdx]}.</strong> {opt}
+                            </span>
+                            {q.correctIndex === optIdx && <CheckCircle2 size={14} />}
+                          </button>
+                        ))}
+                      </div>
+                      {q.explanation && (
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
+                          הסבר: {q.explanation}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
+              <button
+                type="button"
+                className="btn btn-outline"
+                disabled={savingDeck}
+                onClick={() => setShowBuilder(false)}
+              >
+                ביטול
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline"
+                disabled={savingDeck || parsedQuestions.length === 0}
+                onClick={() => handleSaveCustomDeck(false)}
+              >
+                שמור חידון לרשימה
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={savingDeck || parsedQuestions.length === 0}
+                onClick={() => handleSaveCustomDeck(true)}
+              >
+                <Play size={16} />
+                {savingDeck ? 'שומר...' : 'שמור והתחל משחק עכשיו'}
+              </button>
+            </div>
+          </div>
+        </motion.div>
       )}
 
       {/* Round Configuration Bar */}
@@ -254,46 +576,81 @@ const AdminQuizHub = () => {
             ))}
           </div>
         </div>
+
+        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <label className="quiz-checkbox-label">
+            <input
+              type="checkbox"
+              checked={shuffleOrder}
+              onChange={(e) => setShuffleOrder(e.target.checked)}
+            />
+            <Shuffle size={15} style={{ color: 'var(--primary)' }} />
+            ערבב סדר שאלות
+          </label>
+          <label className="quiz-checkbox-label">
+            <input
+              type="checkbox"
+              checked={limitTenQuestions}
+              onChange={(e) => setLimitTenQuestions(e.target.checked)}
+            />
+            סבב מקוצר (עד 10 שאלות)
+          </label>
+        </div>
       </div>
 
       {/* Decks to launch */}
       <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
         <Sparkles size={19} style={{ color: 'var(--primary)' }} />
-        בחרי חבילת שאלות לפתיחת משחק חדש
+        חידונים מוכנים להפעלה
       </h2>
 
       <div className="quiz-decks-grid">
-        {QUIZ_DECKS.map((deck) => (
-          <div key={deck.id} className="quiz-deck-card">
-            <span
-              className="quiz-deck-badge"
-              style={{ background: `${deck.accentColor}16`, color: deck.accentColor }}
-            >
-              {deck.badge}
-            </span>
-            <h3 className="quiz-deck-title">{deck.title}</h3>
-            <p className="quiz-deck-sub">{deck.subtitle}</p>
-            <div className="quiz-deck-actions">
-              <button
-                className="quiz-launch-btn"
-                style={{ background: deck.accentColor }}
-                disabled={launchingDeckId === deck.id}
-                onClick={() => handleLaunchDeck(deck)}
-              >
-                <Play size={17} />
-                {launchingDeckId === deck.id ? 'פותח סבב...' : 'התחל משחק חדש'}
-              </button>
-              <button
-                className="quiz-preview-btn"
-                type="button"
-                onClick={() => setPreviewDeck(deck)}
-              >
-                <Eye size={16} />
-                הצצה לשאלות
-              </button>
+        {allDecks.map((deck) => {
+          const isCustom = !QUIZ_DECKS.some((d) => d.id === deck.id);
+          return (
+            <div key={deck.id} className="quiz-deck-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
+                <span
+                  className="quiz-deck-badge"
+                  style={{ background: `${deck.accentColor}16`, color: deck.accentColor }}
+                >
+                  {deck.badge}
+                </span>
+                {isCustom && (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDeleteDeck(deck)}
+                    style={{ color: '#dc2626', padding: '0.25rem' }}
+                    title="מחק חידון זה"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+              <h3 className="quiz-deck-title">{deck.title}</h3>
+              <p className="quiz-deck-sub">{deck.subtitle}</p>
+              <div className="quiz-deck-actions">
+                <button
+                  className="quiz-launch-btn"
+                  style={{ background: deck.accentColor }}
+                  disabled={launchingDeckId === deck.id}
+                  onClick={() => handleLaunchDeck(deck)}
+                >
+                  <Play size={17} />
+                  {launchingDeckId === deck.id ? 'פותח סבב...' : 'התחל משחק חדש'}
+                </button>
+                <button
+                  className="quiz-preview-btn"
+                  type="button"
+                  onClick={() => setPreviewDeck(deck)}
+                >
+                  <Eye size={16} />
+                  הצצה לשאלות
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Saved Rounds & Cleanup */}
@@ -454,9 +811,11 @@ const AdminQuizHub = () => {
                       </div>
                     ))}
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.45rem' }}>
-                    {q.explanation}
-                  </div>
+                  {q.explanation && (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.45rem' }}>
+                      {q.explanation}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -527,7 +886,41 @@ const AdminQuizHub = () => {
         </div>
       )}
 
-      {/* Delete Single Confirmation Modal */}
+      {/* Delete Custom Deck Confirmation Modal */}
+      {confirmDeleteDeck && (
+        <div className="quiz-modal-backdrop" onClick={() => !deleting && setConfirmDeleteDeck(null)}>
+          <div className="quiz-modal-card" style={{ maxWidth: '420px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="quiz-modal-header">
+              <h3>מחיקת חידון</h3>
+              <button onClick={() => !deleting && setConfirmDeleteDeck(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+              למחוק את החידון <strong>{confirmDeleteDeck.title}</strong> מהרשימה?
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+              <button
+                className="btn btn-outline"
+                disabled={deleting}
+                onClick={() => setConfirmDeleteDeck(null)}
+              >
+                ביטול
+              </button>
+              <button
+                className="btn"
+                style={{ background: '#dc2626', color: '#fff' }}
+                disabled={deleting}
+                onClick={handleConfirmDeleteDeck}
+              >
+                {deleting ? 'מוחק...' : 'כן, מחק'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Single Session Confirmation Modal */}
       {confirmDeleteSession && (
         <div className="quiz-modal-backdrop" onClick={() => !deleting && setConfirmDeleteSession(null)}>
           <div className="quiz-modal-card" style={{ maxWidth: '420px' }} onClick={(e) => e.stopPropagation()}>

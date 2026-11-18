@@ -4,8 +4,10 @@ import {
   type QuizAnswer,
   type QuizDeck,
   type QuizPlayer,
+  type QuizQuestion,
   type QuizSession
 } from '../data/quizDecks';
+import { shuffleQuestions } from './quizParser';
 
 export interface QuizSessionWithStats extends QuizSession {
   players: QuizPlayer[];
@@ -31,16 +33,32 @@ export function isMissingQuizTablesError(error: unknown): boolean {
   return (
     code === '42P01' ||
     code === 'PGRST205' ||
-    msg.includes('quiz_sessions') && (msg.includes('does not exist') || msg.includes('could not find'))
+    ((msg.includes('quiz_sessions') || msg.includes('quiz_decks')) &&
+      (msg.includes('does not exist') || msg.includes('could not find')))
   );
 }
 
 export async function createQuizSession(
   deck: QuizDeck,
-  options?: { customTitle?: string; durationSec?: number; createdBy?: string | null }
+  options?: {
+    customTitle?: string;
+    durationSec?: number;
+    createdBy?: string | null;
+    shuffle?: boolean;
+    limitCount?: number | null;
+  }
 ): Promise<QuizSession> {
   const durationSec = options?.durationSec ?? 20;
   const title = (options?.customTitle || '').trim() || deck.title;
+  const shouldShuffle = options?.shuffle !== false;
+
+  let sessionQuestions = shouldShuffle
+    ? shuffleQuestions(deck.questions)
+    : [...deck.questions];
+
+  if (options?.limitCount && options.limitCount > 0 && options.limitCount < sessionQuestions.length) {
+    sessionQuestions = sessionQuestions.slice(0, options.limitCount);
+  }
 
   for (let attempt = 0; attempt < 6; attempt++) {
     const code = generateRoomCode();
@@ -50,7 +68,7 @@ export async function createQuizSession(
         code,
         title,
         deck_id: deck.id,
-        questions: deck.questions,
+        questions: sessionQuestions,
         status: 'lobby',
         current_question_index: 0,
         question_duration_sec: durationSec,
@@ -247,4 +265,122 @@ export async function submitQuizAnswer(
 
   if (error) throw error;
   return data as SubmitAnswerResult;
+}
+
+// ─── Custom Saved Quiz Decks (Supabase + seamless local fallback) ───
+const LOCAL_DECKS_KEY = 'chabad_biu_custom_quiz_decks_v1';
+
+export interface CustomDeckLoadResult {
+  decks: QuizDeck[];
+  usingLocalFallback: boolean;
+}
+
+function readLocalDecks(): QuizDeck[] {
+  try {
+    const raw = localStorage.getItem(LOCAL_DECKS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeLocalDecks(decks: QuizDeck[]) {
+  try {
+    localStorage.setItem(LOCAL_DECKS_KEY, JSON.stringify(decks));
+  } catch {
+    // Ignore storage quota errors
+  }
+}
+
+export async function fetchCustomQuizDecks(): Promise<CustomDeckLoadResult> {
+  try {
+    const { data, error } = await supabase
+      .from('quiz_decks')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const decks: QuizDeck[] = (data || []).map((row: { id: string; title: string; questions: QuizQuestion[] }) => ({
+      id: row.id,
+      title: row.title,
+      subtitle: 'חידון מותאם אישית שיצרתם',
+      badge: `מותאם אישית • ${Array.isArray(row.questions) ? row.questions.length : 0} שאלות`,
+      accentColor: '#dd6755',
+      questions: Array.isArray(row.questions) ? row.questions : []
+    }));
+
+    return { decks, usingLocalFallback: false };
+  } catch (err) {
+    if (isMissingQuizTablesError(err)) {
+      return { decks: readLocalDecks(), usingLocalFallback: true };
+    }
+    throw err;
+  }
+}
+
+export async function createCustomQuizDeck(
+  title: string,
+  questions: QuizQuestion[],
+  createdBy?: string | null
+): Promise<{ deck: QuizDeck; savedToCloud: boolean }> {
+  const cleanTitle = title.trim() || `חידון מותאם אישית (${questions.length} שאלות)`;
+
+  try {
+    const { data, error } = await supabase
+      .from('quiz_decks')
+      .insert({
+        title: cleanTitle,
+        questions,
+        created_by: createdBy ?? null
+      })
+      .select('*')
+      .single();
+
+    if (error) throw error;
+
+    return {
+      savedToCloud: true,
+      deck: {
+        id: data.id,
+        title: data.title,
+        subtitle: 'חידון מותאם אישית שיצרתם',
+        badge: `מותאם אישית • ${questions.length} שאלות`,
+        accentColor: '#dd6755',
+        questions
+      }
+    };
+  } catch (err) {
+    if (isMissingQuizTablesError(err)) {
+      const localDeck: QuizDeck = {
+        id: `local-${Date.now()}`,
+        title: cleanTitle,
+        subtitle: 'חידון שמור בדפדפן זה',
+        badge: `שמור מקומית • ${questions.length} שאלות`,
+        accentColor: '#dd6755',
+        questions
+      };
+      const existing = readLocalDecks();
+      writeLocalDecks([localDeck, ...existing]);
+      return { deck: localDeck, savedToCloud: false };
+    }
+    throw err;
+  }
+}
+
+export async function deleteCustomQuizDeck(deckId: string): Promise<void> {
+  if (deckId.startsWith('local-')) {
+    const existing = readLocalDecks().filter((d) => d.id !== deckId);
+    writeLocalDecks(existing);
+    return;
+  }
+
+  const { error } = await supabase
+    .from('quiz_decks')
+    .delete()
+    .eq('id', deckId);
+
+  if (error) throw error;
 }
