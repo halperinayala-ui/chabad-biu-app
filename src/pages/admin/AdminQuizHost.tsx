@@ -21,6 +21,7 @@ import {
   Zap
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { QuizAvatar } from '../../components/QuizAvatar';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   OPTION_LETTERS,
@@ -172,7 +173,7 @@ const AdminQuizHost = () => {
       const remaining = Math.max(0, Math.ceil(duration - elapsedSec));
       setSecondsLeft((prev) => {
         if (remaining !== prev && remaining > 0 && remaining <= 5) {
-          quizSound.playTick();
+          quizSound.playTick(true);
         }
         return remaining;
       });
@@ -191,6 +192,28 @@ const AdminQuizHost = () => {
     return () => window.clearInterval(timerId);
   }, [session?.status, session?.current_question_index, session?.question_started_at]);
 
+  // Dramatic background music orchestration
+  useEffect(() => {
+    if (!session || muted) {
+      quizSound.stopMusic();
+      return;
+    }
+
+    if (session.status === 'lobby') {
+      quizSound.startLobbyMusic();
+    } else if (session.status === 'question') {
+      quizSound.startQuestionMusic(secondsLeft <= 5 && secondsLeft > 0);
+    } else {
+      quizSound.stopMusic();
+    }
+  }, [session?.status, muted, secondsLeft <= 5]);
+
+  useEffect(() => {
+    return () => {
+      quizSound.stopMusic();
+    };
+  }, []);
+
   // Confetti when game reaches 'finished'
   useEffect(() => {
     if (session?.status === 'finished' && !confettiFiredRef.current) {
@@ -202,7 +225,10 @@ const AdminQuizHost = () => {
 
   const handleToggleMute = () => {
     const next = !muted;
-    quizSound.muted = next;
+    quizSound.setMuted(next);
+    if (!next) {
+      quizSound.unlock();
+    }
     setMuted(next);
   };
 
@@ -366,7 +392,15 @@ const AdminQuizHost = () => {
     secondsLeft <= 5 ? '#ef4444' : secondsLeft <= 10 ? '#f59e0b' : '#34d399';
 
   return (
-    <div className="quiz-host-shell">
+    <div
+      className="quiz-host-shell"
+      onPointerDown={() => {
+        if (!muted) {
+          quizSound.unlock();
+          if (session.status === 'lobby') quizSound.startLobbyMusic();
+        }
+      }}
+    >
       {/* Top Bar */}
       <div className="quiz-host-topbar">
         <div className="quiz-host-brand">
@@ -377,6 +411,11 @@ const AdminQuizHost = () => {
           >
             <ArrowRight size={20} />
           </button>
+          <img
+            src="/logo-orange.png"
+            alt="חב״ד בר אילן"
+            style={{ height: '38px', width: 'auto', objectFit: 'contain' }}
+          />
           <div>
             <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{session.title}</div>
             <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.68)' }}>
@@ -456,7 +495,7 @@ const AdminQuizHost = () => {
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.7, opacity: 0 }}
                     >
-                      <span>{p.avatar}</span>
+                      <QuizAvatar avatar={p.avatar} size={30} />
                       <span>{p.nickname}</span>
                     </motion.div>
                   ))
@@ -593,8 +632,9 @@ const AdminQuizHost = () => {
                     const p = players.find((pl) => pl.id === ans.player_id);
                     if (!p) return null;
                     return (
-                      <span key={ans.id} className="quiz-answered-chip">
-                        {p.avatar} {p.nickname}
+                      <span key={ans.id} className="quiz-answered-chip" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <QuizAvatar avatar={p.avatar} size={22} />
+                        <span>{p.nickname}</span>
                       </span>
                     );
                   })}
@@ -611,8 +651,9 @@ const AdminQuizHost = () => {
                           <div style={{ fontSize: '0.8rem', color: '#fde68a', fontWeight: 700 }}>
                             המהיר/ה ביותר בשאלה זו
                           </div>
-                          <div style={{ fontSize: '1.12rem', fontWeight: 900 }}>
-                            {fastestPlayer.avatar} {fastestPlayer.nickname}
+                          <div style={{ fontSize: '1.12rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.15rem' }}>
+                            <QuizAvatar avatar={fastestPlayer.avatar} size={28} />
+                            <span>{fastestPlayer.nickname}</span>
                           </div>
                         </div>
                       </div>
@@ -646,7 +687,7 @@ const AdminQuizHost = () => {
                         <strong style={{ width: '24px', color: idx === 0 ? '#fbbf24' : 'rgba(255,255,255,0.7)' }}>
                           #{idx + 1}
                         </strong>
-                        <span>{p.avatar}</span>
+                        <QuizAvatar avatar={p.avatar} size={28} />
                         <span style={{ fontWeight: 700 }}>{p.nickname}</span>
                         {p.streak >= 2 && (
                           <span style={{ fontSize: '0.78rem', color: '#fb923c', display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
@@ -681,7 +722,7 @@ const AdminQuizHost = () => {
                 <div style={{ fontSize: '2rem' }}>🥈</div>
                 {players[1] ? (
                   <>
-                    <div style={{ fontSize: '2rem' }}>{players[1].avatar}</div>
+                    <QuizAvatar avatar={players[1].avatar} size={52} />
                     <strong style={{ fontSize: '1.2rem' }}>{players[1].nickname}</strong>
                     <div style={{ color: '#fde68a', fontWeight: 800 }}>
                       {players[1].score.toLocaleString()} נק׳
@@ -700,7 +741,7 @@ const AdminQuizHost = () => {
                 <div style={{ fontSize: '2.5rem' }}>🥇</div>
                 {players[0] && (
                   <>
-                    <div style={{ fontSize: '2.4rem' }}>{players[0].avatar}</div>
+                    <QuizAvatar avatar={players[0].avatar} size={64} />
                     <strong style={{ fontSize: '1.45rem' }}>{players[0].nickname}</strong>
                     <div style={{ color: '#fde68a', fontWeight: 900, fontSize: '1.2rem' }}>
                       {players[0].score.toLocaleString()} נק׳
@@ -717,7 +758,7 @@ const AdminQuizHost = () => {
                 <div style={{ fontSize: '2rem' }}>🥉</div>
                 {players[2] ? (
                   <>
-                    <div style={{ fontSize: '2rem' }}>{players[2].avatar}</div>
+                    <QuizAvatar avatar={players[2].avatar} size={48} />
                     <strong style={{ fontSize: '1.15rem' }}>{players[2].nickname}</strong>
                     <div style={{ color: '#fde68a', fontWeight: 800 }}>
                       {players[2].score.toLocaleString()} נק׳
@@ -740,7 +781,7 @@ const AdminQuizHost = () => {
                 <div key={p.id} className="quiz-lb-row">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                     <strong>#{idx + 4}</strong>
-                    <span>{p.avatar}</span>
+                    <QuizAvatar avatar={p.avatar} size={26} />
                     <span>{p.nickname}</span>
                   </div>
                   <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem' }}>

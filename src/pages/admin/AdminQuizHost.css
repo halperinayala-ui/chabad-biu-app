@@ -279,10 +279,27 @@
   transition: all 0.3s ease;
 }
 
-.quiz-host-option-card.accent-0 { border-color: rgba(129, 140, 248, 0.4); }
-.quiz-host-option-card.accent-1 { border-color: rgba(251, 146, 60, 0.4); }
-.quiz-host-option-card.accent-2 { border-color: rgba(45, 212, 191, 0.4); }
-.quiz-host-option-card.accent-3 { border-color: rgba(244, 114, 182, 0.4); }
+.quiz-host-option-card.accent-0 {
+  border-color: rgba(129, 140, 248, 0.78);
+  background: rgba(99, 102, 241, 0.14);
+}
+.quiz-host-option-card.accent-1 {
+  border-color: rgba(251, 146, 60, 0.78);
+  background: rgba(249, 115, 22, 0.14);
+}
+.quiz-host-option-card.accent-2 {
+  border-color: rgba(45, 212, 191, 0.78);
+  background: rgba(20, 184, 166, 0.14);
+}
+.quiz-host-option-card.accent-3 {
+  border-color: rgba(244, 114, 182, 0.78);
+  background: rgba(236, 72, 153, 0.14);
+}
+
+.quiz-host-option-card.accent-0 .quiz-option-letter-badge { background: #6366f1; color: #fff; }
+.quiz-host-option-card.accent-1 .quiz-option-letter-badge { background: #f97316; color: #fff; }
+.quiz-host-option-card.accent-2 .quiz-option-letter-badge { background: #14b8a6; color: #fff; }
+.quiz-host-option-card.accent-3 .quiz-option-letter-badge { background: #ec4899; color: #fff; }
 
 .quiz-host-option-card.is-correct {
   background: rgba(16, 185, 129, 0.22);

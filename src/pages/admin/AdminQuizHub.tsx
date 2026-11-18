@@ -18,6 +18,7 @@ import {
   X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { QuizAvatar } from '../../components/QuizAvatar';
 import { useAuth } from '../../contexts/AuthContext';
 import { OPTION_LETTERS, QUIZ_DECKS, type QuizDeck } from '../../data/quizDecks';
 import {
@@ -378,9 +379,9 @@ const AdminQuizHub = () => {
                     {topPlayer && (
                       <>
                         <span>•</span>
-                        <span style={{ color: 'var(--primary)', fontWeight: 700 }}>
-                          <Trophy size={14} style={{ verticalAlign: 'text-bottom', marginLeft: '4px' }} />
-                          מוביל/ה: {topPlayer.avatar} {topPlayer.nickname} ({topPlayer.score.toLocaleString()} נק׳)
+                        <span style={{ color: 'var(--primary)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <Trophy size={14} />
+                          מוביל/ה: <QuizAvatar avatar={topPlayer.avatar} size={22} /> {topPlayer.nickname} ({topPlayer.score.toLocaleString()} נק׳)
                         </span>
                       </>
                     )}
@@ -504,7 +505,10 @@ const AdminQuizHub = () => {
                       <tr key={p.id}>
                         <td style={{ fontWeight: 900 }}>#{idx + 1}</td>
                         <td style={{ fontWeight: 700 }}>
-                          {p.avatar} {p.nickname}
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+                            <QuizAvatar avatar={p.avatar} size={24} />
+                            <span>{p.nickname}</span>
+                          </div>
                         </td>
                         <td style={{ fontWeight: 800, color: 'var(--primary)' }}>
                           {p.score.toLocaleString()}

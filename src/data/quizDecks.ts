@@ -57,7 +57,25 @@ export interface QuizAnswer {
 
 export const OPTION_LETTERS = ['א', 'ב', 'ג', 'ד'] as const;
 
-export const PLAYER_AVATARS = ['✨', '🎓', '🔥', '🦁', '🌟', '☕', '📖', '⚡', '🕊️', '🎶'] as const;
+export const OPTION_ACCENTS = [
+  { border: '#818cf8', badgeBg: '#6366f1', softBg: 'rgba(99, 102, 241, 0.16)', glow: 'rgba(99, 102, 241, 0.35)' },
+  { border: '#fb923c', badgeBg: '#f97316', softBg: 'rgba(249, 115, 22, 0.16)', glow: 'rgba(249, 115, 22, 0.35)' },
+  { border: '#2dd4bf', badgeBg: '#14b8a6', softBg: 'rgba(20, 184, 166, 0.16)', glow: 'rgba(20, 184, 166, 0.35)' },
+  { border: '#f472b6', badgeBg: '#ec4899', softBg: 'rgba(236, 72, 153, 0.16)', glow: 'rgba(236, 72, 153, 0.35)' }
+] as const;
+
+export const PLAYER_AVATARS = [
+  'chabad-flame',
+  'star-david',
+  'torah-book',
+  'campus-cap',
+  'menorah',
+  'shabbat-candles',
+  'kiddush-cup',
+  'campus-coffee',
+  'crown-torah',
+  'niggun-note'
+] as const;
 
 const PARASHA_VAYETZEI_QUESTIONS: QuizQuestion[] = [
   {
