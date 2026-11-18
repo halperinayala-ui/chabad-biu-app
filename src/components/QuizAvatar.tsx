@@ -10,7 +10,7 @@ export interface QuizAvatarDef {
 export const QUIZ_AVATARS: QuizAvatarDef[] = [
   {
     id: 'student-boy-kippah',
-    label: 'סטודנט בקמפוס',
+    label: 'חושב מהר',
     gradient: 'linear-gradient(135deg, #492691, #7c3aed)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
@@ -42,7 +42,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'student-girl-glasses',
-    label: 'סטודנטית משקיענית',
+    label: 'שולטת בחומר',
     gradient: 'linear-gradient(135deg, #db2777, #9333ea)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
@@ -72,7 +72,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'student-boy-headphones',
-    label: 'חובב מוזיקה',
+    label: 'בקצב הנכון',
     gradient: 'linear-gradient(135deg, #0d9488, #2563eb)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
@@ -101,7 +101,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'student-girl-curly',
-    label: 'סטודנטית חייכנית',
+    label: 'מלאת שמחה',
     gradient: 'linear-gradient(135deg, #ea580c, #f59e0b)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
@@ -136,7 +136,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'student-boy-beard',
-    label: 'סטודנט מזוקן',
+    label: 'ראש טוב',
     gradient: 'linear-gradient(135deg, #4338ca, #0284c7)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
@@ -165,7 +165,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'student-girl-bun',
-    label: 'סטודנטית באסוף',
+    label: 'בפוקוס מלא',
     gradient: 'linear-gradient(135deg, #059669, #14b8a6)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
@@ -195,7 +195,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'student-boy-cap',
-    label: 'סטודנט ספורטיבי',
+    label: 'שחקן נשמה',
     gradient: 'linear-gradient(135deg, #f97316, #dc2626)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
@@ -221,7 +221,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'student-girl-beret',
-    label: 'סטודנטית בסטייל',
+    label: 'סטייל בקמפוס',
     gradient: 'linear-gradient(135deg, #7c3aed, #ec4899)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
@@ -273,7 +273,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'chabad-shliach',
-    label: 'חסיד בקמפוס',
+    label: 'רוח חב״דית',
     gradient: 'linear-gradient(135deg, #b45309, #492691)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
@@ -299,7 +299,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'student-girl-headphones',
-    label: 'חובבת מוזיקה',
+    label: 'וייב מוזיקלי',
     gradient: 'linear-gradient(135deg, #ec4899, #6366f1)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
@@ -351,7 +351,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'student-girl-coffee',
-    label: 'אחרי קפה של בוקר',
+    label: 'קפה של רביעי',
     gradient: 'linear-gradient(135deg, #c2410c, #f59e0b)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
@@ -378,7 +378,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'student-boy-scholar',
-    label: 'מתמיד בשיעור',
+    label: 'חד כתער',
     gradient: 'linear-gradient(135deg, #3730a3, #492691)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
@@ -406,7 +406,7 @@ export const QUIZ_AVATARS: QuizAvatarDef[] = [
   },
   {
     id: 'student-girl-sunnies',
-    label: 'הכי קולית בקמפוס',
+    label: 'אלופת הסבב',
     gradient: 'linear-gradient(135deg, #0ea5e9, #6366f1)',
     renderSvg: () => (
       <svg viewBox="0 0 64 64" fill="none">
