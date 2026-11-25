@@ -370,6 +370,52 @@ export async function createCustomQuizDeck(
   }
 }
 
+export async function updateCustomQuizDeck(
+  deckId: string,
+  title: string,
+  questions: QuizQuestion[]
+): Promise<{ deck: QuizDeck; savedToCloud: boolean }> {
+  const cleanTitle = title.trim() || `חידון מותאם אישית (${questions.length} שאלות)`;
+
+  if (deckId.startsWith('local-')) {
+    const updatedDeck: QuizDeck = {
+      id: deckId,
+      title: cleanTitle,
+      subtitle: 'חידון שמור בדפדפן זה',
+      badge: `שמור מקומית • ${questions.length} שאלות`,
+      accentColor: '#dd6755',
+      questions
+    };
+    const existing = readLocalDecks().map((d) => (d.id === deckId ? updatedDeck : d));
+    writeLocalDecks(existing);
+    return { deck: updatedDeck, savedToCloud: false };
+  }
+
+  const { data, error } = await supabase
+    .from('quiz_decks')
+    .update({
+      title: cleanTitle,
+      questions
+    })
+    .eq('id', deckId)
+    .select('*')
+    .single();
+
+  if (error) throw error;
+
+  return {
+    savedToCloud: true,
+    deck: {
+      id: data.id,
+      title: data.title,
+      subtitle: 'חידון מותאם אישית שיצרתם',
+      badge: `מותאם אישית • ${questions.length} שאלות`,
+      accentColor: '#dd6755',
+      questions
+    }
+  };
+}
+
 export async function deleteCustomQuizDeck(deckId: string): Promise<void> {
   if (deckId.startsWith('local-')) {
     const existing = readLocalDecks().filter((d) => d.id !== deckId);

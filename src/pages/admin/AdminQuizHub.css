@@ -493,3 +493,150 @@
   border: 1px solid var(--border);
 }
 
+/* ─── EDIT DECK MODAL ─────────────────────────────────── */
+.quiz-edit-modal-card {
+  max-width: 780px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.quiz-edit-questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-height: 55vh;
+  overflow-y: auto;
+  padding-left: 0.25rem;
+}
+
+.quiz-edit-question-card {
+  background: var(--background);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.quiz-edit-q-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.quiz-edit-q-num {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--primary);
+  background: rgba(73, 38, 145, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 8px;
+}
+
+.quiz-edit-q-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.quiz-edit-icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.quiz-edit-icon-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.quiz-edit-icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.quiz-edit-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.5rem;
+}
+
+.quiz-edit-option-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 11px;
+  padding: 0.35rem 0.5rem;
+}
+
+.quiz-edit-option-row.is-correct {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.quiz-edit-correct-toggle {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--background);
+  color: var(--text-secondary);
+  font-weight: 900;
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.quiz-edit-option-row.is-correct .quiz-edit-correct-toggle {
+  background: #10b981;
+  border-color: #10b981;
+  color: #fff;
+}
+
+.quiz-edit-option-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  min-width: 0;
+}
+
+.quiz-edit-option-input:focus {
+  outline: none;
+}
+
+.quiz-deck-icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.quiz-deck-icon-btn:hover {
+  border-color: var(--primary);
+}
+
+

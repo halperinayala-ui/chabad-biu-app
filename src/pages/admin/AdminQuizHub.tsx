@@ -2,17 +2,21 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
+  ArrowDown,
   ArrowRight,
+  ArrowUp,
   BarChart3,
   CheckCircle2,
   ClipboardPaste,
   Copy,
   Database,
+  Edit3,
   Eye,
   Play,
   Plus,
   QrCode,
   RefreshCw,
+  Save,
   Shuffle,
   Sparkles,
   Trash2,
@@ -40,6 +44,7 @@ import {
   fetchAllQuizSessions,
   fetchCustomQuizDecks,
   isMissingQuizTablesError,
+  updateCustomQuizDeck,
   type QuizSessionWithStats
 } from '../../utils/quizService';
 import quizMigrationSql from '../../../supabase_quiz_migration.sql?raw';
@@ -77,6 +82,14 @@ const AdminQuizHub = () => {
   const [parsedQuestions, setParsedQuestions] = useState<QuizQuestion[]>([]);
   const [parseWarnings, setParseWarnings] = useState<string[]>([]);
   const [savingDeck, setSavingDeck] = useState(false);
+
+  // Edit existing quiz deck modal
+  const [editingDeck, setEditingDeck] = useState<QuizDeck | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editQuestions, setEditQuestions] = useState<QuizQuestion[]>([]);
+  const [showEditAppendPaste, setShowEditAppendPaste] = useState(false);
+  const [editAppendText, setEditAppendText] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // Modals (Zero browser alert/confirm)
   const [previewDeck, setPreviewDeck] = useState<QuizDeck | null>(null);
@@ -217,6 +230,148 @@ const AdminQuizHub = () => {
 
   const handleRemoveParsedQuestion = (qIdx: number) => {
     setParsedQuestions((prev) => prev.filter((_, i) => i !== qIdx));
+  };
+
+  const openEditDeck = (deck: QuizDeck, asCopy = false) => {
+    setEditingDeck(
+      asCopy
+        ? { ...deck, id: '__copy__', title: `${deck.title} (עותק)` }
+        : deck
+    );
+    setEditTitle(asCopy ? `${deck.title} (עותק)` : deck.title);
+    setEditQuestions(
+      deck.questions.map((q) => ({
+        ...q,
+        options: [...q.options] as [string, string, string, string]
+      }))
+    );
+    setShowEditAppendPaste(false);
+    setEditAppendText('');
+  };
+
+  const handleEditQuestionText = (qIdx: number, val: string) => {
+    setEditQuestions((prev) =>
+      prev.map((q, i) => (i === qIdx ? { ...q, question: val } : q))
+    );
+  };
+
+  const handleEditOptionText = (qIdx: number, optIdx: number, val: string) => {
+    setEditQuestions((prev) =>
+      prev.map((q, i) => {
+        if (i !== qIdx) return q;
+        const nextOpts = [...q.options] as [string, string, string, string];
+        nextOpts[optIdx] = val;
+        return { ...q, options: nextOpts };
+      })
+    );
+  };
+
+  const handleEditCorrectIndex = (qIdx: number, optIdx: 0 | 1 | 2 | 3) => {
+    setEditQuestions((prev) =>
+      prev.map((q, i) => (i === qIdx ? { ...q, correctIndex: optIdx } : q))
+    );
+  };
+
+  const handleEditExplanation = (qIdx: number, val: string) => {
+    setEditQuestions((prev) =>
+      prev.map((q, i) => (i === qIdx ? { ...q, explanation: val } : q))
+    );
+  };
+
+  const handleMoveEditQuestion = (qIdx: number, dir: -1 | 1) => {
+    setEditQuestions((prev) => {
+      const target = qIdx + dir;
+      if (target < 0 || target >= prev.length) return prev;
+      const copy = [...prev];
+      [copy[qIdx], copy[target]] = [copy[target], copy[qIdx]];
+      return copy;
+    });
+  };
+
+  const handleDeleteEditQuestion = (qIdx: number) => {
+    setEditQuestions((prev) => prev.filter((_, i) => i !== qIdx));
+  };
+
+  const handleAddBlankEditQuestion = () => {
+    setEditQuestions((prev) => [
+      ...prev,
+      {
+        id: `custom-${Date.now()}-${prev.length}`,
+        question: '',
+        options: ['', '', '', ''],
+        correctIndex: 0,
+        explanation: ''
+      }
+    ]);
+  };
+
+  const handleAppendPastedToEdit = () => {
+    const { questions, warnings } = parseQuizText(editAppendText);
+    if (questions.length === 0) {
+      toast.error('לא זוהו שאלות תקינות בטקסט שהודבק');
+      return;
+    }
+    setEditQuestions((prev) => [...prev, ...questions]);
+    setEditAppendText('');
+    setShowEditAppendPaste(false);
+    toast.success(
+      warnings.length > 0
+        ? `נוספו ${questions.length} שאלות (שימי לב לסימון התשובות הנכונות)`
+        : `נוספו ${questions.length} שאלות לחידון!`
+    );
+  };
+
+  const handleSaveEditedDeck = async (andLaunch: boolean) => {
+    if (!editingDeck) return;
+    if (editQuestions.length === 0) {
+      toast.error('חייבת להישאר לפחות שאלה אחת בחידון');
+      return;
+    }
+
+    const sanitized: QuizQuestion[] = [];
+    for (let i = 0; i < editQuestions.length; i++) {
+      const q = editQuestions[i];
+      const qText = q.question.trim();
+      const opts = q.options.map((o) => o.trim());
+      if (!qText || opts.some((o) => !o)) {
+        toast.error(`שאלה ${i + 1} חסרה טקסט או אחת מ-4 התשובות`);
+        return;
+      }
+      sanitized.push({
+        ...q,
+        question: qText,
+        options: [opts[0], opts[1], opts[2], opts[3]],
+        explanation: (q.explanation || '').trim()
+      });
+    }
+
+    setSavingEdit(true);
+    try {
+      let savedDeck: QuizDeck;
+      if (editingDeck.id === '__copy__') {
+        const res = await createCustomQuizDeck(editTitle, sanitized, user?.id ?? null);
+        savedDeck = res.deck;
+        setCustomDecks((prev) => [savedDeck, ...prev]);
+        toast.success('נוצר עותק חדש של החידון!');
+      } else {
+        const res = await updateCustomQuizDeck(editingDeck.id, editTitle, sanitized);
+        savedDeck = res.deck;
+        setCustomDecks((prev) =>
+          prev.map((d) => (d.id === savedDeck.id ? savedDeck : d))
+        );
+        toast.success('השינויים נשמרו בהצלחה!');
+      }
+
+      setEditingDeck(null);
+      if (andLaunch) {
+        await handleLaunchDeck(savedDeck);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('שגיאה בשמירת השינויים');
+    } finally {
+      setSavingEdit(false);
+    }
   };
 
   const handleConfirmDeleteDeck = async () => {
@@ -616,16 +771,41 @@ const AdminQuizHub = () => {
                 >
                   {deck.badge}
                 </span>
-                {isCustom && (
-                  <button
-                    type="button"
-                    onClick={() => setConfirmDeleteDeck(deck)}
-                    style={{ color: '#dc2626', padding: '0.25rem' }}
-                    title="מחק חידון זה"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  {isCustom ? (
+                    <>
+                      <button
+                        type="button"
+                        className="quiz-deck-icon-btn"
+                        onClick={() => openEditDeck(deck, false)}
+                        style={{ color: 'var(--primary)' }}
+                        title="ערוך כותרת ושאלות"
+                      >
+                        <Edit3 size={15} />
+                      </button>
+                      <button
+                        type="button"
+                        className="quiz-deck-icon-btn"
+                        onClick={() => setConfirmDeleteDeck(deck)}
+                        style={{ color: '#dc2626' }}
+                        title="מחק חידון זה"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      className="quiz-deck-icon-btn"
+                      onClick={() => openEditDeck(deck, true)}
+                      style={{ color: 'var(--primary)', width: 'auto', padding: '0 0.55rem', fontSize: '0.76rem', fontWeight: 700, gap: '0.25rem' }}
+                      title="שכפל חידון זה כדי לערוך אותו"
+                    >
+                      <Copy size={13} />
+                      <span>שכפל לעריכה</span>
+                    </button>
+                  )}
+                </div>
               </div>
               <h3 className="quiz-deck-title">{deck.title}</h3>
               <p className="quiz-deck-sub">{deck.subtitle}</p>
@@ -779,6 +959,199 @@ const AdminQuizHub = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Edit Quiz Deck Modal */}
+      {editingDeck && (
+        <div className="quiz-modal-backdrop" onClick={() => !savingEdit && setEditingDeck(null)}>
+          <div className="quiz-modal-card quiz-edit-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="quiz-modal-header" style={{ marginBottom: 0 }}>
+              <div>
+                <h3>{editingDeck.id === '__copy__' ? 'שכפול ועריכת חידון' : 'עריכת חידון'}</h3>
+                <div style={{ fontSize: '0.83rem', color: 'var(--text-secondary)' }}>
+                  עדכני כותרת, נוסח שאלות, אפשרויות, תשובה נכונה והסבר ({editQuestions.length} שאלות)
+                </div>
+              </div>
+              <button onClick={() => !savingEdit && setEditingDeck(null)} style={{ color: 'var(--text-secondary)' }}>
+                <X size={22} />
+              </button>
+            </div>
+
+            <div>
+              <label
+                htmlFor="edit-deck-title"
+                style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}
+              >
+                כותרת החידון
+              </label>
+              <input
+                id="edit-deck-title"
+                className="quiz-config-input"
+                style={{ width: '100%' }}
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+              />
+            </div>
+
+            <div className="quiz-edit-questions-list">
+              {editQuestions.map((q, qIdx) => (
+                <div key={q.id || qIdx} className="quiz-edit-question-card">
+                  <div className="quiz-edit-q-top">
+                    <span className="quiz-edit-q-num">שאלה {qIdx + 1}</span>
+                    <div className="quiz-edit-q-controls">
+                      <button
+                        type="button"
+                        className="quiz-edit-icon-btn"
+                        disabled={qIdx === 0}
+                        onClick={() => handleMoveEditQuestion(qIdx, -1)}
+                        title="הזז למעלה"
+                      >
+                        <ArrowUp size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className="quiz-edit-icon-btn"
+                        disabled={qIdx === editQuestions.length - 1}
+                        onClick={() => handleMoveEditQuestion(qIdx, 1)}
+                        title="הזז למטה"
+                      >
+                        <ArrowDown size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className="quiz-edit-icon-btn"
+                        style={{ color: '#dc2626' }}
+                        onClick={() => handleDeleteEditQuestion(qIdx)}
+                        title="מחק שאלה"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <input
+                    type="text"
+                    className="quiz-config-input"
+                    value={q.question}
+                    onChange={(e) => handleEditQuestionText(qIdx, e.target.value)}
+                    aria-label={`נוסח שאלה ${qIdx + 1}`}
+                  />
+
+                  <div className="quiz-edit-options-grid">
+                    {q.options.map((opt, optIdx) => {
+                      const isCorrect = q.correctIndex === optIdx;
+                      return (
+                        <div
+                          key={optIdx}
+                          className={`quiz-edit-option-row ${isCorrect ? 'is-correct' : ''}`}
+                        >
+                          <button
+                            type="button"
+                            className="quiz-edit-correct-toggle"
+                            onClick={() => handleEditCorrectIndex(qIdx, optIdx as 0 | 1 | 2 | 3)}
+                            title="סמן כתשובה נכונה"
+                          >
+                            {isCorrect ? <CheckCircle2 size={15} /> : OPTION_LETTERS[optIdx]}
+                          </button>
+                          <input
+                            type="text"
+                            className="quiz-edit-option-input"
+                            value={opt}
+                            onChange={(e) => handleEditOptionText(qIdx, optIdx, e.target.value)}
+                            aria-label={`אפשרות ${OPTION_LETTERS[optIdx]}`}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <input
+                    type="text"
+                    className="quiz-config-input"
+                    style={{ fontSize: '0.84rem', padding: '0.48rem 0.75rem' }}
+                    value={q.explanation || ''}
+                    onChange={(e) => handleEditExplanation(qIdx, e.target.value)}
+                    placeholder="הסבר קצר שיוצג אחרי חשיפת התשובה (אופציונלי)"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Add manual question or paste more questions */}
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ fontSize: '0.84rem', padding: '0.45rem 0.85rem' }}
+                onClick={handleAddBlankEditQuestion}
+              >
+                <Plus size={15} />
+                הוסף שאלה ידנית
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ fontSize: '0.84rem', padding: '0.45rem 0.85rem' }}
+                onClick={() => setShowEditAppendPaste((prev) => !prev)}
+              >
+                <ClipboardPaste size={15} />
+                {showEditAppendPaste ? 'סגור הדבקה' : 'הוסף עוד שאלות בהדבקה'}
+              </button>
+            </div>
+
+            {showEditAppendPaste && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'var(--background)', padding: '0.85rem', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                <textarea
+                  className="quiz-builder-textarea"
+                  style={{ minHeight: '110px' }}
+                  value={editAppendText}
+                  onChange={(e) => setEditAppendText(e.target.value)}
+                  placeholder="הדביקי כאן שאלות נוספות מהצ׳אט ולחצי על הוסף..."
+                />
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ fontSize: '0.84rem', padding: '0.45rem 1rem' }}
+                    onClick={handleAppendPastedToEdit}
+                  >
+                    הוסף שאלות לרשימה
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', flexWrap: 'wrap', paddingTop: '0.4rem', borderTop: '1px solid var(--border)' }}>
+              <button
+                type="button"
+                className="btn btn-outline"
+                disabled={savingEdit}
+                onClick={() => setEditingDeck(null)}
+              >
+                ביטול
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline"
+                disabled={savingEdit}
+                onClick={() => handleSaveEditedDeck(false)}
+              >
+                <Save size={16} />
+                {savingEdit ? 'שומר...' : 'שמור שינויים'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={savingEdit}
+                onClick={() => handleSaveEditedDeck(true)}
+              >
+                <Play size={16} />
+                שמור והתחל משחק
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
